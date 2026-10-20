@@ -88,7 +88,7 @@ export default function Header({
         style={{ "--d": "0.5s" } as React.CSSProperties}
         className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,padding,border-color] duration-300 border-b ${
           scrolled ? "py-3.5" : "py-5 sm:py-7"
-        } ${solid ? "bg-[#0e0f12]/95 border-white/10" : "bg-transparent border-transparent"}`}
+        } ${solid ? "bg-[#0e0f12]/75 backdrop-blur-[8px] border-white/10" : "bg-transparent border-transparent"}`}
       >
         <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Logo: monograma "MR" en la tipografía del título + nombre.
@@ -237,7 +237,7 @@ export default function Header({
               <button
                 key={link.id}
                 onClick={() => handleNav(link.id)}
-                className="w-full flex items-center gap-4 py-4 border-b border-[#0e0f12]/15 text-left cursor-pointer group"
+                className="w-full flex items-center gap-4 py-3.5 text-left cursor-pointer group"
               >
                 <span className="font-mono text-xs text-[#0e0f12]/50">
                   {String(i + 1).padStart(2, "0")}

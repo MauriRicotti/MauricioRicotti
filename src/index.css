@@ -61,6 +61,18 @@ html.lenis body {
 .hero-title {
   font-size: min(100cqw / 4.3, 12.2rem);
 }
+/* PC: un poco más de aire en el título (líneas y letras) y tamaño según el alto de la
+   pantalla, para que en notebooks bajas todo el hero siga entrando en la primera vista */
+@media (min-width: 1024px) {
+  .hero-title.font-hero {
+    line-height: 1;
+    letter-spacing: 0.006em;
+    font-size: min(100cqw / 4.4, 12.5rem, 23.5svh);
+  }
+  .hero-title .hero-outline {
+    letter-spacing: 0.02em;
+  }
+}
 
 /* Nombre gigante del footer: el tamaño se calcula para llenar el ancho del contenedor */
 .footer-name-wrap {

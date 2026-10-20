@@ -129,7 +129,7 @@ export default function TechStack({ title, groups }: TechStackProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
             {groups.map((group, i) => (
               <div
-                key={group.title}
+                key={i} // índice: el título cambia con el idioma
                 className="tech-group"
                 style={{ "--i": i } as CSSProperties}
               >
@@ -149,7 +149,7 @@ export default function TechStack({ title, groups }: TechStackProps) {
                     const icon = item.icon ? techIcons[item.icon] : undefined;
                     return (
                       <li
-                        key={item.name}
+                        key={j}
                         style={{ "--j": j } as CSSProperties}
                         className="tech-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border-[1.5px] border-[#0e0f12]/80 text-sm font-medium text-[#0e0f12]"
                       >

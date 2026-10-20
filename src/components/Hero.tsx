@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import type { Profile } from "../types";
-import { Download } from "lucide-react";
+import { ArrowUpRight, Download } from "lucide-react";
 import { sound } from "../lib/sound";
 import { useLang } from "../i18n";
 
@@ -12,11 +12,11 @@ interface HeroProps {
 export default function Hero({ profile, onOpenContact }: HeroProps) {
   const { ui } = useLang().c;
   return (
-    <section className="relative isolate overflow-hidden pt-28 sm:pt-36 lg:pt-40 pb-10 sm:pb-14 bg-[#0e0f12] text-white">
+    <section className="relative isolate overflow-hidden pt-28 sm:pt-36 pb-10 sm:pb-14 lg:pb-20 lg:min-h-svh lg:flex lg:flex-col bg-[#0e0f12] text-white">
       {/* Fondo: cuadrícula que se desvanece. Estático, sin brillos ni máscaras. */}
       <div aria-hidden="true" className="hero-bg" />
-      <div className="relative max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="hero-wrap mb-8 sm:mb-10">
+      <div className="relative w-full max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 lg:flex-1 lg:flex lg:flex-col lg:justify-center">
+        <div className="hero-wrap mb-8 sm:mb-10 lg:mb-[clamp(2.5rem,7svh,5rem)]">
           {/* Tamaño fluido: ocupa casi todo el ancho en celulares, con tope de 12.2rem en escritorio */}
           <h1 className="hero-title font-hero font-black uppercase tracking-tight leading-[0.88] text-[#f2ede4] text-left">
             {(() => {
@@ -51,36 +51,36 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-start pb-2">
+        <div className="grid grid-cols-1 md:grid-cols-12 xl:grid-cols-[1fr_1fr_auto] gap-6 sm:gap-8 lg:gap-x-12 xl:gap-x-16 items-start pb-2">
           <div
             data-intro="fade"
             style={{ "--d": "0.6s" } as React.CSSProperties}
-            className="md:col-span-5 text-neutral-400 text-sm sm:text-base leading-relaxed"
+            className="md:col-span-6 lg:col-span-4 xl:col-span-1 text-neutral-400 text-sm sm:text-base leading-relaxed"
           >
             <p>{profile.leftBio}</p>
           </div>
           <div
             data-intro="fade"
             style={{ "--d": "0.68s" } as React.CSSProperties}
-            className="md:col-span-5 text-neutral-400 text-sm sm:text-base leading-relaxed"
+            className="md:col-span-6 lg:col-span-4 xl:col-span-1 text-neutral-400 text-sm sm:text-base leading-relaxed"
           >
             <p>{profile.centerBio}</p>
           </div>
           <div
             data-intro="fade"
             style={{ "--d": "0.76s" } as React.CSSProperties}
-            className="md:col-span-2 flex flex-wrap md:flex-col items-center md:items-end gap-x-7 gap-y-4"
+            className="md:col-span-12 lg:col-span-4 xl:col-span-1 flex flex-wrap items-center lg:justify-end gap-3 pt-2 lg:pt-0"
           >
             <button
               onClick={() => {
                 sound.playPop(580);
                 onOpenContact();
               }}
-              className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold tracking-widest text-[#f2ede4] uppercase border-b-2 border-white pb-0.5 hover:text-[#3cd3b7] hover:border-[#3cd3b7] transition-colors cursor-pointer"
+              className="group flex-1 sm:flex-none inline-flex items-center justify-between sm:justify-start gap-3 h-14 pl-6 pr-1.5 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm sm:text-[15px] font-bold tracking-wider uppercase whitespace-nowrap shadow-[4px_4px_0_#3cd3b7] hover:shadow-[1px_1px_0_#3cd3b7] hover:translate-x-[3px] hover:translate-y-[3px] transition-[transform,box-shadow] duration-200 cursor-pointer"
             >
               <span>{profile.ctaText}</span>
-              <span className="group-hover:translate-x-1 transition-transform inline-block">
-                →
+              <span className="w-11 h-11 rounded-full bg-[#0e0f12] text-[#f2ede4] flex items-center justify-center transition-transform duration-300 group-hover:rotate-45">
+                <ArrowUpRight size={20} />
               </span>
             </button>
             {profile.cvUrl && (
@@ -88,14 +88,15 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
                 href={profile.cvUrl}
                 download
                 onClick={() => sound.playClick()}
-                className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold tracking-widest text-neutral-400 uppercase border-b-2 border-white/25 pb-0.5 hover:text-[#3cd3b7] hover:border-[#3cd3b7] transition-colors whitespace-nowrap"
+                aria-label={ui.downloadCv}
+                className="group inline-flex items-center justify-center gap-2 h-14 px-5 sm:px-6 rounded-full border-2 border-white/30 text-[#f2ede4] text-sm sm:text-[15px] font-bold tracking-wider uppercase whitespace-nowrap hover:border-[#3cd3b7] hover:text-[#3cd3b7] transition-colors"
               >
-                <span>CV</span>
                 <Download
-                  size={14}
+                  size={18}
                   className="group-hover:translate-y-0.5 transition-transform"
                 />
-                <span className="sr-only">{ui.downloadCv}</span>
+                <span className="sm:hidden">CV</span>
+                <span className="hidden sm:inline">{ui.downloadCv}</span>
               </a>
             )}
           </div>
