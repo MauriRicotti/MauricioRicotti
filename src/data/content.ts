@@ -42,7 +42,7 @@ export const profile: Profile = {
     { label: "Email", url: "mailto:ricottim4@gmail.com" },
     { label: "GitHub", url: "https://github.com/tu-usuario" },
     { label: "WhatsApp", url: "https://wa.me/5491141948773" },
-    { label: "Instagram", url: "https://www.instagram.com/tu-usuario" },
+    { label: "Instagram", url: "https://www.instagram.com/mauri._r" },
   ],
 };
 
@@ -124,9 +124,8 @@ export const workSection = {
 export const projects: Project[] = [
   {
     // App estrella. TODO: reemplazar descripción/tecnologías por las reales.
-    // Captura: guardala vertical (ej. 1080×2340) en public/images/projects/offbeat.jpg
-    // (o .webp) y poné image: "/images/projects/offbeat.jpg". Mientras esté vacío se muestra
-    // una pantalla de reproductor de ejemplo hecha en código.
+    // Captura vertical en public/images/projects/offbeat.webp (para cambiarla, reemplazá ese
+    // archivo). Si dejás image: "", se muestra una pantalla de reproductor de ejemplo hecha en código.
     id: "offbeat",
     name: "OffBeat",
     subtitle: "Reproductor de música local, offline y gratuito para celulares",
@@ -136,7 +135,7 @@ export const projects: Project[] = [
     description:
       "Mi proyecto más completo: una app para escuchar la música guardada en tu teléfono, sin conexión a internet, sin cuentas y gratis. Pensada para ser rápida, simple y agradable de usar todos los días.",
     tags: ["App móvil", "100% offline", "Gratuita"],
-    image: "",
+    image: "/images/projects/offbeat.webp",
     // downloadUrl: "https://play.google.com/store/apps/details?id=...",
   },
   {

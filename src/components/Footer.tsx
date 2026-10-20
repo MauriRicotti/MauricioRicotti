@@ -179,10 +179,11 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
           </div>
         )}
 
-        <div className="pt-10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400 font-mono">
+        <div className="pt-10 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 text-xs text-neutral-400 font-mono text-center sm:text-left">
           <span>
-            © {new Date().getFullYear()} {profile.name}. Todos los derechos
-            reservados.
+            © {new Date().getFullYear()} {profile.name}.{" "}
+            <br className="sm:hidden" />
+            Todos los derechos reservados.
           </span>
           <span className="flex items-center gap-1 text-[#8c8c8c]">
             <span>{footer.credit}</span>

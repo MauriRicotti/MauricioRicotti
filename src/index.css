@@ -77,6 +77,38 @@ html.lenis body {
   letter-spacing: 0.012em;
 }
 
+/* ---------- Celulares: tipografía de títulos (Anton) con más aire ----------
+   Solo en pantallas chicas: letras un poco más separadas y más alto de línea.
+   El h1 y el nombre del footer se recalculan para seguir entrando en el ancho. */
+@media (max-width: 767px) {
+  .font-hero {
+    letter-spacing: 0.03em;
+  }
+  /* Títulos que tenían alto de línea menor a 1 */
+  .font-hero[class*="leading-[0."],
+  .font-hero.leading-none {
+    line-height: 1.04;
+  }
+  .hero-title.font-hero {
+    line-height: 0.98;
+    letter-spacing: 0.04em;
+    /* "DEVELOPER" mide ~4.47em con esta separación */
+    font-size: min(100cqw / 4.62, 12.2rem);
+  }
+  .hero-outline {
+    letter-spacing: 0.05em;
+  }
+  .footer-name.font-hero {
+    line-height: 0.86;
+    letter-spacing: 0.025em;
+    /* "MAURICIO RICOTTI" mide ~7.0em con esta separación */
+    font-size: calc(100cqw / 7.2);
+  }
+  .marquee-outline {
+    letter-spacing: 0.04em;
+  }
+}
+
 /* Paneles de proyectos (escritorio): el alto se calcula a partir del ancho del panel
    abierto para que la captura (16:9) entre completa dentro del marco de navegador.
    ancho abierto = contenedor − paneles cerrados (88px + 12px de separación c/u)

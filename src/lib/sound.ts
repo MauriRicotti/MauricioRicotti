@@ -1,6 +1,9 @@
 /**
  * Pequeños efectos de sonido generados con Web Audio API (sin archivos de audio).
  */
+/** Volumen general de los efectos (1 = original). Subilo o bajalo a gusto (máx. ~4). */
+const VOLUME = 2.6;
+
 class SoundEngine {
   private ctx: AudioContext | null = null;
   enabled = true;
@@ -34,7 +37,7 @@ class SoundEngine {
       osc.frequency.setValueAtTime(from, now);
       if (to !== null)
         osc.frequency.exponentialRampToValueAtTime(to, now + duration);
-      g.gain.setValueAtTime(gain, now);
+      g.gain.setValueAtTime(Math.min(gain * VOLUME, 0.6), now);
       g.gain.exponentialRampToValueAtTime(0.001, now + duration);
       osc.connect(g);
       g.connect(this.ctx.destination);
