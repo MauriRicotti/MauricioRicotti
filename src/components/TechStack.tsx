@@ -29,47 +29,81 @@ export default function TechStack({ title, groups }: TechStackProps) {
   const ref = useRef<HTMLElement>(null);
 
   // Animación de entrada: una sola vez por carga de la página (como la del título).
-  // Si el banner se ve al cargar, arranca después del título; si no, cuando llegás con el scroll.
-  // Solo agrega la clase "is-in"; el movimiento lo hace el CSS (index.css → "tech-anim").
+  // 1) Cuando la sección entra en pantalla, la franja se desliza desde el borde (solo transform).
+  // 2) Cuando la franja terminó de llegar, cada grupo (sticker + pastillas) se anima al verse.
+  // El movimiento lo hace el CSS (index.css → "tech-anim"); acá solo se agrega la clase "is-in".
   useEffect(() => {
     const root = ref.current;
-    if (!root || !("IntersectionObserver" in window)) return;
-    const html = document.documentElement;
-    let timer = 0;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          const el = e.target as HTMLElement;
-          if (e.intersectionRatio >= 0.2) {
-            if (el.classList.contains("is-in")) continue;
-            // Si se ve al cargar, espera a que termine la entrada del título
-            if (html.classList.contains("intro-wait")) {
-              clearTimeout(timer);
-              timer = window.setTimeout(() => {
-                io.unobserve(el);
-                io.observe(el);
-              }, 120);
-              continue;
-            }
-            // La franja espera al título si se ve recién cargada la página;
-            // cada grupo arranca cuando la franja lo descubre
-            if (el === root)
-              root.style.setProperty(
-                "--base",
-                performance.now() < 2500 ? "0.8s" : "0s",
-              );
-            el.classList.add("is-in");
-            io.unobserve(el); // ya se animó: no se repite
-          }
-        }
-      },
-      { threshold: [0, 0.2] },
+    if (!root) return;
+    const band = root.querySelector<HTMLElement>(".tech-band");
+    const groups = Array.from(
+      root.querySelectorAll<HTMLElement>(".tech-group"),
     );
-    io.observe(root);
-    root.querySelectorAll("[data-tech-in]").forEach((el) => io.observe(el));
+    const showAll = () => {
+      root.classList.add("is-in");
+      groups.forEach((g) => g.classList.add("is-in"));
+    };
+    if (
+      !band ||
+      !("IntersectionObserver" in window) ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      showAll();
+      return;
+    }
+
+    const html = document.documentElement;
+    const timers: number[] = [];
+    let groupIO: IntersectionObserver | null = null;
+
+    // Grupos: se observan recién con la franja quieta (medidas exactas)
+    const startGroups = () => {
+      if (groupIO) return;
+      groupIO = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            e.target.classList.add("is-in");
+            groupIO?.unobserve(e.target);
+          }
+        },
+        { threshold: 0.15 },
+      );
+      groups.forEach((g) => groupIO?.observe(g));
+    };
+
+    const begin = () => {
+      // Si se ve recién cargada la página, espera a que termine la entrada del título
+      const delay = performance.now() < 2500 ? 800 : 0;
+      root.style.setProperty("--base", `${delay}ms`);
+      root.classList.add("is-in");
+      band.addEventListener("animationend", (e) => {
+        if (e.target === band) startGroups();
+      });
+      timers.push(window.setTimeout(startGroups, delay + 950)); // respaldo
+    };
+
+    const sectionIO = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        sectionIO.disconnect();
+        // Espera (máx. ~2 s) a que arranque la animación del título
+        let tries = 0;
+        const ready = () => {
+          if (html.classList.contains("intro-wait") && tries++ < 20)
+            timers.push(window.setTimeout(ready, 100));
+          else begin();
+        };
+        ready();
+      },
+      { threshold: 0.1 },
+    );
+    sectionIO.observe(root);
+
     return () => {
-      clearTimeout(timer);
-      io.disconnect();
+      sectionIO.disconnect();
+      groupIO?.disconnect();
+      timers.forEach(clearTimeout);
     };
   }, []);
 
@@ -77,7 +111,6 @@ export default function TechStack({ title, groups }: TechStackProps) {
     <section
       ref={ref}
       id="stack"
-      data-tech-in
       aria-label={title}
       className="tech-anim bg-[#0e0f12] pb-2 sm:pb-4 overflow-hidden"
     >
@@ -97,7 +130,6 @@ export default function TechStack({ title, groups }: TechStackProps) {
             {groups.map((group, i) => (
               <div
                 key={group.title}
-                data-tech-in
                 className="tech-group"
                 style={{ "--i": i } as CSSProperties}
               >
