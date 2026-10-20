@@ -1,0 +1,272 @@
+@import "tailwindcss";
+
+/* Tipografía de títulos (Anton). font-display: block → el navegador espera la fuente
+   (precargada en index.html) en vez de mostrar otra y cambiarla: así el hero no "salta". */
+@font-face {
+  font-family: "Anton";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("../node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2")
+    format("woff2");
+}
+
+@layer base {
+  :root {
+    --font-heading: "Anton", "Bebas Neue", sans-serif;
+    --font-condensed: "Bebas Neue", sans-serif;
+    --font-sans:
+      "Plus Jakarta Sans Variable", "Plus Jakarta Sans", system-ui,
+      -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #0e0f12;
+    color: #e5e5e5;
+    overflow-x: hidden;
+  }
+}
+
+/* Scroll suave (Lenis): estilos recomendados */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.font-hero {
+  font-family: "Anton", "Bebas Neue", Impact, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Título del hero: ocupa todo el ancho disponible ("FULL STACK" ≈ 4 em de ancho), tope 12.2rem */
+/* El h1 se escala con el ancho real de su contenedor (no con la ventana, que incluye
+   la barra de scroll). 4.3 = ancho de "DEVELOPER" (~4.13em) + margen de seguridad. */
+.hero-wrap {
+  container-type: inline-size;
+}
+.hero-title {
+  font-size: min(100cqw / 4.3, 12.2rem);
+}
+
+/* Nombre gigante del footer: el tamaño se calcula para llenar el ancho del contenedor */
+.footer-name-wrap {
+  container-type: inline-size;
+}
+.footer-name {
+  /* "MAURICIO RICOTTI" siempre en UNA línea, llenando el ancho (en cualquier pantalla) */
+  font-size: calc(100cqw / 6.45);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* Palabra del h1 solo con borde (sin relleno) */
+.hero-outline {
+  color: transparent;
+  -webkit-text-stroke: max(1.5px, 0.009em) #f2ede4;
+  /* Un poco de aire entre letras para que los contornos no se crucen */
+  letter-spacing: 0.012em;
+}
+
+/* Paneles de proyectos (escritorio): el alto se calcula a partir del ancho del panel
+   abierto para que la captura (16:9) entre completa dentro del marco de navegador.
+   ancho abierto = contenedor − paneles cerrados (88px + 12px de separación c/u)
+   alto = (ancho abierto − 28px de bordes y relleno) × 9/16
+          + 29px (barra) + 29px (relleno y bordes verticales) + alto del texto */
+.work-wrap {
+  container-type: inline-size;
+  --info: 164px; /* alto del bloque de texto (en una columna) */
+  --panel-closed: 72px; /* ancho de cada panel cerrado */
+}
+@media (min-width: 1280px) {
+  .work-wrap {
+    --info: 190px; /* texto en dos columnas, con descripción */
+    --panel-closed: 88px;
+  }
+}
+.work-wrap .work-panels {
+  height: clamp(
+    460px,
+    calc(
+      (100cqw - var(--closed) * (var(--panel-closed) + 12px) - 28px) * 0.5625 +
+        58px + var(--info)
+    ),
+    800px
+  );
+}
+
+/* Marco de teléfono (apps de celular): referencia para las unidades cqw de la pantalla */
+.phone-wrap {
+  container-type: inline-size;
+}
+/* Escenario del teléfono en el panel de escritorio: el teléfono usa todo el alto
+   disponible, pero nunca más ancho que el escenario. Cuadrícula estática de fondo. */
+.phone-stage {
+  container-type: size;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center;
+}
+.phone-stage .phone-wrap {
+  height: min(100cqh, 100cqw * 19.5 / 9);
+}
+
+/* Barra de progreso del pase automático de proyectos */
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.animate-progress {
+  animation-name: progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+/* Pausa: mouse encima, sección fuera de pantalla o pestaña oculta (data-paused lo pone Work.tsx) */
+.work-panels:hover .animate-progress,
+.work-panels[data-paused] .animate-progress {
+  animation-play-state: paused;
+}
+
+/* Contacto paso a paso */
+@keyframes flow-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-flow-in {
+  animation: flow-in 0.25s ease-out both;
+}
+.animate-step-in {
+  animation: step-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0e0f12;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2c32;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f424c;
+}
+
+/* ---------- Rendimiento ---------- */
+/* Respeta la preferencia del sistema de reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* "De la idea al deploy": resaltado de servicios.
+   --n = color normal, --c = color del servicio.
+   · Al hacer scroll se resalta el que cruza el medio de la pantalla (data-active).
+   · Con el mouse encima de la lista, solo se resalta el que está bajo el mouse
+     (el resaltado por scroll vuelve a su estado normal). */
+.svc-hl {
+  color: var(--n);
+  transition: color 0.25s;
+}
+.svc-list li[data-active] .svc-hl {
+  color: var(--c);
+}
+@media (hover: hover) {
+  .svc-list:hover li[data-active] .svc-hl {
+    color: var(--n);
+  }
+  .svc-list li:hover .svc-hl,
+  .svc-list:hover li[data-active]:hover .svc-hl {
+    color: var(--c);
+  }
+}
+
+/* Franjas de texto gigante: fila solo con contorno */
+.marquee-outline {
+  color: transparent;
+  -webkit-text-stroke: max(1.5px, 0.01em) #f2ede4;
+  letter-spacing: 0.012em;
+}
+
+/* Proceso: tarjetas que se apilan (solo CSS, position: sticky).
+   Cada una se frena un poco más abajo que la anterior para que asome el borde de las de atrás. */
+.process-card {
+  position: sticky;
+  top: calc(80px + var(--i) * 14px);
+}
+.process-card:not(:last-child) {
+  margin-bottom: 14vh;
+}
+@media (min-width: 1024px) {
+  .process-card {
+    top: calc(100px + var(--i) * 22px);
+  }
+}
+
+/* Fondo del hero: 3 capas estáticas (no se recalculan al hacer scroll)
+   1) brillos de color muy suaves  2) cuadrícula fina que se desvanece hacia los bordes  3) grano */
+/* Fondo del hero: cuadrícula que se desvanece. Sin grano, sin brillos, sin blur, sin sombras
+   y sin mask-image (las máscaras y el filtro SVG de ruido bajaban los FPS al hacer scroll).
+   Todo está en UN solo background con capas, de arriba hacia abajo:
+   1) desvanecido hacia abajo (empalma con la sección siguiente)
+   2) "viñeta" que esconde la cuadrícula lejos del centro (reemplaza la máscara radial)
+   3) y 4) líneas de la cuadrícula cada 64px */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: #0e0f12;
+  background-image:
+    linear-gradient(to bottom, transparent 55%, #0e0f12 100%),
+    radial-gradient(ellipse 75% 65% at 65% 35%, transparent 20%, #0e0f12 75%),
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    64px 64px,
+    64px 64px;
+  background-position:
+    0 0,
+    0 0,
+    center top,
+    center top;
+}
