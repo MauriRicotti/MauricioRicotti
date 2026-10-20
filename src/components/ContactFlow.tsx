@@ -5,6 +5,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { flushSync } from "react-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -44,6 +45,11 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const FORM_ENDPOINT = "https://api.web3forms.com/submit";
 const hasFormKey = baseContact.formAccessKey.trim().length > 0;
 
+// Celulares/tablets: pantalla táctil sin mouse
+const isTouch =
+  typeof window !== "undefined" &&
+  window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
 const emptyForm = {
   name: "",
   email: "",
@@ -69,6 +75,9 @@ export default function ContactFlow({
   const [sendFailed, setSendFailed] = useState(false); // muestra el botón de respaldo (mailto)
   const honeypotRef = useRef<HTMLInputElement>(null); // campo oculto anti-spam
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  // Teclado en pantalla abierto: alto y posición de la parte visible (visualViewport)
+  const [vv, setVv] = useState<{ h: number; top: number } | null>(null);
+  const kb = vv !== null;
 
   const id = STEPS[step];
   const firstName = form.name.trim().split(" ")[0] || "";
@@ -89,9 +98,44 @@ export default function ContactFlow({
     }
   }, [isOpen, sentVia]);
 
-  // Enfoca el campo de cada paso (sin mover el scroll)
+  // Celular: detecta el teclado en pantalla y ajusta el formulario a la parte visible
   useEffect(() => {
-    if (!isOpen || sentVia) return;
+    const v = window.visualViewport;
+    if (!isOpen || !isTouch || !v) return;
+    let raf = 0;
+    const update = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const hidden =
+          document.documentElement.clientHeight - v.height * v.scale;
+        const typing =
+          !!inputRef.current && document.activeElement === inputRef.current;
+        setVv(
+          hidden > 120 && typing
+            ? { h: Math.round(v.height), top: Math.round(v.offsetTop) }
+            : null,
+        );
+      });
+    };
+    update();
+    v.addEventListener("resize", update);
+    v.addEventListener("scroll", update);
+    document.addEventListener("focusin", update);
+    document.addEventListener("focusout", update);
+    return () => {
+      cancelAnimationFrame(raf);
+      v.removeEventListener("resize", update);
+      v.removeEventListener("scroll", update);
+      document.removeEventListener("focusin", update);
+      document.removeEventListener("focusout", update);
+      setVv(null);
+    };
+  }, [isOpen]);
+
+  // Enfoca el campo de cada paso (sin mover el scroll).
+  // En celulares no: el teclado aparece recién cuando la persona toca el campo.
+  useEffect(() => {
+    if (!isOpen || sentVia || isTouch) return;
     const t = setTimeout(
       () => inputRef.current?.focus({ preventScroll: true }),
       60,
@@ -108,6 +152,23 @@ export default function ContactFlow({
     return "";
   };
 
+  // Cambia de paso. En celular, si se está escribiendo y el próximo paso también
+  // es de texto, pasa el foco en el mismo toque para que el teclado no se cierre.
+  const goTo = (to: number) => {
+    const typing =
+      isTouch &&
+      !!inputRef.current &&
+      document.activeElement === inputRef.current;
+    const toText = STEPS[to] === "name" || STEPS[to] === "email";
+    if (typing && toText) {
+      flushSync(() => setStep(to));
+      inputRef.current?.focus({ preventScroll: true });
+    } else {
+      if (typing) inputRef.current?.blur();
+      setStep(to);
+    }
+  };
+
   const next = () => {
     const err = validate();
     if (err) {
@@ -118,7 +179,7 @@ export default function ContactFlow({
     setError("");
     if (step < STEPS.length - 1) {
       sound.playPop(460 + step * 60);
-      setStep(step + 1);
+      goTo(step + 1);
     }
   };
 
@@ -126,7 +187,7 @@ export default function ContactFlow({
     if (step === 0) return;
     sound.playClick();
     setError("");
-    setStep(step - 1);
+    goTo(step - 1);
   };
 
   const choose = (field: "projectType" | "budget", value: string) => {
@@ -261,6 +322,7 @@ export default function ContactFlow({
       aria-label={ui.contactDialog}
       data-lenis-prevent
       className="fixed inset-0 z-[60] bg-[#0e0f12] text-white overflow-y-auto overscroll-contain animate-flow-in"
+      style={vv ? { top: vv.top, height: vv.h, bottom: "auto" } : undefined}
     >
       {/* Barra de progreso */}
       <div className="fixed top-0 left-0 right-0 h-[3px] bg-white/5 z-10">
@@ -274,7 +336,9 @@ export default function ContactFlow({
 
       <div className="min-h-full max-w-5xl mx-auto px-5 sm:px-10 flex flex-col">
         {/* Barra superior */}
-        <div className="flex items-center justify-between py-5 sm:py-7">
+        <div
+          className={`flex items-center justify-between ${kb ? "py-3" : "py-5 sm:py-7"}`}
+        >
           <span className="font-mono text-xs text-[#8c8c8c]">
             {sentVia
               ? ui.sent
@@ -295,7 +359,9 @@ export default function ContactFlow({
         </div>
 
         {/* Contenido del paso */}
-        <div className="flex-1 flex flex-col justify-center py-8 sm:py-12">
+        <div
+          className={`flex-1 flex flex-col ${kb ? "justify-start pt-1" : "justify-center py-8 sm:py-12"}`}
+        >
           {sentVia ? (
             <div key="done" className="animate-step-in">
               <h2 className="font-hero text-6xl sm:text-8xl lg:text-9xl uppercase tracking-tight leading-[0.9] text-[#f2ede4]">
@@ -323,17 +389,21 @@ export default function ContactFlow({
             <form
               key={id}
               onSubmit={onSubmit}
-              className="animate-step-in"
+              className={`animate-step-in ${kb ? "flex-1 flex flex-col" : ""}`}
               noValidate
             >
-              <p className="font-mono text-sm text-[#3cd3b7] mb-4 flex items-center gap-2">
+              <p
+                className={`font-mono text-sm text-[#3cd3b7] mb-4 items-center gap-2 ${kb ? "hidden" : "flex"}`}
+              >
                 {String(step + 1).padStart(2, "0")} <ArrowRight size={14} />
               </p>
-              <h2 className="font-hero text-5xl sm:text-7xl lg:text-8xl uppercase tracking-tight leading-[0.92] text-[#f2ede4]">
+              <h2
+                className={`font-hero uppercase tracking-tight leading-[0.92] text-[#f2ede4] ${kb ? "text-3xl" : "text-5xl sm:text-7xl lg:text-8xl"}`}
+              >
                 {question}
               </h2>
 
-              <div className="mt-10 sm:mt-14">
+              <div className={kb ? "mt-5" : "mt-10 sm:mt-14"}>
                 {(id === "name" || id === "email") && (
                   <input
                     ref={(el) => {
@@ -362,7 +432,7 @@ export default function ContactFlow({
                     ref={(el) => {
                       inputRef.current = el;
                     }}
-                    rows={4}
+                    rows={kb ? 3 : 4}
                     value={form.message}
                     onChange={(e) => {
                       setError("");
@@ -414,7 +484,7 @@ export default function ContactFlow({
                 )}
 
                 <p
-                  className={`mt-4 text-sm text-[#ff4f7b] min-h-[1.25rem] ${error ? "" : "invisible"}`}
+                  className={`${kb ? "mt-2" : "mt-4"} text-sm text-[#ff4f7b] min-h-[1.25rem] ${error ? "" : "invisible"}`}
                   role="alert"
                 >
                   {error || "·"}
@@ -422,11 +492,14 @@ export default function ContactFlow({
               </div>
 
               {/* Acciones */}
-              <div className="mt-4 flex flex-wrap items-center gap-3">
+              <div
+                className={`flex flex-wrap items-center gap-3 ${kb ? "mt-auto sticky bottom-0 bg-[#0e0f12] py-3" : "mt-4"}`}
+              >
                 {step > 0 && (
                   <button
                     type="button"
                     onClick={back}
+                    onMouseDown={(e) => e.preventDefault()}
                     aria-label={ui.prevStep}
                     className="w-12 h-12 rounded-full border border-white/15 hover:border-white/40 flex items-center justify-center text-neutral-300 hover:text-white transition-colors cursor-pointer"
                   >
@@ -438,6 +511,7 @@ export default function ContactFlow({
                   <>
                     <button
                       type="submit"
+                      onMouseDown={(e) => e.preventDefault()}
                       className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-[#3cd3b7] transition-colors cursor-pointer"
                     >
                       {ui.next} <ArrowRight size={18} />
@@ -516,7 +590,9 @@ export default function ContactFlow({
         </div>
 
         {/* Contacto directo */}
-        <div className="py-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-2 font-mono text-xs text-[#8c8c8c]">
+        <div
+          className={`py-6 border-t border-white/10 flex-col ${kb ? "hidden" : "flex"} sm:flex-row sm:items-center gap-x-6 gap-y-2 font-mono text-xs text-[#8c8c8c]`}
+        >
           <span>{contact.directText}</span>
           <a
             href={`mailto:${profile.email}`}

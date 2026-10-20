@@ -263,6 +263,74 @@ html.lenis body {
   animation: step-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
+/* ── Banner de tecnologías: animación de entrada ──────────────────────────
+   La franja se despliega desde el borde izquierdo, las etiquetas caen como
+   stickers y las pastillas aparecen una tras otra. Una sola vez por carga
+   de la página (TechStack.tsx agrega "is-in").
+   Para quitarla: borra este bloque (y el useEffect de TechStack.tsx). */
+.tech-label {
+  transform: rotate(var(--tilt, 0deg));
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Franja */
+  .tech-anim:not(.is-in) .tech-band {
+    clip-path: inset(0 100% 0 0);
+  }
+  .tech-anim.is-in .tech-band {
+    animation: tech-band 0.8s cubic-bezier(0.65, 0, 0.35, 1) var(--base, 0s)
+      backwards;
+  }
+  /* Etiquetas (stickers): cada grupo arranca cuando la franja lo descubre */
+  .tech-group {
+    --gd: 0.12s;
+  }
+  .tech-group:not(.is-in) .tech-label,
+  .tech-group:not(.is-in) .tech-pill {
+    opacity: 0;
+  }
+  .tech-group.is-in .tech-label {
+    animation: tech-sticker 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) var(--gd)
+      backwards;
+  }
+  /* Pastillas */
+  .tech-group.is-in .tech-pill {
+    animation: tech-pill 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)
+      calc(var(--gd) + 0.22s + var(--j) * 0.035s) backwards;
+  }
+}
+@keyframes tech-band {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes tech-sticker {
+  from {
+    opacity: 0;
+    transform: translateY(-28px) rotate(calc(var(--tilt, 0deg) - 12deg))
+      scale(1.15);
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--tilt, 0deg));
+  }
+}
+@keyframes tech-pill {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
