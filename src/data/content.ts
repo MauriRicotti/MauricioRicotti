@@ -7,6 +7,10 @@
  *  no hace falta tocar los componentes.
  *
  *  ⚠️ Los textos actuales son DE EJEMPLO. Reemplazalos por los tuyos.
+ *
+ *  🌐 VERSIÓN EN INGLÉS: está en content.en.ts. Si cambiás un texto acá,
+ *     cambiá también su traducción allá. Las fotos, links y datos de contacto
+ *     se toman de este archivo (no hace falta repetirlos).
  * ============================================================
  */
 import type { Profile, Project, TechGroup } from "../types";
@@ -44,6 +48,8 @@ export const profile: Profile = {
     { label: "WhatsApp", url: "https://wa.me/5491141948773" },
     { label: "Instagram", url: "https://www.instagram.com/mauri._r" },
   ],
+  // CV en PDF (está en public/cv/). La versión en inglés usa su propio archivo.
+  cvUrl: "/cv/Mauricio-Ricotti-CV.pdf",
 };
 
 /* ------------------------------------------------------------------ */
@@ -61,7 +67,7 @@ export const navLinks = [
 /*  3. STACK TECNOLÓGICO — banda debajo del hero                       */
 /*     icon = clave del logo (ver src/lib/techIcons.ts). Es opcional.  */
 /* ------------------------------------------------------------------ */
-export const techStackTitle = "Stack tecnológico";
+export const techStackTitle: string = "Stack tecnológico";
 
 export const techStack: TechGroup[] = [
   {
@@ -432,4 +438,75 @@ export const footer = {
   ctaText: "EMPECEMOS ➔",
   credit: "Diseñado y desarrollado con dedicación",
   timeZone: "America/Argentina/Buenos_Aires",
+};
+
+/* ------------------------------------------------------------------ */
+/*  9. SEO — título y descripción de la pestaña (por idioma)          */
+/* ------------------------------------------------------------------ */
+export const seo = {
+  title: "Mauricio Ricotti | Full Stack Developer",
+  description:
+    "Portfolio de Mauricio Ricotti, Full Stack Developer en Buenos Aires, Argentina. Desarrollo sitios y aplicaciones web rápidas con React, TypeScript y Node.js.",
+};
+
+/* ------------------------------------------------------------------ */
+/*  10. TEXTOS DE LA INTERFAZ — botones, etiquetas y mensajes cortos   */
+/* ------------------------------------------------------------------ */
+export const ui = {
+  // Barra de navegación
+  goHome: "Ir al inicio",
+  soundToggle: "Activar o silenciar sonidos",
+  soundOn: "Sonido activado",
+  soundOff: "Sonido silenciado",
+  soundShort: "Sonido",
+  muteShort: "Silencio",
+  talk: "Hablemos",
+  openMenu: "Abrir menú",
+  closeMenu: "Cerrar menú",
+  language: "Idioma",
+  switchTo: "Switch to English", // se lee en el idioma al que se cambia
+  // CV
+  downloadCv: "Descargar CV",
+  // Proyectos
+  viewDemo: "Ver demo",
+  download: "Descargar",
+  code: "Código",
+  openProject: "abrir proyecto",
+  screenshotOf: "Captura de {name}",
+  // Proceso
+  step: "Paso",
+  // Footer
+  sendEmail: "Enviar un email",
+  location: "Ubicación",
+  hours: "Horario de atención",
+  now: "Ahora",
+  openNow: "En horario de atención",
+  closedNow: "Fuera de horario · te respondo pronto",
+  localTime: "Hora local: {time} hs",
+  closed: "Cerrado",
+  rights: "Todos los derechos reservados.",
+  backToTop: "Volver arriba",
+  // Formulario de contacto
+  contactDialog: "Contacto",
+  sent: "Enviado",
+  stepOf: "Paso {n} de {total}",
+  close: "Cerrar",
+  backToSite: "Volver al sitio",
+  yourMailApp: "tu app de correo",
+  next: "Siguiente",
+  orPressEnter: "o presioná Enter",
+  prevStep: "Paso anterior",
+  sendMessage: "Enviar mensaje",
+  sendByEmail: "Enviar por email",
+  sendByWhatsapp: "Enviar por WhatsApp",
+  errName: "Necesito tu nombre para seguir.",
+  errEmail: "Revisá el email, parece que falta algo.",
+  errOption: "Elegí una opción.",
+  errMessage: "Contame aunque sea en una línea.",
+  // Mensaje armado que se envía por email o WhatsApp
+  sumHello: "Hola Mauricio, soy {name}.",
+  sumEmail: "Email",
+  sumProject: "Proyecto",
+  sumBudget: "Presupuesto (ARS)",
+  sumSubject: "Nuevo proyecto: {type} — {name}",
 };

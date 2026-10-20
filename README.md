@@ -118,3 +118,28 @@ de a poco. Ajustá `EASE` (más bajo = frenan más lento).
    (o en *Settings → Environment Variables*) y volvé a publicar.
 
 Alternativa sin GitHub: `npm i -g vercel` y, dentro de la carpeta, `vercel` (y después `vercel --prod`).
+
+## Idiomas (español / inglés)
+
+- `/` = español (`src/data/content.ts`) · `/en` = inglés (`src/data/content.en.ts`).
+- Botón **ES | EN** en la barra (en celular, un botón con el otro idioma al lado del menú). Cambia al instante.
+- `content.en.ts` solo tiene los **textos**: fotos, links, email, WhatsApp y redes se toman de `content.ts`.
+  Si cambiás un texto en español, actualizá también su traducción.
+- Los textos chicos de la interfaz (botones, etiquetas, mensajes del formulario) están en el bloque `ui` de cada archivo.
+- Al compilar se genera `dist/en/index.html` con título, descripción y vista previa al compartir en inglés,
+  y `sitemap.xml` incluye las dos versiones (con `hreflang` para Google). `vercel.json` sirve `/en` con esa página.
+- Los mensajes del formulario te llegan en español; si la persona escribió desde la versión en inglés,
+  el asunto empieza con **[EN]** y se agrega el campo "Idioma".
+
+## CV descargable (PDF)
+
+- Archivos: `public/cv/Mauricio-Ricotti-CV.pdf` (español) y `public/cv/Mauricio-Ricotti-CV-EN.pdf` (inglés).
+  Los botones "Descargar CV" (hero, footer y menú del celular) bajan el del idioma actual (`profile.cvUrl`).
+- Se arman solos con el **mismo contenido de la web** (perfil, proyectos, habilidades, servicios y proceso):
+  `scripts/build-cv.mjs`. Si cambiás algo en `content.ts` / `content.en.ts`, regeneralos:
+  ```bash
+  npm i --no-save playwright && npx playwright install chromium   # solo la primera vez
+  npm run cv
+  ```
+- Formación e idiomas extra: completalos arriba de todo en `scripts/build-cv.mjs` (bloque `EXTRA`).
+- ¿Preferís usar tu propio CV? Reemplazá los PDF por los tuyos con el mismo nombre.

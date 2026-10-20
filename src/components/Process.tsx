@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { processSection, processSteps } from "../data/content";
+import { useLang } from "../i18n";
 
 /**
  * "Cómo trabajo": tarjetas grandes que se van apilando una sobre otra al hacer scroll.
@@ -7,6 +7,7 @@ import { processSection, processSteps } from "../data/content";
  * Cada tarjeta se frena un poco más abajo que la anterior, así se ve el borde de las de atrás.
  */
 export default function Process() {
+  const { processSection, processSteps, ui } = useLang().c;
   const total = String(processSteps.length).padStart(2, "0");
 
   return (
@@ -37,7 +38,7 @@ export default function Process() {
               >
                 <div className="lg:col-span-5 flex lg:flex-col justify-between items-start gap-4">
                   <span className="font-mono text-xs sm:text-sm font-semibold uppercase tracking-widest opacity-90">
-                    Paso {String(i + 1).padStart(2, "0")} / {total}
+                    {ui.step} {String(i + 1).padStart(2, "0")} / {total}
                   </span>
                   <span className="font-hero leading-[0.8] text-[clamp(5rem,16vw,13rem)] tracking-tight">
                     {String(i + 1).padStart(2, "0")}

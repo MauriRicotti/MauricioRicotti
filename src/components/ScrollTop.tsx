@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { sound } from "../lib/sound";
 import { scrollToTop } from "../lib/smoothScroll";
+import { useLang } from "../i18n";
 
 /** Botón flotante (abajo a la derecha) que aparece al bajar y lleva al inicio.
  *  Se oculta al llegar al nombre gigante del footer. */
 export default function ScrollTop() {
+  const { ui } = useLang().c;
   const [scrolled, setScrolled] = useState(false);
   const [atFooterName, setAtFooterName] = useState(false);
   const visible = scrolled && !atFooterName;
@@ -43,8 +45,8 @@ export default function ScrollTop() {
         sound.playPop(600);
         scrollToTop();
       }}
-      aria-label="Volver arriba"
-      title="Volver arriba"
+      aria-label={ui.backToTop}
+      title={ui.backToTop}
       tabIndex={visible ? 0 : -1}
       className={`group fixed z-30 right-4 bottom-4 sm:right-8 sm:bottom-8 w-12 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] border border-[#0e0f12]/10 shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex items-center justify-center hover:bg-[#3cd3b7] transition-[opacity,transform,background-color] duration-300 cursor-pointer ${
         visible

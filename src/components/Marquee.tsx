@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef } from "react";
-import { marqueeRows } from "../data/content";
+import { useLang } from "../i18n";
 
 /**
  * Franjas de texto gigante que se desplazan hacia los costados según el scroll
@@ -33,6 +33,7 @@ function Star({ outline = false }: { outline?: boolean }) {
 }
 
 export default function Marquee() {
+  const { marqueeRows } = useLang().c;
   const sectionRef = useRef<HTMLElement>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 

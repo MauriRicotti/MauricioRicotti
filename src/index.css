@@ -46,6 +46,10 @@ html.lenis body {
 .font-hero {
   font-family: "Anton", "Bebas Neue", Impact, sans-serif;
   letter-spacing: -0.02em;
+  /* Anton tiene un solo grosor (400). Sin esto, Edge/Chrome "engordan" las letras
+     cuando se pide negrita (font-black) y se ven distintas que en Firefox. */
+  font-weight: 400;
+  font-synthesis: none;
 }
 
 /* Título del hero: ocupa todo el ancho disponible ("FULL STACK" ≈ 4 em de ancho), tope 12.2rem */
@@ -67,6 +71,65 @@ html.lenis body {
   font-size: calc(100cqw / 6.45);
   letter-spacing: -0.01em;
   white-space: nowrap;
+}
+
+/* ---------- Animación de entrada (al abrir la web) ----------
+   Las palabras del h1 suben, "DEVELOPER" se dibuja de izquierda a derecha y después
+   aparecen la barra y los textos. Solo transform / opacity / clip-path (livianas).
+   - index.html agrega la clase "intro-wait" (todo listo para animar, sin parpadeo).
+   - main.tsx la cambia por "intro-go" cuando la tipografía ya cargó.
+   - Con "reducir movimiento" activado en el sistema, no se anima nada.
+   Para quitarla: borrá este bloque y el <script> de index.html. */
+@media (prefers-reduced-motion: no-preference) {
+  html.intro-wait [data-intro] {
+    opacity: 0;
+  }
+  html.intro-wait [data-intro="draw"] {
+    opacity: 1;
+    clip-path: inset(-0.1em 100% -0.3em -0.1em);
+  }
+  html.intro-go [data-intro="up"] {
+    animation: intro-up 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s)
+      backwards;
+  }
+  html.intro-go [data-intro="draw"] {
+    animation: intro-draw 0.85s cubic-bezier(0.65, 0, 0.35, 1) var(--d, 0s)
+      backwards;
+  }
+  html.intro-go [data-intro="fade"] {
+    animation: intro-fade 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s)
+      backwards;
+  }
+  html.intro-go [data-intro="down"] {
+    animation: intro-down 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s)
+      backwards;
+  }
+}
+@keyframes intro-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.42em);
+  }
+}
+@keyframes intro-draw {
+  from {
+    clip-path: inset(-0.1em 100% -0.3em -0.1em);
+  }
+  to {
+    clip-path: inset(-0.1em -0.1em -0.3em -0.1em);
+  }
+}
+@keyframes intro-fade {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+@keyframes intro-down {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
 }
 
 /* Palabra del h1 solo con borde (sin relleno) */

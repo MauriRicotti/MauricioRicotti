@@ -10,7 +10,7 @@ import { ArrowUpRight, Download, Plus, Star } from "lucide-react";
 import { siGithub } from "simple-icons";
 import type { CSSProperties } from "react";
 import type { Project } from "../types";
-import { workSection } from "../data/content";
+import { useLang } from "../i18n";
 import { sound } from "../lib/sound";
 import PhoneFrame from "./PhoneFrame";
 
@@ -39,6 +39,7 @@ function Tags({ tags }: { tags: string[] }) {
 }
 
 function Links({ project }: { project: Project }) {
+  const { ui } = useLang().c;
   if (!project.demoUrl && !project.githubUrl && !project.downloadUrl)
     return null;
   return (
@@ -50,7 +51,7 @@ function Links({ project }: { project: Project }) {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#3cd3b7] text-[#0e0f12] text-sm font-semibold hover:bg-[#f2ede4] transition-colors"
         >
-          <Download size={16} /> Descargar
+          <Download size={16} /> {ui.download}
         </a>
       )}
       {project.demoUrl && (
@@ -60,7 +61,7 @@ function Links({ project }: { project: Project }) {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-[#3cd3b7] transition-colors"
         >
-          Ver demo <ArrowUpRight size={16} />
+          {ui.viewDemo} <ArrowUpRight size={16} />
         </a>
       )}
       {project.githubUrl && (
@@ -77,7 +78,7 @@ function Links({ project }: { project: Project }) {
           >
             <path d={siGithub.path} />
           </svg>
-          Código
+          {ui.code}
         </a>
       )}
     </div>
@@ -200,6 +201,7 @@ const DesktopPanel = memo(function DesktopPanel({
   onOpen,
   onProgressEnd,
 }: PanelProps) {
+  const { ui } = useLang().c;
   return (
     <article
       style={{ flexBasis: "var(--panel-closed)", contain: "layout paint" }}
@@ -238,7 +240,7 @@ const DesktopPanel = memo(function DesktopPanel({
           {p.name}
         </span>
         <span className="sr-only">
-          {p.highlight ? ` (${p.highlight})` : ""}, abrir proyecto
+          {p.highlight ? ` (${p.highlight})` : ""}, {ui.openProject}
         </span>
         <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-neutral-400 group-hover:text-[#0e0f12] group-hover:bg-[#3cd3b7] group-hover:border-[#3cd3b7] transition-colors">
           <Plus size={16} />
@@ -434,6 +436,7 @@ const subscribeDesktop = (cb: () => void) => {
 const getDesktop = () => window.matchMedia(DESKTOP_MQ).matches;
 
 export default function Work({ projects }: WorkProps) {
+  const { workSection } = useLang().c;
   // Índice del proyecto abierto (uno a la vez). En celular se puede cerrar todo (-1).
   const [openIdx, setOpenIdx] = useState(0);
   const desktopIdx = openIdx < 0 ? 0 : openIdx;

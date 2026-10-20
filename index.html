@@ -2,6 +2,10 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <!-- Animación de entrada: deja el hero listo para animar (ver index.css y main.tsx) -->
+    <script>
+      document.documentElement.classList.add("intro-wait");
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mauricio Ricotti | Full Stack Developer</title>
     <meta
@@ -11,6 +15,10 @@
     <meta name="author" content="Mauricio Ricotti" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="%VITE_SITE_URL%/" />
+    <!-- Versiones por idioma (la de inglés se genera sola al compilar: /en) -->
+    <link rel="alternate" hreflang="es" href="%VITE_SITE_URL%/" />
+    <link rel="alternate" hreflang="en" href="%VITE_SITE_URL%/en" />
+    <link rel="alternate" hreflang="x-default" href="%VITE_SITE_URL%/" />
     <meta name="theme-color" content="#0e0f12" />
     <meta name="color-scheme" content="dark" />
 
@@ -23,6 +31,7 @@
     <!-- Vista previa al compartir (WhatsApp, LinkedIn, Facebook, Discord…) -->
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_AR" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:site_name" content="Mauricio Ricotti" />
     <meta property="og:title" content="Mauricio Ricotti | Full Stack Developer" />
     <meta

@@ -1,5 +1,8 @@
+import { Fragment } from "react";
 import type { Profile } from "../types";
+import { Download } from "lucide-react";
 import { sound } from "../lib/sound";
+import { useLang } from "../i18n";
 
 interface HeroProps {
   profile: Profile;
@@ -7,6 +10,7 @@ interface HeroProps {
 }
 
 export default function Hero({ profile, onOpenContact }: HeroProps) {
+  const { ui } = useLang().c;
   return (
     <section className="relative isolate overflow-hidden pt-28 sm:pt-36 lg:pt-40 pb-10 sm:pb-14 bg-[#0e0f12] text-white">
       {/* Fondo: cuadrícula que se desvanece. Estático, sin brillos ni máscaras. */}
@@ -22,12 +26,23 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
               const last = words.pop();
               return (
                 <>
-                  {words.map((w) => (
-                    <span key={w} className="block sm:inline">
-                      {w}{" "}
-                    </span>
+                  {/* Animación de entrada: cada palabra sube; la última se "dibuja" (ver index.css) */}
+                  {words.map((w, i) => (
+                    <Fragment key={w}>
+                      <span
+                        data-intro="up"
+                        style={{ "--d": `${i * 0.09}s` } as React.CSSProperties}
+                        className="block sm:inline-block"
+                      >
+                        {w}
+                      </span>{" "}
+                    </Fragment>
                   ))}
-                  <span className="hero-outline block lg:text-right">
+                  <span
+                    data-intro="draw"
+                    style={{ "--d": "0.28s" } as React.CSSProperties}
+                    className="hero-outline block lg:text-right"
+                  >
                     {last}
                   </span>
                 </>
@@ -37,13 +52,25 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-start pb-2">
-          <div className="md:col-span-5 text-neutral-400 text-sm sm:text-base leading-relaxed">
+          <div
+            data-intro="fade"
+            style={{ "--d": "0.6s" } as React.CSSProperties}
+            className="md:col-span-5 text-neutral-400 text-sm sm:text-base leading-relaxed"
+          >
             <p>{profile.leftBio}</p>
           </div>
-          <div className="md:col-span-5 text-neutral-400 text-sm sm:text-base leading-relaxed">
+          <div
+            data-intro="fade"
+            style={{ "--d": "0.68s" } as React.CSSProperties}
+            className="md:col-span-5 text-neutral-400 text-sm sm:text-base leading-relaxed"
+          >
             <p>{profile.centerBio}</p>
           </div>
-          <div className="md:col-span-2 flex items-center md:justify-end">
+          <div
+            data-intro="fade"
+            style={{ "--d": "0.76s" } as React.CSSProperties}
+            className="md:col-span-2 flex flex-wrap md:flex-col items-center md:items-end gap-x-7 gap-y-4"
+          >
             <button
               onClick={() => {
                 sound.playPop(580);
@@ -56,6 +83,21 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
                 →
               </span>
             </button>
+            {profile.cvUrl && (
+              <a
+                href={profile.cvUrl}
+                download
+                onClick={() => sound.playClick()}
+                className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold tracking-widest text-neutral-400 uppercase border-b-2 border-white/25 pb-0.5 hover:text-[#3cd3b7] hover:border-[#3cd3b7] transition-colors whitespace-nowrap"
+              >
+                <span>CV</span>
+                <Download
+                  size={14}
+                  className="group-hover:translate-y-0.5 transition-transform"
+                />
+                <span className="sr-only">{ui.downloadCv}</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

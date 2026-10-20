@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { ArrowRight, Plus } from "lucide-react";
-import { faqs, faqSection } from "../data/content";
+import { useLang } from "../i18n";
 import { sound } from "../lib/sound";
 
 const EASE = "ease-[cubic-bezier(0.65,0,0.25,1)]";
 
 export default function Faq({ onOpenContact }: { onOpenContact: () => void }) {
+  const { faqs, faqSection } = useLang().c;
   // Una pregunta abierta a la vez (-1 = ninguna). Arranca abierta la primera.
   const [open, setOpen] = useState(0);
 

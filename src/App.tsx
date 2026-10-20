@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { profile, projects, techStack, techStackTitle } from "./data/content";
+import { useLang } from "./i18n";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import TechStack from "./components/TechStack";
@@ -15,6 +15,7 @@ const ContactFlow = lazy(() => import("./components/ContactFlow"));
 import { scrollToId, setSmoothScrollPaused } from "./lib/smoothScroll";
 
 export default function App() {
+  const { profile, projects, techStack, techStackTitle } = useLang().c;
   const [contactOpen, setContactOpen] = useState(false);
   const [flowReady, setFlowReady] = useState(false);
 

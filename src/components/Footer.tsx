@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Heart, Mail, MapPin } from "lucide-react";
+import { ArrowUpRight, Download, Heart, Mail, MapPin } from "lucide-react";
 import { siWhatsapp } from "simple-icons";
 import type { Profile } from "../types";
 import { sound } from "../lib/sound";
-import { footer } from "../data/content";
+import { fill, useLang } from "../i18n";
 
 interface FooterProps {
   profile: Profile;
@@ -11,6 +11,7 @@ interface FooterProps {
 }
 
 export default function Footer({ profile, onOpenContact }: FooterProps) {
+  const { footer, ui } = useLang().c;
   const [time, setTime] = useState("");
   const [openNow, setOpenNow] = useState(false);
 
@@ -64,7 +65,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href={`mailto:${profile.email}`}
-                aria-label="Enviar un email"
+                aria-label={ui.sendEmail}
                 onClick={() => sound.playClick()}
                 className="group inline-flex items-center gap-3 h-12 pl-1.5 pr-6 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/35 text-sm font-semibold text-neutral-200 hover:text-white transition-colors"
               >
@@ -95,6 +96,19 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
                   <span>WhatsApp</span>
                 </a>
               )}
+              {profile.cvUrl && (
+                <a
+                  href={profile.cvUrl}
+                  download
+                  onClick={() => sound.playClick()}
+                  className="group inline-flex items-center gap-3 h-12 pl-1.5 pr-6 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/35 text-sm font-semibold text-neutral-200 hover:text-white transition-colors"
+                >
+                  <span className="w-9 h-9 rounded-full bg-[#3cd3b7] text-[#0e0f12] flex items-center justify-center group-hover:bg-[#f2ede4] transition-colors">
+                    <Download size={16} />
+                  </span>
+                  <span>{ui.downloadCv}</span>
+                </a>
+              )}
             </div>
           </div>
           <button
@@ -112,7 +126,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
         <div className="py-10 border-b border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-8 text-sm">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-widest text-[#8c8c8c] mb-3">
-              Ubicación
+              {ui.location}
             </p>
             <p className="text-neutral-200 flex items-start gap-2">
               <MapPin size={16} className="text-[#3cd3b7] mt-0.5 shrink-0" />
@@ -122,7 +136,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
           {profile.hours && (
             <div>
               <p className="font-mono text-[11px] uppercase tracking-widest text-[#8c8c8c] mb-3">
-                Horario de atención
+                {ui.hours}
               </p>
               <ul className="space-y-1.5">
                 {profile.hours.map((h) => (
@@ -132,7 +146,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
                   >
                     <span className="text-neutral-400">{h.label}</span>
                     <span className="font-mono text-neutral-200">
-                      {h.from && h.to ? `${h.from} – ${h.to}` : "Cerrado"}
+                      {h.from && h.to ? `${h.from} – ${h.to}` : ui.closed}
                     </span>
                   </li>
                 ))}
@@ -141,18 +155,16 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
           )}
           <div>
             <p className="font-mono text-[11px] uppercase tracking-widest text-[#8c8c8c] mb-3">
-              Ahora
+              {ui.now}
             </p>
             <p className="flex items-center gap-2 text-neutral-200">
               <span
                 className={`w-2 h-2 rounded-full ${openNow ? "bg-emerald-400" : "bg-neutral-500"}`}
               />
-              {openNow
-                ? "En horario de atención"
-                : "Fuera de horario · te respondo pronto"}
+              {openNow ? ui.openNow : ui.closedNow}
             </p>
             <p className="mt-1.5 font-mono text-xs text-[#8c8c8c]">
-              Hora local: {time} hs
+              {fill(ui.localTime, { time })}
             </p>
           </div>
         </div>
@@ -183,7 +195,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
           <span>
             © {new Date().getFullYear()} {profile.name}.{" "}
             <br className="sm:hidden" />
-            Todos los derechos reservados.
+            {ui.rights}
           </span>
           <span className="flex items-center gap-1 text-[#8c8c8c]">
             <span>{footer.credit}</span>

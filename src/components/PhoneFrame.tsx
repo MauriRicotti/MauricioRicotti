@@ -8,6 +8,8 @@ import {
   WifiOff,
 } from "lucide-react";
 import type { Project } from "../types";
+import { useLang } from "../i18n";
+import { fill } from "../i18n";
 
 /**
  * Marco de teléfono para apps de celular (captura vertical).
@@ -24,6 +26,7 @@ export default function PhoneFrame({
   project: Project;
   className?: string;
 }) {
+  const { ui } = useLang().c;
   return (
     // phone-wrap = contenedor de referencia para las unidades cqw (un elemento no puede usar las suyas)
     <div className={`phone-wrap aspect-[9/19.5] ${className}`}>
@@ -32,7 +35,7 @@ export default function PhoneFrame({
           {p.image ? (
             <img
               src={p.image}
-              alt={`Captura de ${p.name}`}
+              alt={fill(ui.screenshotOf, { name: p.name })}
               width={1080}
               height={2340}
               loading="lazy"

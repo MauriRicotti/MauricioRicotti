@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import type { Profile } from "../types";
 import { sound } from "../lib/sound";
-import { contact } from "../data/content";
+import { contact as baseContact } from "../data/content";
+import { fill as fillText, useLang } from "../i18n";
 
 /**
  * Contacto conversacional: una pregunta por pantalla (estilo Typeform).
@@ -41,7 +42,7 @@ const LETTERS = "ABCDEFGHIJ";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const FORM_ENDPOINT = "https://api.web3forms.com/submit";
-const hasFormKey = contact.formAccessKey.trim().length > 0;
+const hasFormKey = baseContact.formAccessKey.trim().length > 0;
 
 const emptyForm = {
   name: "",
@@ -56,6 +57,8 @@ export default function ContactFlow({
   onClose,
   profile,
 }: ContactFlowProps) {
+  const { lang, c } = useLang();
+  const { contact, ui } = c;
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
@@ -97,14 +100,11 @@ export default function ContactFlow({
   }, [isOpen, step, sentVia]);
 
   const validate = (): string => {
-    if (id === "name" && !form.name.trim())
-      return "Necesito tu nombre para seguir.";
-    if (id === "email" && !EMAIL_RE.test(form.email.trim()))
-      return "Revisá el email, parece que falta algo.";
-    if (id === "projectType" && !form.projectType) return "Elegí una opción.";
-    if (id === "budget" && !form.budget) return "Elegí una opción.";
-    if (id === "message" && !form.message.trim())
-      return "Contame aunque sea en una línea.";
+    if (id === "name" && !form.name.trim()) return ui.errName;
+    if (id === "email" && !EMAIL_RE.test(form.email.trim())) return ui.errEmail;
+    if (id === "projectType" && !form.projectType) return ui.errOption;
+    if (id === "budget" && !form.budget) return ui.errOption;
+    if (id === "message" && !form.message.trim()) return ui.errMessage;
     return "";
   };
 
@@ -158,10 +158,10 @@ export default function ContactFlow({
 
   const summary = () =>
     [
-      `Hola Mauricio, soy ${form.name.trim()}.`,
-      `Email: ${form.email.trim()}`,
-      `Proyecto: ${form.projectType}`,
-      `Presupuesto (ARS): ${form.budget}`,
+      fillText(ui.sumHello, { name: form.name.trim() }),
+      `${ui.sumEmail}: ${form.email.trim()}`,
+      `${ui.sumProject}: ${form.projectType}`,
+      `${ui.sumBudget}: ${form.budget}`,
       "",
       form.message.trim(),
     ].join("\n");
@@ -188,7 +188,7 @@ export default function ContactFlow({
       fd.append("access_key", contact.formAccessKey);
       fd.append(
         "subject",
-        `Nuevo proyecto: ${form.projectType} — ${form.name.trim()}`,
+        `${lang === "en" ? "[EN] " : ""}Nuevo proyecto: ${form.projectType} — ${form.name.trim()}`,
       );
       fd.append("from_name", `Portfolio · ${form.name.trim()}`);
       fd.append("name", form.name.trim());
@@ -196,6 +196,7 @@ export default function ContactFlow({
       fd.append("replyto", form.email.trim());
       fd.append("Tipo de proyecto", form.projectType);
       fd.append("Presupuesto (ARS)", form.budget);
+      fd.append("Idioma", lang === "en" ? "Inglés" : "Español");
       fd.append("message", form.message.trim());
       const res = await fetch(FORM_ENDPOINT, {
         method: "POST",
@@ -223,7 +224,10 @@ export default function ContactFlow({
     }
     sound.playPop(700);
     if (via === "email") {
-      const subject = `Nuevo proyecto: ${form.projectType} — ${form.name.trim()}`;
+      const subject = fillText(ui.sumSubject, {
+        type: form.projectType,
+        name: form.name.trim(),
+      });
       window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summary())}`;
     } else if (profile.whatsapp) {
       window.open(
@@ -254,7 +258,7 @@ export default function ContactFlow({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Contacto"
+      aria-label={ui.contactDialog}
       data-lenis-prevent
       className="fixed inset-0 z-[60] bg-[#0e0f12] text-white overflow-y-auto overscroll-contain animate-flow-in"
     >
@@ -272,11 +276,13 @@ export default function ContactFlow({
         {/* Barra superior */}
         <div className="flex items-center justify-between py-5 sm:py-7">
           <span className="font-mono text-xs text-[#8c8c8c]">
-            {sentVia ? "Enviado" : `Paso ${step + 1} de ${STEPS.length}`}
+            {sentVia
+              ? ui.sent
+              : fillText(ui.stepOf, { n: step + 1, total: STEPS.length })}
           </span>
           <button
             onClick={close}
-            aria-label="Cerrar"
+            aria-label={ui.close}
             className="group flex items-center gap-2 text-neutral-400 hover:text-white transition-colors cursor-pointer"
           >
             <span className="hidden sm:inline font-mono text-[11px] px-1.5 py-0.5 rounded border border-white/15">
@@ -303,14 +309,14 @@ export default function ContactFlow({
                     )
                   : contact.successText.replace(
                       "{app}",
-                      sentVia === "email" ? "tu app de correo" : "WhatsApp",
+                      sentVia === "email" ? ui.yourMailApp : "WhatsApp",
                     )}
               </p>
               <button
                 onClick={close}
                 className="mt-10 inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-[#3cd3b7] transition-colors cursor-pointer"
               >
-                <ArrowLeft size={18} /> Volver al sitio
+                <ArrowLeft size={18} /> {ui.backToSite}
               </button>
             </div>
           ) : (
@@ -421,7 +427,7 @@ export default function ContactFlow({
                   <button
                     type="button"
                     onClick={back}
-                    aria-label="Paso anterior"
+                    aria-label={ui.prevStep}
                     className="w-12 h-12 rounded-full border border-white/15 hover:border-white/40 flex items-center justify-center text-neutral-300 hover:text-white transition-colors cursor-pointer"
                   >
                     <ArrowLeft size={18} />
@@ -434,10 +440,10 @@ export default function ContactFlow({
                       type="submit"
                       className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-[#3cd3b7] transition-colors cursor-pointer"
                     >
-                      Siguiente <ArrowRight size={18} />
+                      {ui.next} <ArrowRight size={18} />
                     </button>
                     <span className="hidden sm:flex items-center gap-1.5 font-mono text-xs text-[#8c8c8c]">
-                      o presioná Enter <CornerDownLeft size={13} />
+                      {ui.orPressEnter} <CornerDownLeft size={13} />
                     </span>
                   </>
                 ) : (
@@ -469,7 +475,7 @@ export default function ContactFlow({
                           <>
                             <Send size={18} />
                             <span className="whitespace-nowrap">
-                              Enviar mensaje
+                              {ui.sendMessage}
                             </span>
                           </>
                         )}
@@ -481,7 +487,7 @@ export default function ContactFlow({
                         onClick={() => send("email")}
                         className="inline-flex items-center gap-2 px-6 h-12 rounded-full border border-white/25 text-neutral-200 font-semibold hover:border-white/50 hover:text-white transition-colors cursor-pointer"
                       >
-                        <Mail size={18} /> Enviar por email
+                        <Mail size={18} /> {ui.sendByEmail}
                       </button>
                     )}
                     {!hasFormKey && (
@@ -490,7 +496,7 @@ export default function ContactFlow({
                         onClick={() => send("email")}
                         className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-[#3cd3b7] transition-colors cursor-pointer"
                       >
-                        <Mail size={18} /> Enviar por email
+                        <Mail size={18} /> {ui.sendByEmail}
                       </button>
                     )}
                     {profile.whatsapp && (
@@ -499,7 +505,7 @@ export default function ContactFlow({
                         onClick={() => send("whatsapp")}
                         className="inline-flex items-center gap-2 px-6 h-12 rounded-full border-2 border-[#3cd3b7] text-[#3cd3b7] font-semibold hover:bg-[#3cd3b7] hover:text-[#0e0f12] transition-colors cursor-pointer"
                       >
-                        <MessageCircle size={18} /> Enviar por WhatsApp
+                        <MessageCircle size={18} /> {ui.sendByWhatsapp}
                       </button>
                     )}
                   </>

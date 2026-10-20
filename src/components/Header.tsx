@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Volume2, VolumeX } from "lucide-react";
+import { ArrowUpRight, Download, Volume2, VolumeX } from "lucide-react";
 import { sound } from "../lib/sound";
 import { scrollToTop } from "../lib/smoothScroll";
-import { navLinks } from "../data/content";
+import { useLang, type Lang } from "../i18n";
 
 interface HeaderProps {
   name: string;
@@ -24,6 +24,15 @@ export default function Header({
   const [scrolled, setScrolled] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { lang, setLang, c } = useLang();
+  const { navLinks, ui, profile } = c;
+  const changeLang = (l: Lang) => {
+    if (l === lang) return;
+    sound.playPop(620);
+    setLang(l);
+    // Si se cambió desde el menú del celular, se cierra detrás de la cortina
+    if (menuOpen) setTimeout(() => setMenuOpen(false), 380);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -75,6 +84,8 @@ export default function Header({
   return (
     <>
       <header
+        data-intro="down"
+        style={{ "--d": "0.5s" } as React.CSSProperties}
         className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,padding,border-color] duration-300 border-b ${
           scrolled ? "py-3.5" : "py-5 sm:py-7"
         } ${solid ? "bg-[#0e0f12]/95 border-white/10" : "bg-transparent border-transparent"}`}
@@ -88,7 +99,7 @@ export default function Header({
               setMenuOpen(false);
               scrollToTop();
             }}
-            title="Ir al inicio"
+            title={ui.goHome}
             className="group flex items-center gap-3 whitespace-nowrap focus:outline-none cursor-pointer"
           >
             <span
@@ -104,7 +115,7 @@ export default function Header({
             <span className="font-hero uppercase leading-none tracking-[0.02em] text-[1.4rem] sm:text-2xl md:text-xl text-[#f2ede4] md:text-white/80 group-hover:text-white md:group-hover:text-white transition-colors duration-200">
               {name}
             </span>
-            <span className="sr-only">, ir al inicio</span>
+            <span className="sr-only">, {ui.goHome.toLowerCase()}</span>
           </button>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -120,11 +131,34 @@ export default function Header({
           </nav>
 
           <div className="justify-self-end flex items-center gap-3 sm:gap-4">
+            {/* Idioma en escritorio: selector ES | EN (en celular está dentro del menú) */}
+            <div
+              role="group"
+              aria-label={ui.language}
+              className="hidden md:flex items-center h-8 p-0.5 rounded-full border border-white/20 font-mono text-[11px]"
+            >
+              {(["es", "en"] as const).map((l) => (
+                <button
+                  key={l}
+                  lang={l}
+                  onClick={() => changeLang(l)}
+                  aria-pressed={lang === l}
+                  className={`h-full px-2.5 rounded-full uppercase tracking-wider transition-colors cursor-pointer ${
+                    lang === l
+                      ? "bg-[#f2ede4] text-[#0e0f12]"
+                      : "text-white/65 hover:text-white"
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+
             {/* Sonido: en escritorio en la barra, en celular dentro del menú */}
             <button
               onClick={toggleSound}
-              aria-label="Activar o silenciar sonidos"
-              title={soundOn ? "Sonido activado" : "Sonido silenciado"}
+              aria-label={ui.soundToggle}
+              title={soundOn ? ui.soundOn : ui.soundOff}
               className="hidden md:flex w-8 h-8 rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 items-center justify-center transition-colors"
             >
               {soundOn ? (
@@ -141,7 +175,7 @@ export default function Header({
               }}
               className="group hidden md:flex items-center gap-3 h-10 pl-5 pr-1 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-[#3cd3b7] transition-colors duration-200 cursor-pointer"
             >
-              <span>Hablemos</span>
+              <span>{ui.talk}</span>
               <span className="w-8 h-8 rounded-full bg-[#0e0f12] text-[#f2ede4] flex items-center justify-center transition-transform duration-300 group-hover:rotate-45">
                 <ArrowUpRight size={16} />
               </span>
@@ -150,7 +184,7 @@ export default function Header({
             {/* Botón hamburguesa: las dos líneas se cruzan y forman una X */}
             <button
               onClick={toggleMenu}
-              aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+              aria-label={menuOpen ? ui.closeMenu : ui.openMenu}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
               className={`md:hidden relative w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
@@ -219,7 +253,7 @@ export default function Header({
             ))}
           </nav>
 
-          <div className="px-6 pt-5 pb-6 flex items-center justify-between gap-3">
+          <div className="px-6 pt-5 flex items-center justify-between gap-3">
             {/* Interruptor de sonido */}
             <button
               onClick={toggleSound}
@@ -240,19 +274,57 @@ export default function Header({
               </span>
               <span className="flex items-center gap-1.5 text-sm font-semibold">
                 {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
-                {soundOn ? "Sonido" : "Silencio"}
+                {soundOn ? ui.soundShort : ui.muteShort}
               </span>
             </button>
 
+            {/* Idioma */}
+            <div
+              role="group"
+              aria-label={ui.language}
+              className="flex items-center h-10 p-1 rounded-full border-2 border-[#0e0f12] font-mono text-xs font-semibold"
+            >
+              {(["es", "en"] as const).map((l) => (
+                <button
+                  key={l}
+                  lang={l}
+                  onClick={() => changeLang(l)}
+                  aria-pressed={lang === l}
+                  className={`h-full px-3.5 rounded-full uppercase tracking-wider transition-colors ${
+                    lang === l
+                      ? "bg-[#0e0f12] text-[#f2ede4]"
+                      : "text-[#0e0f12]/60 active:bg-[#0e0f12]/10"
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="px-6 pt-4 pb-6 flex items-center gap-3">
+            {profile.cvUrl && (
+              <a
+                href={profile.cvUrl}
+                download
+                onClick={() => {
+                  sound.playClick();
+                  setMenuOpen(false);
+                }}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-full border-2 border-[#0e0f12] text-sm font-semibold whitespace-nowrap active:bg-[#0e0f12] active:text-[#f2ede4] transition-colors"
+              >
+                <Download size={16} /> {ui.downloadCv}
+              </a>
+            )}
             <button
               onClick={() => {
                 sound.playPop(650);
                 setMenuOpen(false);
                 onOpenContact();
               }}
-              className="flex items-center gap-1.5 px-5 py-3 rounded-full bg-[#0e0f12] text-[#f2ede4] text-sm font-semibold shadow-[3px_3px_0_#3cd3b7]"
+              className="flex-1 flex items-center justify-center gap-1.5 px-5 py-3 rounded-full whitespace-nowrap bg-[#0e0f12] text-[#f2ede4] text-sm font-semibold shadow-[3px_3px_0_#3cd3b7]"
             >
-              Hablemos <ArrowUpRight size={16} />
+              {ui.talk} <ArrowUpRight size={16} />
             </button>
           </div>
         </div>

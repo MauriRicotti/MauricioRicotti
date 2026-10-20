@@ -18,6 +18,8 @@ export interface Profile {
   /** Horario de atención. days: 0 = domingo … 6 = sábado. Sin from/to = cerrado */
   hours?: { label: string; days: number[]; from?: string; to?: string }[];
   socials: SocialLink[];
+  /** CV en PDF para descargar (dentro de public/). Opcional: si no está, no aparece el botón. */
+  cvUrl?: string;
 }
 
 export interface Project {

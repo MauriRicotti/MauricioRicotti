@@ -1,8 +1,9 @@
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { about } from "../data/content";
+import { useLang } from "../i18n";
 
 export default function About() {
+  const { about } = useLang().c;
   /* Al hacer scroll, se "enciende" (mismo aspecto que el hover) el servicio que cruza una
      línea imaginaria al 45% del alto de la pantalla, así se van activando de arriba hacia abajo.
      Se calcula a mano (y no con IntersectionObserver + rootMargin) porque dentro de un iframe,
