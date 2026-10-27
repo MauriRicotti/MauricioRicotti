@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { loaderDelay } from "../lib/loader";
 import type { BadgeArt, BadgeDesign, BadgeTexts } from "../lib/badgeArt";
 
 /**
@@ -50,7 +51,7 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
   // Espera a que termine la entrada del título; mientras, baja three.js en paralelo
   useEffect(() => {
     import("./Lanyard");
-    const t = window.setTimeout(() => setShow(true), 1300);
+    const t = window.setTimeout(() => setShow(true), 1300 + loaderDelay());
     return () => clearTimeout(t);
   }, []);
 

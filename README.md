@@ -109,7 +109,7 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
 - **Etiquetas:** título, descripción, Open Graph (WhatsApp, LinkedIn, Facebook, Discord), Twitter/X y datos
   estructurados de Google (persona + profesión) están en `index.html`.
 - **Imagen al compartir:** `public/og-image.jpg` (1200×630). Reemplazala por otra del mismo tamaño si querés.
-- **Favicon (monograma MR):** `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`,
+- **Favicon (logo MR):** `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`,
   `icon-512.png`, `icon-maskable-512.png` y `site.webmanifest`.
 - **Probar la vista previa** después de publicar: https://www.opengraph.xyz o el "Post Inspector" de LinkedIn.
   WhatsApp guarda la vista previa en caché: si cambiás la imagen, puede tardar en actualizarse.
@@ -124,6 +124,20 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
 - La sección de proyectos dibuja solo el diseño de la pantalla actual (paneles en PC, franjas en celular).
 - Lighthouse (local): celular 98 · 100 · 100 · 100 — PC 100 · 100 · 100 · 100
   (rendimiento · accesibilidad · buenas prácticas · SEO).
+
+## Pantalla de carga y logo
+
+- **Pantalla de carga** (al entrar a la web): el logo MAURTTI se arma pieza por pieza y la pantalla
+  se va en franjas verticales (negras y después turquesas, como una ola; ≈2,5 s). Está **dentro de `index.html`** (bloques
+  `loader:start` / `loader-markup:start`), así aparece al instante sin esperar a que cargue nada.
+  - Se muestra **cada vez que se carga o recarga la página**.
+  - Con "reducir movimiento" activado en el sistema no se muestra.
+  - El título del hero y la credencial esperan a que las franjas empiecen a abrirse (`src/lib/loader.ts`).
+- **Logo MR** en la barra (solo el logo, sin el nombre, en PC y celular): `src/components/LogoMark.tsx`.
+  Con el mouse encima, el borde y las letras se ponen turquesa.
+- **Favicon e íconos:** `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`,
+  `icon-512.png`, `icon-maskable-512.png` (todos con el logo MR).
+- Los dos logos en vector (para usar donde quieras): `src/assets/logo/logo-mauritti.svg` y `logo-mr.svg`.
 
 ## Footer
 

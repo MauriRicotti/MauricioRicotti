@@ -1,3 +1,4 @@
+import LogoMark from "./LogoMark";
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Download, Volume2, VolumeX } from "lucide-react";
 import { sound } from "../lib/sound";
@@ -91,8 +92,7 @@ export default function Header({
         } ${solid ? "bg-[#0e0f12]/75 backdrop-blur-[8px] border-white/10" : "bg-transparent border-transparent"}`}
       >
         <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Logo: monograma "MR" en la tipografía del título + nombre.
-              En celular no se muestra el monograma: el nombre queda alineado a la izquierda. */}
+          {/* Logo: solo el sticker "MR" (en PC y en celular). El nombre queda para lectores de pantalla. */}
           <button
             onClick={() => {
               sound.playClick();
@@ -100,22 +100,12 @@ export default function Header({
               scrollToTop();
             }}
             title={ui.goHome}
-            className="group flex items-center gap-3 whitespace-nowrap focus:outline-none cursor-pointer"
+            className="group flex items-center focus:outline-none cursor-pointer rounded-md focus-visible:ring-2 focus-visible:ring-[#3cd3b7]/60"
           >
-            <span
-              aria-hidden="true"
-              className="hidden md:inline font-hero uppercase leading-none text-[2rem] tracking-[-0.01em] text-[#f2ede4] group-hover:text-[#3cd3b7] group-focus-visible:text-[#3cd3b7] transition-colors duration-200"
-            >
-              MR
+            <LogoMark className="h-10 md:h-11 w-auto text-[#f2ede4] group-hover:text-[#3cd3b7] group-focus-visible:text-[#3cd3b7] transition-[color,transform] duration-200 group-active:scale-95" />
+            <span className="sr-only">
+              {name}, {ui.goHome.toLowerCase()}
             </span>
-            <span
-              aria-hidden="true"
-              className="hidden md:block w-px h-6 bg-white/20"
-            />
-            <span className="font-hero uppercase leading-none tracking-[0.02em] text-[1.4rem] sm:text-2xl md:text-xl text-[#f2ede4] md:text-white/80 group-hover:text-white md:group-hover:text-white transition-colors duration-200">
-              {name}
-            </span>
-            <span className="sr-only">, {ui.goHome.toLowerCase()}</span>
           </button>
 
           <nav className="hidden md:flex items-center gap-8">
