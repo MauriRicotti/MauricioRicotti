@@ -95,6 +95,10 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
   (`passThrough`): solo atrapa el puntero sobre la tarjeta.
 - **Quitarla:** borrá `<HeroBadge … />` en `Hero.tsx`, los archivos `Lanyard.tsx`, `HeroBadge.tsx`,
   `lib/badgeArt.ts` y `three` de `package.json`.
+- **Arrastre con límite:** la tarjeta no se puede llevar fuera del hero (ni debajo de la franja de
+  tecnologías ni cortada por los costados). Si se suelta el clic fuera de la ventana, se suelta sola.
+- **Fluidez:** mientras se hace scroll la tarjeta se queda quieta (no se dibuja) y retoma el
+  balanceo al parar. En pantallas de 120/144 Hz se dibuja a ~60–75 cuadros por segundo.
 
 ## SEO, favicon y vista previa al compartir
 

@@ -55,7 +55,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
   return (
     <footer
       id="contact"
-      className="relative bg-[#090a0d] text-white pt-20 sm:pt-28 pb-20 sm:pb-5 border-t border-white/10 overflow-hidden"
+      className="relative bg-[#090a0d] text-white pt-20 sm:pt-28 pb-4 sm:pb-5 border-t border-white/10 overflow-hidden"
     >
       <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">

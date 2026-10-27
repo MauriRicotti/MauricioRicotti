@@ -79,9 +79,11 @@ export default function Marquee() {
       last = now;
       computeTarget();
       if (!visible()) {
-        // fuera de pantalla: se ubica directo y se detiene (no gasta nada)
-        current = target;
-        apply();
+        // fuera de pantalla: se ubica directo y se detiene (no gasta nada; si no cambió, ni lo toca)
+        if (current !== target) {
+          current = target;
+          apply();
+        }
         raf = 0;
         return;
       }

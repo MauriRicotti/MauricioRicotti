@@ -1066,6 +1066,10 @@ const Lanyard = ({
     let time = 0;
     let visible = true;
     let alive = true;
+    // (Portfolio) mientras se hace scroll la tarjeta se congela (no se simula ni se redibuja):
+    // así el navegador solo desplaza la página y el scroll va fluido. Retoma al parar.
+    let scrolling = false;
+    let scrollTimer = 0;
     let placed = false;
     let hovering = false;
     let press: Press | null = null;
@@ -1330,6 +1334,12 @@ const Lanyard = ({
     const tick = (now: number) => {
       raf = 0;
       if (!alive) return;
+      if (scrolling && !sim.grab) return;
+      // (Portfolio) en pantallas de 120/144 Hz se dibuja a ~60–75 cuadros por segundo (menos trabajo)
+      if (now - last < 12) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
       const dt = Math.min(1 / 30, Math.max(1 / 240, (now - last) / 1000));
       last = now;
       time += dt;
@@ -1347,6 +1357,7 @@ const Lanyard = ({
 
     const start = () => {
       if (raf || !visible || !alive) return;
+      if (scrolling && !sim.grab) return;
       sim.calm = 0;
       last = performance.now();
       raf = requestAnimationFrame(tick);
@@ -1432,12 +1443,56 @@ const Lanyard = ({
       start();
     };
 
+    // (Portfolio) límite del arrastre: el centro de la tarjeta no puede salir de la zona visible del
+    // lienzo (si no, quedaba debajo de la franja de tecnologías o cortada por los costados)
+    const clampVec = new THREE.Vector3();
+    const offsetVec = new THREE.Vector3();
+    const clampGrab = (grab: NonNullable<typeof sim.grab>) => {
+      const h = view.height;
+      const w = view.width;
+      const cardH = clamp(settingsRef.current!.size, 0.05, 1) * h;
+      const cardW = cardH * 0.72;
+      offsetVec.copy(grab.local).applyQuaternion(grab.rotation);
+      clampVec.copy(grab.target).sub(offsetVec).project(camera);
+      const px = ((clampVec.x + 1) / 2) * w;
+      const py = ((1 - clampVec.y) / 2) * h;
+      // media diagonal: lo máximo que ocupa la tarjeta desde su centro aunque esté inclinada
+      const reach = 0.5 * Math.hypot(cardW, cardH);
+      const minX = Math.min(w / 2, reach + 10);
+      const maxX = Math.max(w / 2, w - reach - 10);
+      const minY = Math.min(h / 2, cardH * 0.55);
+      const maxY = Math.max(h * 0.45, h - reach - 14);
+      const cx = clamp(px, minX, maxX);
+      const cy = clamp(py, minY, maxY);
+      if (cx === px && cy === py) return;
+      clampVec.x = (cx / w) * 2 - 1;
+      clampVec.y = 1 - (cy / h) * 2;
+      clampVec.unproject(camera);
+      grab.target.copy(clampVec).add(offsetVec);
+    };
+
+    // (Portfolio) suelta la tarjeta sin "dar vuelta" (cuando el botón se soltó fuera de la ventana)
+    const release = () => {
+      if (!sim.grab) return;
+      sim.grab = null;
+      press = null;
+      suppressClick = false;
+      setCursor('');
+      start();
+    };
+
     const onPointerMove = (event: PointerEvent) => {
       if (!settingsRef.current!.interactive) return;
       toPointer(event);
       if (sim.grab) {
+        // si se soltó el botón fuera de la ventana, el navegador no avisa: se suelta acá
+        if (event.pointerType === 'mouse' && event.buttons === 0) {
+          release();
+          return;
+        }
         if (press && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6) press = null;
         raycaster.ray.at(sim.grab.reach, sim.grab.target);
+        clampGrab(sim.grab);
         start();
         return;
       }
@@ -1510,6 +1565,21 @@ const Lanyard = ({
       if (!document.hidden) start();
     };
     document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('blur', release);
+    const onScroll = () => {
+      if (sim.grab) return;
+      scrolling = true;
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        scrolling = false;
+        start();
+      }, 140);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     applyRef.current = apply;
     resize();
@@ -1521,6 +1591,9 @@ const Lanyard = ({
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('blur', release);
+      window.removeEventListener('scroll', onScroll);
+      window.clearTimeout(scrollTimer);
       canvas.removeEventListener('pointerdown', onPointerDown);
       canvas.removeEventListener('pointermove', onPointerMove);
       canvas.removeEventListener('pointerup', onPointerUp);
