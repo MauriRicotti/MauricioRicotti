@@ -438,6 +438,11 @@ export const footer = {
   ctaText: "EMPECEMOS ➔",
   credit: "Diseñado y desarrollado con dedicación",
   timeZone: "America/Argentina/Buenos_Aires",
+  // Tarjeta del final
+  tagline:
+    "Full Stack Developer independiente. Diseño y desarrollo sitios y aplicaciones web de punta a punta.",
+  explore: "Explorar",
+  follow: "Seguime",
 };
 
 /* ------------------------------------------------------------------ */

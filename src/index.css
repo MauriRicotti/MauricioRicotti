@@ -69,6 +69,10 @@
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
+/* Dentro de la tarjeta del footer: la parte de abajo de las letras queda cortada por el borde */
+.footer-name--cut {
+  margin-bottom: -0.16em;
+}
 
 /* ---------- Animación de entrada (al abrir la web) ----------
    Las palabras del h1 suben, "DEVELOPER" se dibuja de izquierda a derecha y después

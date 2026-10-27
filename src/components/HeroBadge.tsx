@@ -88,9 +88,12 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
       if (desktopMq.matches) {
         const contentRight = Math.min(w, (w + 1408) / 2); // max-w-[88rem]
         cx = contentRight - 0.4 * Math.min(0.6 * w, 820);
-      } else cx = w * (mobile ? 0.64 : 0.77);
+      } else cx = w * (mobile ? 0.72 : 0.77);
       // Alto de la tarjeta y distancia de su borde superior al techo
       const cardPx = titleH * (mobile ? CARD.mobile : CARD.desktop);
+      // En celular: bien a la derecha, pero con margen para que al balancearse
+      // con el viento no toque el borde de la pantalla
+      if (mobile) cx = Math.min(cx, w - cardPx * 0.36 - 34);
       const topPx = titleH * (mobile ? 0.25 : 0.19);
       setBox({
         ready: true,
@@ -111,6 +114,8 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
       ref={boxRef}
       aria-hidden="true"
       className="absolute inset-0 z-10 pointer-events-none"
+      // en línea también: si el CSS no carga, la tarjeta no tapa la página
+      style={{ position: "absolute", inset: 0 }}
     >
       {show && art && box.ready && (
         <Suspense fallback={null}>

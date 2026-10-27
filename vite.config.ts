@@ -103,8 +103,23 @@ function seo(siteUrl: string, single: boolean): Plugin {
   };
 }
 
+/** Dirección pública por defecto (si no hay .env) */
+const DEFAULT_SITE_URL = "https://mauricio-ricotti.vercel.app";
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  // Dirección del sitio: .env → la que informa Vercel al compilar → la de producción.
+  // (Así funciona aunque el archivo .env no se suba a GitHub, que pasa seguido porque
+  // es un archivo oculto.)
+  const siteUrl = (
+    env.VITE_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "") ||
+    DEFAULT_SITE_URL
+  ).replace(/\/+$/, "");
+  // Vite reemplaza %VITE_SITE_URL% en index.html con esta variable
+  process.env.VITE_SITE_URL = siteUrl;
   // SINGLEFILE=1 → todo en un solo index.html (lo usa `npm run build:preview` para preview.html).
   // Normal (Vercel) → archivos separados, que el navegador puede guardar en caché.
   const single = process.env.SINGLEFILE === "1";
@@ -112,7 +127,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
-      seo(env.VITE_SITE_URL || "https://example.com", single),
+      seo(siteUrl, single),
       ...(single ? [viteSingleFile()] : []),
     ],
     // La tarjeta 3D (three.js) va en su propio archivo y se carga después; es esperable que pese ~530 KB.

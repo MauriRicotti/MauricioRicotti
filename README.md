@@ -98,7 +98,7 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
 
 ## SEO, favicon y vista previa al compartir
 
-- **Dirección del sitio:** editá `VITE_SITE_URL` en `.env` (sin "/" al final) cuando tengas el dominio real.
+- **Dirección del sitio:** editá `VITE_SITE_URL` en `.env` (sin "/" al final) si cambiás de dominio (por defecto: `https://mauricio-ricotti.vercel.app`).
   De ahí salen la URL canónica, la imagen al compartir (`og:image`), `sitemap.xml` y `robots.txt`
   (se generan solos al compilar; ver el plugin `seo` en `vite.config.ts`).
   En Vercel también podés cargarla en *Settings → Environment Variables*.
@@ -121,13 +121,30 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
 - Lighthouse (local): celular 98 · 100 · 100 · 100 — PC 100 · 100 · 100 · 100
   (rendimiento · accesibilidad · buenas prácticas · SEO).
 
+## Footer
+
+- Arriba: "¿Tenés una idea en mente?" con los botones Email, WhatsApp, Descargar CV y Empecemos.
+- Debajo, una tarjeta oscura redondeada con 4 columnas: frase corta + ubicación, **Explorar**
+  (los mismos enlaces de la barra), **Seguime** (las redes de `profile.socials`, con su ícono) y
+  **Horario de atención** (con "abierto/fuera de horario" y la hora de Argentina).
+- Al pie de la tarjeta, "MAURICIO RICOTTI" gigante en una línea, cortado por el borde de abajo
+  (cuánto se corta: `.footer-name--cut` en `src/index.css`).
+- Los textos de la tarjeta están en `footer` de `content.ts` / `content.en.ts` (`tagline`, `explore`, `follow`).
+
 ## Deploy en Vercel
 
 1. Subí esta carpeta a un repositorio de GitHub (sin `node_modules` ni `dist`; ya están en `.gitignore`).
 2. En https://vercel.com → **Add New… → Project** → importá el repositorio.
 3. Vercel detecta Vite solo (`vercel.json`): build `npm run build`, salida `dist`. Tocá **Deploy**.
-4. Si la dirección final no es `https://mauricioricotti.vercel.app`, cambiá `VITE_SITE_URL` en `.env`
-   (o en *Settings → Environment Variables*) y volvé a publicar.
+4. Dirección del sitio: `https://mauricio-ricotti.vercel.app`. Ya viene como valor por defecto en
+   `vite.config.ts`, así que funciona aunque `.env` no se suba (GitHub en la web suele omitir los
+   archivos ocultos). Si cambiás de dominio, editá `VITE_SITE_URL` en `.env` o en Vercel →
+   *Settings → Environment Variables*, y volvé a publicar.
+
+**Al subir por la web de GitHub:** cada subida (commit) dispara un deploy nuevo. Si subís los archivos
+en varias tandas, por unos minutos el sitio puede verse roto (sin estilos) mientras faltan archivos o
+mientras se publica la siguiente tanda. Lo ideal: subir todo en una sola tanda (máximo 100 archivos
+por vez), esperar a que Vercel marque *Ready* y recargar la página.
 
 Alternativa sin GitHub: `npm i -g vercel` y, dentro de la carpeta, `vercel` (y después `vercel --prod`).
 

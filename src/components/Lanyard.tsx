@@ -960,6 +960,8 @@ const Lanyard = ({
     renderer.toneMappingExposure = 1;
     const canvas = renderer.domElement;
     canvas.className = 'block w-full h-full';
+    // (Portfolio) estilos en línea: si el CSS no carga, el canvas no se dibuja gigante
+    canvas.style.cssText = 'display:block;width:100%;height:100%';
     canvas.setAttribute('aria-hidden', 'true');
     container.appendChild(canvas);
 

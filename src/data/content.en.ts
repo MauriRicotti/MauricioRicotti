@@ -316,6 +316,10 @@ export const footer = {
   title: "GOT AN IDEA IN MIND?",
   ctaText: "LET'S START ➔",
   credit: "Designed and built with care",
+  tagline:
+    "Independent Full Stack Developer. I design and build websites and web apps end to end.",
+  explore: "Explore",
+  follow: "Follow me",
 };
 
 /* 9. SEO */
