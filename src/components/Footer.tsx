@@ -203,19 +203,13 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
           </span>
         </div>
 
-        {/* Nombre gigante al cierre: siempre en una sola línea, a todo el ancho, con degradado negro abajo */}
+        {/* Nombre gigante al cierre: siempre en una sola línea, a todo el ancho, color sólido */}
         <div className="footer-name-wrap relative mt-12 sm:mt-16">
           <p
             aria-hidden="true"
             className="footer-name relative font-hero uppercase leading-[0.82] text-[#f2ede4] select-none"
           >
             {profile.name}
-            {/* Degradado negro de abajo hacia arriba (capa encima, sin máscaras).
-                Baja un poco más que la línea para cubrir el pie de las letras. */}
-            <span
-              aria-hidden="true"
-              className="absolute inset-x-0 top-0 -bottom-[0.12em] pointer-events-none bg-gradient-to-t from-[#090a0d] from-10% to-transparent"
-            />
           </p>
         </div>
       </div>

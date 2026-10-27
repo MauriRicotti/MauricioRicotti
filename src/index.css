@@ -28,21 +28,6 @@
   }
 }
 
-/* Scroll suave (Lenis): estilos recomendados */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis:not(.lenis-autoToggle).lenis-stopped {
-  overflow: clip;
-}
-.lenis [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-.lenis.lenis-smooth iframe {
-  pointer-events: none;
-}
-
 .font-hero {
   font-family: "Anton", "Bebas Neue", Impact, sans-serif;
   letter-spacing: -0.02em;

@@ -12,7 +12,7 @@ import Footer from "./components/Footer";
 import ScrollTop from "./components/ScrollTop";
 // El formulario se carga aparte (no frena la carga inicial de la página)
 const ContactFlow = lazy(() => import("./components/ContactFlow"));
-import { scrollToId, setSmoothScrollPaused } from "./lib/smoothScroll";
+import { scrollToId } from "./lib/smoothScroll";
 
 export default function App() {
   const { profile, projects, techStack, techStackTitle } = useLang().c;
@@ -31,11 +31,6 @@ export default function App() {
   }, []);
 
   const scrollTo = (id: string) => scrollToId(id);
-
-  // Con el formulario abierto, la página de fondo no se mueve
-  useEffect(() => {
-    setSmoothScrollPaused(contactOpen);
-  }, [contactOpen]);
 
   const openContact = () => setContactOpen(true);
 

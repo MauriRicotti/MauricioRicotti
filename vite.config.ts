@@ -10,7 +10,8 @@ import { seo as seoEn } from "./src/data/content.en";
  *  con título, descripción y vista previa al compartir en inglés. */
 function englishHtml(html: string, url: string) {
   const rep = (re: RegExp, to: string) => {
-    if (!re.test(html)) throw new Error(`[seo] No se encontró ${re} en index.html`);
+    if (!re.test(html))
+      throw new Error(`[seo] No se encontró ${re} en index.html`);
     html = html.replace(re, to);
   };
   const desc = seoEn.description.replace(/"/g, "&quot;");
@@ -47,7 +48,10 @@ function seo(siteUrl: string, single: boolean): Plugin {
       if (single) return;
       const html = readFileSync(path.join(outDir, "index.html"), "utf8");
       mkdirSync(path.join(outDir, "en"), { recursive: true });
-      writeFileSync(path.join(outDir, "en", "index.html"), englishHtml(html, url));
+      writeFileSync(
+        path.join(outDir, "en", "index.html"),
+        englishHtml(html, url),
+      );
     },
     generateBundle() {
       const today = new Date().toISOString().slice(0, 10);
@@ -111,6 +115,8 @@ export default defineConfig(({ mode }) => {
       seo(env.VITE_SITE_URL || "https://example.com", single),
       ...(single ? [viteSingleFile()] : []),
     ],
+    // La tarjeta 3D (three.js) va en su propio archivo y se carga después; es esperable que pese ~530 KB.
+    build: { chunkSizeWarningLimit: 600 },
     resolve: {
       alias: { "@": path.resolve(__dirname, "src") },
     },

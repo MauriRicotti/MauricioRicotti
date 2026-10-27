@@ -1,0 +1,143 @@
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import type { BadgeArt, BadgeDesign, BadgeTexts } from "../lib/badgeArt";
+
+/**
+ * Credencial 3D colgante del hero (Lanyard de React Bits).
+ *
+ * - Se carga DESPUÉS de la animación del título: la librería 3D (three.js) baja
+ *   en paralelo, así que no frena la primera carga de la página.
+ * - Cuelga sobre el lado derecho del título, desde arriba de la pantalla. Su lienzo
+ *   cubre TODO el hero (así, al estirarla, solo se corta en el borde de la pantalla)
+ *   y va por delante de todo, pero deja pasar los clics: solo atrapa el puntero
+ *   cuando está justo sobre la tarjeta (botones, textos y scroll funcionan normal).
+ * - Se pausa sola fuera de pantalla y con la pestaña oculta.
+ * - Si el navegador no tiene WebGL, simplemente no aparece.
+ *
+ * Para quitarla: borrá <HeroBadge /> en Hero.tsx (y los archivos Lanyard.tsx,
+ * HeroBadge.tsx y lib/badgeArt.ts; y "three" de package.json).
+ */
+
+const Lanyard = lazy(() => import("./Lanyard"));
+const loadArt = () => import("../lib/badgeArt");
+
+/** Alto de la tarjeta, en proporción al alto del título */
+const CARD = { desktop: 0.78, mobile: 0.48 };
+
+/** Ajustes de la tarjeta (los podés cambiar a gusto) */
+const SETTINGS = {
+  design: "foto" as BadgeDesign, // "foto" (tu retrato) | "credencial" (solo tipografía)
+  finish: "glossy" as const, // "glossy" | "matte" | "holographic" | "metallic"
+  metal: "silver" as const, // "graphite" | "silver" | "gold"
+  gravity: 2,
+  damping: 0.5,
+  elasticity: 0.5,
+  breeze: 0.5, // viento suave (0 = quieta cuando nadie la toca)
+  strapWidth: 0.65,
+  cornerRadius: 0.3,
+};
+
+export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [art, setArt] = useState<BadgeArt | null>(null);
+  const [show, setShow] = useState(false);
+  const [box, setBox] = useState({
+    ready: false,
+    size: 0.3,
+    x: 0.75,
+    top: 0.15,
+  });
+
+  // Espera a que termine la entrada del título; mientras, baja three.js en paralelo
+  useEffect(() => {
+    import("./Lanyard");
+    const t = window.setTimeout(() => setShow(true), 1300);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Dibuja el arte (y lo vuelve a dibujar si cambia el idioma)
+  const key = JSON.stringify(texts);
+  useEffect(() => {
+    let alive = true;
+    loadArt()
+      .then((m) => m.drawBadgeArt(texts, SETTINGS.design))
+      .then((a) => alive && setArt(a));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  // Posición y tamaño en píxeles, calculados a partir del título y del ancho de la página
+  useEffect(() => {
+    const el = boxRef.current;
+    const section = el?.parentElement;
+    const title = section?.querySelector(".hero-wrap");
+    if (!el || !section || !title) return;
+    const mobileMq = window.matchMedia("(max-width: 767px)");
+    const desktopMq = window.matchMedia("(min-width: 1024px)");
+    const measure = () => {
+      const w = section.clientWidth;
+      const h = section.offsetHeight;
+      const titleH =
+        title.getBoundingClientRect().bottom -
+        section.getBoundingClientRect().top;
+      if (w <= 0 || h <= 0 || titleH <= 0) return;
+      const mobile = mobileMq.matches;
+      // Centro horizontal del enganche
+      let cx: number;
+      if (desktopMq.matches) {
+        const contentRight = Math.min(w, (w + 1408) / 2); // max-w-[88rem]
+        cx = contentRight - 0.4 * Math.min(0.6 * w, 820);
+      } else cx = w * (mobile ? 0.64 : 0.77);
+      // Alto de la tarjeta y distancia de su borde superior al techo
+      const cardPx = titleH * (mobile ? CARD.mobile : CARD.desktop);
+      const topPx = titleH * (mobile ? 0.25 : 0.19);
+      setBox({
+        ready: true,
+        size: Math.min(0.9, cardPx / h),
+        x: cx / w,
+        top: topPx / h,
+      });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(section);
+    ro.observe(title);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={boxRef}
+      aria-hidden="true"
+      className="absolute inset-0 z-10 pointer-events-none"
+    >
+      {show && art && box.ready && (
+        <Suspense fallback={null}>
+          <Lanyard
+            className="w-full h-full"
+            frontImage={art.front}
+            backImage={art.back}
+            strapImage={art.strap}
+            imageFit="cover"
+            orientation="portrait"
+            anchorX={box.x}
+            cardTop={box.top}
+            size={box.size}
+            passThrough
+            intro
+            interactive
+            finish={SETTINGS.finish}
+            metal={SETTINGS.metal}
+            gravity={SETTINGS.gravity}
+            damping={SETTINGS.damping}
+            elasticity={SETTINGS.elasticity}
+            breeze={SETTINGS.breeze}
+            strapWidth={SETTINGS.strapWidth}
+            cornerRadius={SETTINGS.cornerRadius}
+          />
+        </Suspense>
+      )}
+    </div>
+  );
+}

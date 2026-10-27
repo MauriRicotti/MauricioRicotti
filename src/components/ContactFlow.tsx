@@ -320,7 +320,6 @@ export default function ContactFlow({
       role="dialog"
       aria-modal="true"
       aria-label={ui.contactDialog}
-      data-lenis-prevent
       className="fixed inset-0 z-[60] bg-[#0e0f12] text-white overflow-y-auto overscroll-contain animate-flow-in"
       style={vv ? { top: vv.top, height: vv.h, bottom: "auto" } : undefined}
     >

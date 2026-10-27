@@ -3,6 +3,7 @@ import type { Profile } from "../types";
 import { ArrowUpRight, Download } from "lucide-react";
 import { sound } from "../lib/sound";
 import { useLang } from "../i18n";
+import HeroBadge from "./HeroBadge";
 
 interface HeroProps {
   profile: Profile;
@@ -15,6 +16,22 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
     <section className="relative isolate overflow-hidden pt-28 sm:pt-36 pb-10 sm:pb-14 lg:pb-20 lg:min-h-svh lg:flex lg:flex-col bg-[#0e0f12] text-white">
       {/* Fondo: cuadrícula que se desvanece. Estático, sin brillos ni máscaras. */}
       <div aria-hidden="true" className="hero-bg" />
+      {/* Credencial 3D colgante (se carga después de la animación del título) */}
+      <HeroBadge
+        texts={{
+          name: profile.name,
+          role: profile.role,
+          cta: profile.ctaText,
+          instagram:
+            "@" +
+            (profile.socials
+              .find((s) => s.label === "Instagram")
+              ?.url.replace(/\/+$/, "")
+              .split("/")
+              .pop() ?? ""),
+          year: String(new Date().getFullYear()),
+        }}
+      />
       <div className="relative w-full max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 lg:flex-1 lg:flex lg:flex-col lg:justify-center">
         <div className="hero-wrap mb-8 sm:mb-10 lg:mb-[clamp(2.5rem,7svh,5rem)]">
           {/* Tamaño fluido: ocupa casi todo el ancho en celulares, con tope de 12.2rem en escritorio */}

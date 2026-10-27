@@ -72,17 +72,29 @@ Los desvanecidos se hacen con capas de degradado del mismo color del fondo (`#0e
 - Más/menos visible la cuadrícula: cambiá el `0.045` de las dos líneas.
 - Para quitar el fondo: borrá el `<div className="hero-bg" />` en `src/components/Hero.tsx`.
 
-## Scroll suave
+## Scroll
 
-Toda la web usa **Lenis** (`src/lib/smoothScroll.ts`, se activa en `src/main.tsx`).
-
-- Con mouse/trackpad el scroll arranca y frena de a poco. En celulares se usa el scroll táctil nativo.
-- Suavidad: `lerp` en `smoothScroll.ts` (más bajo = más suave/lento; por defecto 0.085).
-- Si el sistema tiene "reducir movimiento" activado, no se activa.
-- Para desactivarlo: borrá `initSmoothScroll()` en `src/main.tsx`.
+El scroll con rueda / trackpad / táctil es el **nativo del navegador** (sin suavizado extra).
+Solo los links del menú y el botón "volver arriba" se desplazan con una animación corta
+(`src/lib/smoothScroll.ts`). Para que salten de golpe, cambiá `behavior: "smooth"` por `"auto"`.
 
 Las **franjas de palabras** (`Marquee.tsx`) tienen inercia: siguen al scroll con un pequeño retraso y frenan
 de a poco. Ajustá `EASE` (más bajo = frenan más lento).
+
+## Credencial 3D del hero
+
+Tarjeta colgante interactiva (componente **Lanyard** de [React Bits](https://reactbits.dev), licencia
+MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación del título.
+
+- **Ajustes:** `SETTINGS` en `src/components/HeroBadge.tsx`: `design` (`"foto"` con tu retrato o
+  `"credencial"` solo tipografía), acabado, metal, gravedad, viento (`breeze`, 0 = quieta), etc.
+  Tamaño: `CARD` en el mismo archivo.
+- **Retrato:** `src/assets/badge-portrait.webp` (PNG/WebP con fondo transparente, vertical 3:4).
+- **Diseños** (frente, dorso y cinta): `src/lib/badgeArt.ts`.
+- **Interacción:** el lienzo cubre todo el hero y va por delante, pero deja pasar los clics
+  (`passThrough`): solo atrapa el puntero sobre la tarjeta.
+- **Quitarla:** borrá `<HeroBadge … />` en `Hero.tsx`, los archivos `Lanyard.tsx`, `HeroBadge.tsx`,
+  `lib/badgeArt.ts` y `three` de `package.json`.
 
 ## SEO, favicon y vista previa al compartir
 
