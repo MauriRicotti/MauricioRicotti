@@ -49,7 +49,7 @@ function Links({ project }: { project: Project }) {
           href={project.downloadUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#3cd3b7] text-[#0e0f12] text-sm font-semibold hover:bg-[#f2ede4] transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-[#0e0f12] text-sm font-semibold hover:bg-[#f2ede4] transition-colors"
         >
           <Download size={16} /> {ui.download}
         </a>
@@ -59,7 +59,7 @@ function Links({ project }: { project: Project }) {
           href={project.demoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-[#3cd3b7] transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-accent transition-colors"
         >
           {ui.viewDemo} <ArrowUpRight size={16} />
         </a>
@@ -131,7 +131,7 @@ function BrowserFrame({ project: p }: { project: Project }) {
 /** Etiqueta destacada (ej. "App estrella") */
 function Highlight({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#3cd3b7] text-[#0e0f12] text-[11px] font-bold uppercase tracking-wider">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent text-[#0e0f12] text-[11px] font-bold uppercase tracking-wider">
       <Star size={12} className="fill-current" />
       {label}
     </span>
@@ -157,7 +157,7 @@ function MobileAppOpen({
         <div className="min-w-0">
           {p.highlight && <Highlight label={p.highlight} />}
           <p className="mt-4 font-mono text-xs text-[#8c8c8c]">
-            <span className="text-[#3cd3b7]">{num(i)}</span>
+            <span className="text-accent">{num(i)}</span>
             <span className="mx-2 text-neutral-700">/</span>
             {p.category}
             {p.year ? ` · ${p.year}` : ""}
@@ -224,14 +224,14 @@ const DesktopPanel = memo(function DesktopPanel({
         <span className="flex flex-col items-center gap-2">
           <span
             aria-hidden="true"
-            className="font-mono text-xs text-[#8c8c8c] group-hover:text-[#3cd3b7] transition-colors"
+            className="font-mono text-xs text-[#8c8c8c] group-hover:text-accent transition-colors"
           >
             {num(i)}
           </span>
           {p.highlight && (
             <Star
               size={14}
-              className="text-[#3cd3b7] fill-current"
+              className="text-accent fill-current"
               aria-hidden="true"
             />
           )}
@@ -242,7 +242,7 @@ const DesktopPanel = memo(function DesktopPanel({
         <span className="sr-only">
           {p.highlight ? ` (${p.highlight})` : ""}, {ui.openProject}
         </span>
-        <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-neutral-400 group-hover:text-[#0e0f12] group-hover:bg-[#3cd3b7] group-hover:border-[#3cd3b7] transition-colors">
+        <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-neutral-400 group-hover:text-[#0e0f12] group-hover:bg-accent group-hover:border-accent transition-colors">
           <Plus size={16} />
         </span>
       </button>
@@ -265,7 +265,7 @@ const DesktopPanel = memo(function DesktopPanel({
             <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] items-end gap-x-8 gap-y-3 px-3 pt-5 pb-4">
               <div className="min-w-0">
                 <p className="font-mono text-xs text-[#8c8c8c]">
-                  <span className="text-[#3cd3b7]">{num(i)}</span>
+                  <span className="text-accent">{num(i)}</span>
                   <span className="mx-2 text-neutral-700">/</span>
                   {p.category}
                   {p.year ? ` · ${p.year}` : ""}
@@ -296,7 +296,7 @@ const DesktopPanel = memo(function DesktopPanel({
         <div className="absolute left-6 right-6 bottom-0 h-[3px] rounded-full bg-white/5 overflow-hidden pointer-events-none">
           <div
             onAnimationEnd={onProgressEnd}
-            className="h-full bg-[#3cd3b7] origin-left animate-progress"
+            className="h-full bg-accent origin-left animate-progress"
             style={{ animationDuration: `${autoplayMs}ms` }}
           />
         </div>
@@ -338,7 +338,7 @@ const MobileRow = memo(function MobileRow({
         className="w-full flex items-center gap-4 px-4 sm:px-6 py-4 text-left cursor-pointer"
       >
         <span
-          className={`font-mono text-xs ${open ? "text-[#3cd3b7]" : "text-[#8c8c8c]"}`}
+          className={`font-mono text-xs ${open ? "text-accent" : "text-[#8c8c8c]"}`}
         >
           {num(i)}
         </span>
@@ -348,7 +348,7 @@ const MobileRow = memo(function MobileRow({
         {p.highlight && (
           <Star
             size={14}
-            className="text-[#3cd3b7] fill-current shrink-0 -ml-2"
+            className="text-accent fill-current shrink-0 -ml-2"
             aria-hidden="true"
           />
         )}
@@ -359,7 +359,7 @@ const MobileRow = memo(function MobileRow({
         <span
           className={`ml-auto sm:ml-0 w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-[transform,background-color,color,border-color] duration-300 ${
             open
-              ? "rotate-45 bg-[#3cd3b7] border-[#3cd3b7] text-[#0e0f12]"
+              ? "rotate-45 bg-accent border-accent text-[#0e0f12]"
               : "border-white/15 text-neutral-400"
           }`}
         >

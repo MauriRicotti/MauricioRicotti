@@ -48,7 +48,7 @@ export default function ScrollTop() {
       aria-label={ui.backToTop}
       title={ui.backToTop}
       tabIndex={visible ? 0 : -1}
-      className={`group fixed z-30 right-4 bottom-4 sm:right-8 sm:bottom-8 w-12 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] border border-[#0e0f12]/10 shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex items-center justify-center hover:bg-[#3cd3b7] transition-[opacity,transform,background-color] duration-300 cursor-pointer ${
+      className={`group fixed z-30 right-4 bottom-4 sm:right-8 sm:bottom-8 w-12 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] border border-[#0e0f12]/10 shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex items-center justify-center hover:bg-accent transition-[opacity,transform,background-color] duration-300 cursor-pointer ${
         visible
           ? "opacity-100 translate-y-0"
           : "opacity-0 translate-y-4 pointer-events-none"

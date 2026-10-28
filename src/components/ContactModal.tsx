@@ -20,9 +20,9 @@ interface ContactModalProps {
 }
 
 const inputClass =
-  "w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 focus:border-[#3cd3b7] focus:outline-none text-sm text-white placeholder-neutral-500 font-sans";
+  "w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 focus:border-accent focus:outline-none text-sm text-white placeholder-neutral-500 font-sans";
 const selectClass =
-  "w-full px-3.5 py-2.5 rounded-xl bg-[#1a1b22] border border-white/10 focus:border-[#3cd3b7] focus:outline-none text-sm text-white font-sans";
+  "w-full px-3.5 py-2.5 rounded-xl bg-[#1a1b22] border border-white/10 focus:border-accent focus:outline-none text-sm text-white font-sans";
 const labelClass =
   "block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1";
 
@@ -89,7 +89,7 @@ export default function ContactModal({
 
         {sent ? (
           <div className="py-12 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-[#3cd3b7]/20 border border-[#3cd3b7] text-[#3cd3b7] mx-auto flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-accent/20 border border-accent text-accent mx-auto flex items-center justify-center">
               <Sparkles size={32} />
             </div>
             <h3 className="text-2xl sm:text-3xl font-bold font-sans">
@@ -102,7 +102,7 @@ export default function ContactModal({
               ¿No se abrió? Escribime directo a{" "}
               <a
                 href={`mailto:${profile.email}`}
-                className="text-[#3cd3b7] underline"
+                className="text-accent underline"
               >
                 {profile.email}
               </a>
@@ -120,7 +120,7 @@ export default function ContactModal({
         ) : (
           <div>
             <div className="mb-6 space-y-2 pr-8">
-              <span className="text-xs font-mono text-[#3cd3b7] uppercase tracking-widest">
+              <span className="text-xs font-mono text-accent uppercase tracking-widest">
                 {contact.eyebrow}
               </span>
               <h2 className="font-hero text-3xl sm:text-4xl font-black uppercase tracking-tight text-[#f2ede4]">
@@ -134,7 +134,7 @@ export default function ContactModal({
             <div className="grid grid-cols-1 gap-3 mb-4">
               <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/10">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-[#3cd3b7] shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-accent shrink-0">
                     <Mail size={16} />
                   </div>
                   <div className="min-w-0">
@@ -167,7 +167,7 @@ export default function ContactModal({
               {profile.whatsapp && (
                 <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/10">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-[#3cd3b7] shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-accent shrink-0">
                       <MessageCircle size={16} />
                     </div>
                     <div className="min-w-0">

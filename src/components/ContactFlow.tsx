@@ -326,7 +326,7 @@ export default function ContactFlow({
       {/* Barra de progreso */}
       <div className="fixed top-0 left-0 right-0 h-[3px] bg-white/5 z-10">
         <div
-          className="h-full bg-[#3cd3b7] origin-left transition-transform duration-500 ease-out"
+          className="h-full bg-accent origin-left transition-transform duration-500 ease-out"
           style={{
             transform: `scaleX(${sentVia ? 1 : (step + 1) / STEPS.length})`,
           }}
@@ -379,7 +379,7 @@ export default function ContactFlow({
               </p>
               <button
                 onClick={close}
-                className="mt-10 inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-[#3cd3b7] transition-colors cursor-pointer"
+                className="mt-10 inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-accent transition-colors cursor-pointer"
               >
                 <ArrowLeft size={18} /> {ui.backToSite}
               </button>
@@ -392,7 +392,7 @@ export default function ContactFlow({
               noValidate
             >
               <p
-                className={`font-mono text-sm text-[#3cd3b7] mb-4 items-center gap-2 ${kb ? "hidden" : "flex"}`}
+                className={`font-mono text-sm text-accent mb-4 items-center gap-2 ${kb ? "hidden" : "flex"}`}
               >
                 {String(step + 1).padStart(2, "0")} <ArrowRight size={14} />
               </p>
@@ -422,7 +422,7 @@ export default function ContactFlow({
                         ? contact.emailPlaceholder
                         : contact.namePlaceholder
                     }
-                    className="w-full bg-transparent border-0 border-b-2 border-white/15 focus:border-[#3cd3b7] outline-none pb-3 text-2xl sm:text-4xl font-medium text-white placeholder:text-neutral-600 transition-colors"
+                    className="w-full bg-transparent border-0 border-b-2 border-white/15 focus:border-accent outline-none pb-3 text-2xl sm:text-4xl font-medium text-white placeholder:text-neutral-600 transition-colors"
                   />
                 )}
 
@@ -444,7 +444,7 @@ export default function ContactFlow({
                       }
                     }}
                     placeholder={contact.messagePlaceholder}
-                    className="w-full bg-transparent border-0 border-b-2 border-white/15 focus:border-[#3cd3b7] outline-none pb-3 text-xl sm:text-3xl font-medium text-white placeholder:text-neutral-600 resize-none leading-snug transition-colors"
+                    className="w-full bg-transparent border-0 border-b-2 border-white/15 focus:border-accent outline-none pb-3 text-xl sm:text-3xl font-medium text-white placeholder:text-neutral-600 resize-none leading-snug transition-colors"
                   />
                 )}
 
@@ -462,14 +462,14 @@ export default function ContactFlow({
                           }
                           className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left text-base sm:text-lg transition-colors cursor-pointer ${
                             selected
-                              ? "border-[#3cd3b7] bg-[#3cd3b7]/10 text-white"
+                              ? "border-accent bg-accent/10 text-white"
                               : "border-white/15 text-neutral-200 hover:border-white/40 hover:bg-white/[0.03]"
                           }`}
                         >
                           <span
                             className={`w-7 h-7 shrink-0 rounded-md border font-mono text-xs flex items-center justify-center ${
                               selected
-                                ? "bg-[#3cd3b7] border-[#3cd3b7] text-[#0e0f12]"
+                                ? "bg-accent border-accent text-[#0e0f12]"
                                 : "border-white/25 text-neutral-400"
                             }`}
                           >
@@ -511,7 +511,7 @@ export default function ContactFlow({
                     <button
                       type="submit"
                       onMouseDown={(e) => e.preventDefault()}
-                      className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-[#3cd3b7] transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-accent transition-colors cursor-pointer"
                     >
                       {ui.next} <ArrowRight size={18} />
                     </button>
@@ -537,7 +537,7 @@ export default function ContactFlow({
                         onClick={sendForm}
                         disabled={sending}
                         aria-busy={sending}
-                        className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-[#3cd3b7] disabled:opacity-70 disabled:cursor-wait transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-accent disabled:opacity-70 disabled:cursor-wait transition-colors cursor-pointer"
                       >
                         {sending ? (
                           <>
@@ -567,7 +567,7 @@ export default function ContactFlow({
                       <button
                         type="button"
                         onClick={() => send("email")}
-                        className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-[#3cd3b7] transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-[#f2ede4] text-[#0e0f12] font-semibold hover:bg-accent transition-colors cursor-pointer"
                       >
                         <Mail size={18} /> {ui.sendByEmail}
                       </button>
@@ -576,7 +576,7 @@ export default function ContactFlow({
                       <button
                         type="button"
                         onClick={() => send("whatsapp")}
-                        className="inline-flex items-center gap-2 px-6 h-12 rounded-full border-2 border-[#3cd3b7] text-[#3cd3b7] font-semibold hover:bg-[#3cd3b7] hover:text-[#0e0f12] transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-2 px-6 h-12 rounded-full border-2 border-accent text-accent font-semibold hover:bg-accent hover:text-[#0e0f12] transition-colors cursor-pointer"
                       >
                         <MessageCircle size={18} /> {ui.sendByWhatsapp}
                       </button>
@@ -595,7 +595,7 @@ export default function ContactFlow({
           <span>{contact.directText}</span>
           <a
             href={`mailto:${profile.email}`}
-            className="inline-flex items-center gap-1 text-neutral-300 hover:text-[#3cd3b7] transition-colors"
+            className="inline-flex items-center gap-1 text-neutral-300 hover:text-accent transition-colors"
           >
             Email <ArrowUpRight size={12} />
           </a>
@@ -604,7 +604,7 @@ export default function ContactFlow({
               href={`https://wa.me/${profile.whatsapp}?text=${encodeURIComponent(contact.whatsappMessage)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-neutral-300 hover:text-[#3cd3b7] transition-colors"
+              className="inline-flex items-center gap-1 text-neutral-300 hover:text-accent transition-colors"
             >
               WhatsApp <ArrowUpRight size={12} />
             </a>

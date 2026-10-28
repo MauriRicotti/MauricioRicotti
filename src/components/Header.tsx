@@ -1,5 +1,5 @@
 import LogoMark from "./LogoMark";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Download, Volume2, VolumeX } from "lucide-react";
 import { sound } from "../lib/sound";
 import { scrollToTop } from "../lib/smoothScroll";
@@ -25,6 +25,8 @@ export default function Header({
   const [scrolled, setScrolled] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [active, setActive] = useState<string | null>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
   const { lang, setLang, c } = useLang();
   const { navLinks, ui, profile } = c;
   const changeLang = (l: Lang) => {
@@ -35,12 +37,46 @@ export default function Header({
     if (menuOpen) setTimeout(() => setMenuOpen(false), 380);
   };
 
+  // Scroll (como mucho una vez por cuadro): estado del header, barra de progreso de la
+  // página (solo transform, no provoca re-render) y sección activa del menú.
+  const sectionIds = navLinks.map((l) => l.id).filter((id) => id !== "contact");
+  const idsKey = sectionIds.join("|");
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
+    const ids = idsKey.split("|");
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+      setScrolled(y > 40);
+      const max = document.documentElement.scrollHeight - vh;
+      const p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
+      if (progressRef.current)
+        progressRef.current.style.transform = `scaleX(${p})`;
+      // Sección activa: la que cruza una línea imaginaria al 45% de la pantalla
+      const line = vh * 0.45;
+      let current: string | null = null;
+      for (const id of ids) {
+        const r = document.getElementById(id)?.getBoundingClientRect();
+        if (r && r.top <= line && r.bottom > line) {
+          current = id;
+          break;
+        }
+      }
+      setActive(current);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [idsKey]);
 
   // Con el menú abierto: se cierra con Escape.
   // (No se bloquea el scroll del body: en celulares eso hace "saltar" la página al cerrar.
@@ -84,14 +120,27 @@ export default function Header({
 
   return (
     <>
+      {/* Barra de progreso de lectura, arriba de todo */}
+      <div
+        aria-hidden="true"
+        className="fixed top-0 left-0 right-0 z-[55] h-[3px] pointer-events-none"
+      >
+        <div
+          ref={progressRef}
+          className="h-full w-full bg-accent origin-left will-change-transform"
+          style={{ transform: "scaleX(0)" }}
+        />
+      </div>
+
       <header
         data-intro="down"
         style={{ "--d": "0.5s" } as React.CSSProperties}
         className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,padding,border-color] duration-300 border-b ${
           scrolled ? "py-3.5" : "py-5 sm:py-7"
-        } ${solid ? "bg-[#0e0f12]/75 backdrop-blur-[8px] border-white/10" : "bg-transparent border-transparent"}`}
+        } ${solid ? "bg-[#0e0f12]/80 backdrop-blur-[3px] border-white/10" : "bg-transparent border-transparent"}`}
       >
-        <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        {/* En PC (desde 1280 px): tres columnas, las de los costados iguales, así los links quedan centrados de verdad respecto de la pantalla. En pantallas más angostas no entra: van entre el logo y los botones. */}
+        <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between xl:grid xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] xl:gap-6">
           {/* Logo: solo el sticker "MR" (en PC y en celular). El nombre queda para lectores de pantalla. */}
           <button
             onClick={() => {
@@ -100,24 +149,39 @@ export default function Header({
               scrollToTop();
             }}
             title={ui.goHome}
-            className="group flex items-center focus:outline-none cursor-pointer rounded-md focus-visible:ring-2 focus-visible:ring-[#3cd3b7]/60"
+            className="group justify-self-start flex items-center focus:outline-none cursor-pointer rounded-md focus-visible:ring-2 focus-visible:ring-accent/60"
           >
-            <LogoMark className="h-10 md:h-11 w-auto text-[#f2ede4] group-hover:text-[#3cd3b7] group-focus-visible:text-[#3cd3b7] transition-[color,transform] duration-200 group-active:scale-95" />
+            <LogoMark className="h-10 md:h-11 w-auto text-[#f2ede4] group-hover:text-accent group-focus-visible:text-accent transition-[color,transform] duration-200 group-active:scale-95" />
             <span className="sr-only">
               {name}, {ui.goHome.toLowerCase()}
             </span>
           </button>
 
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => handleNav(link.id)}
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-150 cursor-pointer relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white hover:after:w-full after:transition-all after:duration-200"
-              >
-                {link.label}
-              </button>
-            ))}
+          <nav className="hidden md:flex items-center gap-5 lg:gap-8">
+            {navLinks.map((link) => {
+              const on = link.id === active;
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => handleNav(link.id)}
+                  aria-current={on ? "true" : undefined}
+                  className={`group/link relative py-1.5 text-sm font-medium whitespace-nowrap cursor-pointer rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
+                    on ? "text-white" : "text-white/65 hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                  {/* subrayado: crece desde el centro; en la sección activa queda fijo y turquesa */}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute left-0 right-0 -bottom-0.5 h-0.5 rounded-full origin-center transition-[transform,background-color] duration-300 ease-out ${
+                      on
+                        ? "scale-x-100 bg-accent"
+                        : "scale-x-0 bg-white group-hover/link:scale-x-100"
+                    }`}
+                  />
+                </button>
+              );
+            })}
           </nav>
 
           <div className="justify-self-end flex items-center gap-3 sm:gap-4">
@@ -125,7 +189,7 @@ export default function Header({
             <div
               role="group"
               aria-label={ui.language}
-              className="hidden md:flex items-center h-8 p-0.5 rounded-full border border-white/20 font-mono text-[11px]"
+              className="hidden md:flex items-center h-9 p-1 rounded-full border border-white/20 font-mono text-[11px]"
             >
               {(["es", "en"] as const).map((l) => (
                 <button
@@ -149,7 +213,7 @@ export default function Header({
               onClick={toggleSound}
               aria-label={ui.soundToggle}
               title={soundOn ? ui.soundOn : ui.soundOff}
-              className="hidden md:flex w-8 h-8 rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 items-center justify-center transition-colors"
+              className="hidden md:flex w-9 h-9 rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 items-center justify-center transition-colors cursor-pointer"
             >
               {soundOn ? (
                 <Volume2 size={14} />
@@ -163,7 +227,7 @@ export default function Header({
                 sound.playPop(650);
                 onOpenContact();
               }}
-              className="group hidden md:flex items-center gap-3 h-10 pl-5 pr-1 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-[#3cd3b7] transition-colors duration-200 cursor-pointer"
+              className="group hidden md:flex items-center gap-3 h-10 pl-5 pr-1 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-accent transition-colors duration-200 cursor-pointer"
             >
               <span>{ui.talk}</span>
               <span className="w-8 h-8 rounded-full bg-[#0e0f12] text-[#f2ede4] flex items-center justify-center transition-transform duration-300 group-hover:rotate-45">
@@ -227,9 +291,22 @@ export default function Header({
               <button
                 key={link.id}
                 onClick={() => handleNav(link.id)}
+                aria-current={link.id === active ? "true" : undefined}
                 className="w-full flex items-center gap-4 py-3.5 text-left cursor-pointer group"
               >
-                <span className="font-mono text-xs text-[#0e0f12]/50">
+                <span
+                  className={`relative font-mono text-xs ${
+                    link.id === active
+                      ? "text-[#0e0f12] font-semibold"
+                      : "text-[#0e0f12]/50"
+                  }`}
+                >
+                  {link.id === active && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-accent ring-1 ring-[#0e0f12]"
+                    />
+                  )}
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="font-hero text-5xl uppercase tracking-tight leading-none">
@@ -253,7 +330,7 @@ export default function Header({
             >
               <span
                 className={`relative w-12 h-7 rounded-full border-2 border-[#0e0f12] transition-colors duration-200 ${
-                  soundOn ? "bg-[#3cd3b7]" : "bg-white"
+                  soundOn ? "bg-accent" : "bg-white"
                 }`}
               >
                 <span
@@ -312,7 +389,7 @@ export default function Header({
                 setMenuOpen(false);
                 onOpenContact();
               }}
-              className="flex-1 flex items-center justify-center gap-1.5 px-5 py-3 rounded-full whitespace-nowrap bg-[#0e0f12] text-[#f2ede4] text-sm font-semibold shadow-[3px_3px_0_#3cd3b7]"
+              className="flex-1 flex items-center justify-center gap-1.5 px-5 py-3 rounded-full whitespace-nowrap bg-[#0e0f12] text-[#f2ede4] text-sm font-semibold shadow-[3px_3px_0_var(--color-accent)]"
             >
               {ui.talk} <ArrowUpRight size={16} />
             </button>

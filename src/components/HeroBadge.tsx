@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { loaderDelay } from "../lib/loader";
-import { sound } from "../lib/sound";
 import type { BadgeArt, BadgeDesign, BadgeTexts } from "../lib/badgeArt";
 
 /**
@@ -48,6 +47,35 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
     x: 0.75,
     top: 0.15,
   });
+
+  // Si el navegador pierde el contexto gráfico (pasa en celulares al ir a otra app, por
+  // ejemplo a WhatsApp o al mail, o con poca memoria), al volver la tarjeta podía quedar
+  // negra. Solución: cuando el contexto se recupera (o sigue perdido al volver a la
+  // pestaña) se vuelve a crear la tarjeta desde cero.
+  const [gen, setGen] = useState(0);
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const rebuild = () => setGen((g) => g + 1);
+    let timer = 0;
+    const onVisible = () => {
+      if (document.hidden) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const canvas = el.querySelector("canvas");
+        const gl = canvas?.getContext("webgl2") as WebGL2RenderingContext | null;
+        if (gl?.isContextLost()) rebuild();
+      }, 1500);
+    };
+    // los eventos de contexto no burbujean: se escuchan en fase de captura
+    el.addEventListener("webglcontextrestored", rebuild, true);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearTimeout(timer);
+      el.removeEventListener("webglcontextrestored", rebuild, true);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
 
   // Espera a que termine la entrada del título; mientras, baja three.js en paralelo
   useEffect(() => {
@@ -122,6 +150,7 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
       {show && art && box.ready && (
         <Suspense fallback={null}>
           <Lanyard
+            key={gen}
             className="w-full h-full"
             frontImage={art.front}
             backImage={art.back}
@@ -132,8 +161,7 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
             cardTop={box.top}
             size={box.size}
             passThrough
-            onGrab={() => sound.playMetal()}
-            intro
+            intro={gen === 0}
             interactive
             finish={SETTINGS.finish}
             metal={SETTINGS.metal}

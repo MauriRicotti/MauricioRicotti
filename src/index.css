@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* ===== Color de acento (botones, subrayados, barra de progreso, arte de la credencial,
+   franjas de la pantalla de carga…). Cambialo SOLO acá y se aplica en toda la web.
+   Turquesa original: #3cd3b7 ===== */
+@theme static {
+  --color-accent: #ff3b3b;
+}
+
 /* Tipografía de títulos (Anton). font-display: block → el navegador espera la fuente
    (precargada en index.html) en vez de mostrar otra y cambiarla: así el hero no "salta". */
 @font-face {
@@ -65,13 +72,57 @@
 }
 .footer-name {
   /* "MAURICIO RICOTTI" siempre en UNA línea, llenando el ancho (en cualquier pantalla) */
-  font-size: calc(100cqw / 6.45);
+  font-size: calc(100cqw / 6.38);
   letter-spacing: -0.01em;
   white-space: nowrap;
+  /* el texto se centra solo: antes quedaba pegado a la izquierda con un hueco a la derecha */
+  width: fit-content;
+  margin-inline: auto;
 }
-/* Dentro de la tarjeta del footer: la parte de abajo de las letras queda cortada por el borde */
-.footer-name--cut {
-  margin-bottom: -0.16em;
+
+/* ---------- Footer "reveal" ----------
+   El footer está detrás del contenido (main va por encima, con las esquinas de abajo
+   redondeadas) y queda pegado con position: sticky: al bajar, la página se levanta y lo
+   descubre. Lo resuelve el navegador al hacer scroll (sin JavaScript), así que va fluido.
+   - Si el footer entra en la pantalla: queda fijo abajo mientras se descubre.
+   - Si es más alto que la pantalla: queda fijo arriba y, ya descubierto, sigue el scroll normal.
+   --fh (alto del footer) lo pone Footer.tsx. Sin JavaScript, el footer se ve normal. */
+.footer-reveal {
+  position: sticky;
+  bottom: min(0px, calc(100vh - var(--fh)));
+}
+@supports (height: 100dvh) {
+  .footer-reveal {
+    bottom: min(0px, calc(100dvh - var(--fh)));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-reveal {
+    position: relative;
+  }
+}
+
+/* Parallax suave (solo en navegadores con animaciones ligadas al scroll, que las corren
+   fuera del hilo principal: Chrome, Edge, Safari 26+). En el resto queda solo el reveal.
+   El contenido sube un poco y se aclara mientras se descubre. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .footer-inner {
+      animation: footer-rise linear both;
+      animation-timeline: scroll(root block);
+      animation-range: calc(100% - var(--fh, 0px)) 100%;
+    }
+  }
+}
+@keyframes footer-rise {
+  from {
+    transform: translate3d(0, 12vh, 0);
+    opacity: 0.25;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 /* ---------- Animación de entrada (al abrir la web) ----------
@@ -161,10 +212,37 @@
   display: inline-block;
 }
 
+/* Párrafos del hero con palabras destacadas (**rojo con brillo**, *negrita crema*).
+   El "reflejo" es una luz suave que cruza la palabra de vez en cuando (gran parte del
+   ciclo está quieta) y se apaga con "reducir movimiento". */
+.bio-strong {
+  color: #f2ede4;
+  font-weight: 700;
+}
+.bio-accent {
+  font-weight: 700;
+  color: var(--color-accent);
+  background-image: linear-gradient(110deg, var(--color-accent) 40%, #ffe4e6 50%, var(--color-accent) 60%);
+  background-size: 260% 100%;
+  background-position: 120% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: bio-sheen 9s ease-in-out infinite;
+}
+@keyframes bio-sheen {
+  /* la luz tarda ~1.2 s en cruzar y después descansa ~7.8 s */
+  0% { background-position: 130% 0; }
+  13%, 100% { background-position: -30% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bio-accent { animation: none; }
+}
+
 /* Palabra del h1 solo con borde (sin relleno) */
 .hero-outline {
-  color: transparent;
-  -webkit-text-stroke: max(1.5px, 0.009em) #f2ede4;
+  color: var(--color-accent);
+  -webkit-text-stroke: max(1.5px, 0.009em) var(--color-accent);
   /* Un poco de aire entre letras para que los contornos no se crucen */
   letter-spacing: 0.012em;
 }

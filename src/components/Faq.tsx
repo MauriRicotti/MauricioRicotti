@@ -60,7 +60,7 @@ export default function Faq({ onOpenContact }: { onOpenContact: () => void }) {
                     <span
                       className={`font-mono text-xs pt-1.5 transition-colors ${
                         isOpen
-                          ? "text-[#3cd3b7]"
+                          ? "text-accent"
                           : "text-[#8c8c8c] group-hover:text-neutral-300"
                       }`}
                     >
@@ -78,7 +78,7 @@ export default function Faq({ onOpenContact }: { onOpenContact: () => void }) {
                     <span
                       className={`w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-[transform,background-color,color,border-color] duration-300 ${
                         isOpen
-                          ? "rotate-45 bg-[#3cd3b7] border-[#3cd3b7] text-[#0e0f12]"
+                          ? "rotate-45 bg-accent border-accent text-[#0e0f12]"
                           : "border-white/15 text-neutral-400 group-hover:border-white/40"
                       }`}
                     >
@@ -125,7 +125,7 @@ export default function Faq({ onOpenContact }: { onOpenContact: () => void }) {
               onPointerLeave={stopLooking}
               onFocus={lookAtButton}
               onBlur={stopLooking}
-              className="group self-start sm:self-auto inline-flex items-center gap-3 h-12 pl-5 pr-1.5 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-bold tracking-wider uppercase whitespace-nowrap shadow-[3px_3px_0_#3cd3b7] hover:shadow-[1px_1px_0_#3cd3b7] hover:translate-x-[2px] hover:translate-y-[2px] transition-[transform,box-shadow] duration-200 cursor-pointer"
+              className="group self-start sm:self-auto inline-flex items-center gap-3 h-12 pl-5 pr-1.5 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-bold tracking-wider uppercase whitespace-nowrap shadow-[3px_3px_0_var(--color-accent)] hover:shadow-[1px_1px_0_var(--color-accent)] hover:translate-x-[2px] hover:translate-y-[2px] transition-[transform,box-shadow] duration-200 cursor-pointer"
             >
               <span>{faqSection.helpCta}</span>
               <span className="w-9 h-9 rounded-full bg-[#0e0f12] text-[#f2ede4] flex items-center justify-center transition-transform duration-300 group-hover:rotate-45">

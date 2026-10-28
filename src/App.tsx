@@ -35,14 +35,16 @@ export default function App() {
   const openContact = () => setContactOpen(true);
 
   return (
-    <div className="min-h-screen bg-[#0e0f12] text-white selection:bg-[#3cd3b7] selection:text-black">
+    <div className="min-h-screen bg-[#0e0f12] text-white selection:bg-accent selection:text-black">
       <Header
         name={profile.name}
         onOpenContact={openContact}
         onNavigate={scrollTo}
       />
 
-      <main>
+      {/* main va por encima del footer (que queda detrás, "pegado"): esquinas de abajo
+          redondeadas y una sombra, para que se vea cómo la página se levanta */}
+      <main className="relative z-10 bg-[#0e0f12] overflow-clip rounded-b-[32px] sm:rounded-b-[56px] shadow-[0_24px_48px_rgba(0,0,0,0.55)]">
         <Hero profile={profile} onOpenContact={openContact} />
         <TechStack title={techStackTitle} groups={techStack} />
         <Work projects={projects} />

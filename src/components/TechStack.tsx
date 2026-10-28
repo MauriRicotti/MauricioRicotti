@@ -9,7 +9,7 @@ interface TechStackProps {
 
 /** Colores de las etiquetas de cada grupo (se repiten si hay más grupos). */
 const LABEL_COLORS = [
-  "#3cd3b7",
+  "var(--color-accent)", // color de acento (index.css)
   "#ffd23f",
   "#ff4f7b",
   "#ff7a1a",

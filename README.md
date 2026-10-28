@@ -22,7 +22,7 @@ npm run build:preview  # genera preview.html (con imágenes incrustadas, se abre
 src/
   data/content.ts        ← tus textos
   types.ts
-  lib/sound.ts           ← efectos de sonido (Web Audio, sin archivos). playMetal() = "clinc" al tocar la tarjeta 3D
+  lib/sound.ts           ← efectos de sonido (Web Audio, sin archivos)
   components/
     Header, Hero, Work, About, Footer,
     ContactModal
@@ -103,6 +103,33 @@ Solo los links del menú y el botón "volver arriba" se desplazan con una animac
 Las **franjas de palabras** (`Marquee.tsx`) tienen inercia: siguen al scroll con un pequeño retraso y frenan
 de a poco. Ajustá `EASE` (más bajo = frenan más lento).
 
+## Color de acento
+
+Todo el color de acento (botones, subrayados, barra de progreso, sombras de los botones, arte de la
+credencial 3D, franjas de la pantalla de carga, primera etiqueta de tecnologías, primer paso del proceso…)
+sale de **una sola línea** en `src/index.css`:
+
+```css
+@theme static {
+  --color-accent: #ff3b3b; /* rojo. Antes: azul #4d8bff. Turquesa original: #3cd3b7 */
+}
+```
+
+En el código se usa como `bg-accent`, `text-accent`, `border-accent`, `ring-accent/60`,
+`shadow-[3px_3px_0_var(--color-accent)]` o `var(--color-accent)`.
+No cambian: la maqueta de la app OffBeat (`PhoneFrame.tsx`, tiene sus propios colores) ni el CV (`scripts/build-cv.mjs`).
+
+## Barra de navegación
+
+`src/components/Header.tsx`.
+
+- **Links centrados:** desde 1280 px de ancho la barra usa tres columnas (los costados iguales), así los
+  links quedan justo en el centro de la pantalla. Más angosto no entran centrados y van entre el logo y los botones.
+- **Sección activa:** el link de la sección que estás viendo queda blanco con subrayado del color de acento
+  (en el menú del celular, con un punto al lado del número).
+- **Barra de progreso:** línea del color de acento de 3 px arriba de todo que muestra cuánto de la página
+  recorriste. Se actualiza una vez por cuadro y solo con `transform` (no frena el scroll).
+
 ## Credencial 3D del hero
 
 Tarjeta colgante interactiva (componente **Lanyard** de [React Bits](https://reactbits.dev), licencia
@@ -119,6 +146,10 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
   `lib/badgeArt.ts` y `three` de `package.json`.
 - **Arrastre con límite:** la tarjeta no se puede llevar fuera del hero (ni debajo de la franja de
   tecnologías ni cortada por los costados). Si se suelta el clic fuera de la ventana, se suelta sola.
+- **Sombra:** un plano difuminado detrás de la tarjeta que copia su inclinación (casi no consume).
+  Corrimiento y opacidad: `SHADOW` al principio de `Lanyard.tsx`. La tarjeta no tiene sonido.
+- **Si se pierde el gráfico** (en celulares pasa al ir a otra app, por ejemplo WhatsApp, y volver):
+  `HeroBadge.tsx` vuelve a crear la tarjeta sola, así no queda negra.
 - **Fluidez:** mientras se hace scroll la tarjeta se queda quieta (no se dibuja) y retoma el
   balanceo al parar. En pantallas de 120/144 Hz se dibuja a ~60–75 cuadros por segundo.
 
@@ -131,7 +162,7 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
 - **Etiquetas:** título, descripción, Open Graph (WhatsApp, LinkedIn, Facebook, Discord), Twitter/X y datos
   estructurados de Google (persona + profesión) están en `index.html`.
 - **Imagen al compartir:** `public/og-image.jpg` (1200×630). Reemplazala por otra del mismo tamaño si querés.
-- **Favicon (logo MR):** `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`,
+- **Favicon (logo MR):** `public/favicon.ico` (16 a 256 px), `apple-touch-icon.png`, `icon-192.png`,
   `icon-512.png`, `icon-maskable-512.png` y `site.webmanifest`.
 - **Probar la vista previa** después de publicar: https://www.opengraph.xyz o el "Post Inspector" de LinkedIn.
   WhatsApp guarda la vista previa en caché: si cambiás la imagen, puede tardar en actualizarse.
@@ -159,20 +190,35 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
   El mismo logo se usa en la **credencial 3D** (detrás del retrato, en el dorso y en la cinta).
   Los trazos están en un solo lugar: `src/lib/logoMR.ts`.
   Con el mouse encima, el borde y las letras se ponen turquesa.
-- **Favicon e íconos:** `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`,
+- **Favicon e íconos:** `public/favicon.ico` (el de la pestaña), `apple-touch-icon.png`, `icon-192.png`,
   `icon-512.png`, `icon-maskable-512.png` (todos con el logo MR). Si los cambiás, subí el número
-  `?v=2` de los enlaces en `index.html` (y en `site.webmanifest`) para que los navegadores no usen el viejo.
+  `?v=3` de los enlaces en `index.html` (y en `site.webmanifest`) para que los navegadores no usen el viejo.
 - Los dos logos en vector (para usar donde quieras): `src/assets/logo/logo-mauritti.svg` y `logo-mr.svg`.
 
 ## Footer
 
-- Arriba: "¿Tenés una idea en mente?" con los botones Email, WhatsApp, Descargar CV y Empecemos.
-- Debajo, una tarjeta oscura redondeada con 4 columnas: frase corta + ubicación, **Explorar**
-  (los mismos enlaces de la barra), **Seguime** (las redes de `profile.socials`, con su ícono) y
-  **Horario de atención** (con "abierto/fuera de horario" y la hora de Argentina).
-- Al pie de la tarjeta, "MAURICIO RICOTTI" gigante en una línea, cortado por el borde de abajo
-  (cuánto se corta: `.footer-name--cut` en `src/index.css`).
-- Los textos de la tarjeta están en `footer` de `content.ts` / `content.en.ts` (`tagline`, `explore`, `follow`).
+El footer (`src/components/Footer.tsx`) tiene:
+- Bloque CTA ("¿TENÉS UNA IDEA EN MENTE?") con botones Email / WhatsApp / Descargar CV y "EMPECEMOS".
+- Grilla de columnas: logo + tagline + ubicación; Explorar; Seguime (redes); Horario de atención con punto "abierto ahora" en vivo.
+- El nombre gigante "MAURICIO RICOTTI" en una línea (`.footer-name`).
+- Fila final con © y crédito.
+
+### Footer reveal (aparece al final de la página)
+
+El footer está "detrás" del contenido y queda pegado con `position: sticky` (`.footer-reveal` en `src/index.css`):
+
+```css
+.footer-reveal {
+  position: sticky;
+  bottom: min(0px, calc(100dvh - var(--fh))); /* 100vh como fallback */
+}
+```
+
+- `--fh` es el alto real del footer; lo mide un `ResizeObserver` en `Footer.tsx` (sin JS, el footer se ve normal).
+- `<main>` (en `App.tsx`) va por encima: `relative z-10` con fondo, esquinas inferiores redondeadas y sombra. Al llegar abajo, la página se "levanta" y descubre el footer.
+- Todo lo resuelve el navegador al hacer scroll (no hay listeners de scroll ni `requestAnimationFrame`), así que no hay tirones.
+- Si el footer es más alto que la pantalla, queda fijo arriba hasta descubrirse y después acompaña el scroll normal.
+- Extra opcional (solo navegadores con `animation-timeline: scroll()` y sin `prefers-reduced-motion`): el contenido sube apenas y se aclara mientras se descubre (`.footer-inner` / keyframes `footer-rise`). En el resto queda solo el reveal, igual de fluido.
 
 ## Deploy en Vercel
 

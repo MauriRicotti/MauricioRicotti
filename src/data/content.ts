@@ -26,9 +26,9 @@ export const profile: Profile = {
   // Cada una con la MISMA cantidad de palabras que "FULL STACK" (2). Dejá [] para que no cambie.
   roleRoll: ["FRONT END", "BACK END"],
   leftBio:
-    "Desarrollo aplicaciones web de punta a punta: desde interfaces rápidas y cuidadas hasta APIs, bases de datos y el deploy en producción.",
+    "Desarrollo aplicaciones web de **punta a punta**: desde interfaces rápidas y cuidadas hasta *APIs*, *bases de datos* y el *deploy* en producción.",
   centerBio:
-    "Trabajo con HTML, CSS, JavaScript, React y Node.js para construir sitios y aplicaciones rápidos, claros y fáciles de mantener, con foco en la experiencia de usuario.",
+    "Trabajo con **HTML**, **CSS**, **JavaScript**, **React** y **Node.js** para construir sitios y aplicaciones *rápidos, claros y fáciles de mantener*, con foco en la experiencia de usuario.",
   ctaText: "HABLEMOS",
   email: "ricottim4@gmail.com",
   phone: "+54 11 4194-8773",
@@ -233,7 +233,7 @@ export const about = {
   services: [
     {
       title: "Landing pages",
-      color: "#3cd3b7",
+      color: "var(--color-accent)",
       description:
         "Páginas rápidas, modernas y enfocadas en convertir. Ideales para campañas, lanzamientos y productos puntuales.",
       tags: ["HTML5", "CSS3", "JavaScript", "Bootstrap"],
@@ -306,7 +306,7 @@ export const processSteps = [
     title: "Análisis y consulta",
     text: "Charlamos sobre tu negocio, tus objetivos y tu público. Defino el alcance, los tiempos y el presupuesto antes de empezar, sin sorpresas.",
     items: ["Reunión inicial", "Objetivos y alcance", "Presupuesto claro"],
-    color: "#3cd3b7",
+    color: "var(--color-accent)",
   },
   {
     title: "Diseño y prototipado",

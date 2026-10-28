@@ -5,6 +5,27 @@ import { useLang } from "../i18n";
 import HeroBadge from "./HeroBadge";
 import HeroTitle from "./HeroTitle";
 
+/** Pinta la bajada: **…** = rojo con brillo, *…* = negrita crema. */
+function renderBio(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).map((chunk, i) => {
+    if (chunk.startsWith("**")) {
+      return (
+        <strong key={i} className="bio-accent">
+          {chunk.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (chunk.startsWith("*")) {
+      return (
+        <strong key={i} className="bio-strong">
+          {chunk.slice(1, -1)}
+        </strong>
+      );
+    }
+    return <span key={i}>{chunk}</span>;
+  });
+}
+
 interface HeroProps {
   profile: Profile;
   onOpenContact: () => void;
@@ -37,14 +58,14 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
             style={{ "--d": "0.6s" } as React.CSSProperties}
             className="md:col-span-6 lg:col-span-4 xl:col-span-1 text-neutral-400 text-sm sm:text-base leading-relaxed"
           >
-            <p>{profile.leftBio}</p>
+            <p>{renderBio(profile.leftBio)}</p>
           </div>
           <div
             data-intro="fade"
             style={{ "--d": "0.68s" } as React.CSSProperties}
             className="md:col-span-6 lg:col-span-4 xl:col-span-1 text-neutral-400 text-sm sm:text-base leading-relaxed"
           >
-            <p>{profile.centerBio}</p>
+            <p>{renderBio(profile.centerBio)}</p>
           </div>
           <div
             data-intro="fade"
@@ -56,7 +77,7 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
                 sound.playPop(580);
                 onOpenContact();
               }}
-              className="group flex-1 sm:flex-none inline-flex items-center justify-between sm:justify-start gap-3 h-14 pl-6 pr-1.5 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm sm:text-[15px] font-bold tracking-wider uppercase whitespace-nowrap shadow-[4px_4px_0_#3cd3b7] hover:shadow-[1px_1px_0_#3cd3b7] hover:translate-x-[3px] hover:translate-y-[3px] transition-[transform,box-shadow] duration-200 cursor-pointer"
+              className="group flex-1 sm:flex-none inline-flex items-center justify-between sm:justify-start gap-3 h-14 pl-6 pr-1.5 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm sm:text-[15px] font-bold tracking-wider uppercase whitespace-nowrap shadow-[4px_4px_0_var(--color-accent)] hover:shadow-[1px_1px_0_var(--color-accent)] hover:translate-x-[3px] hover:translate-y-[3px] transition-[transform,box-shadow] duration-200 cursor-pointer"
             >
               <span>{profile.ctaText}</span>
               <span className="w-11 h-11 rounded-full bg-[#0e0f12] text-[#f2ede4] flex items-center justify-center transition-transform duration-300 group-hover:rotate-45">
@@ -69,7 +90,7 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
                 download
                 onClick={() => sound.playClick()}
                 aria-label={ui.downloadCv}
-                className="group inline-flex items-center justify-center gap-2 h-14 px-5 sm:px-6 rounded-full border-2 border-white/30 text-[#f2ede4] text-sm sm:text-[15px] font-bold tracking-wider uppercase whitespace-nowrap hover:border-[#3cd3b7] hover:text-[#3cd3b7] transition-colors"
+                className="group inline-flex items-center justify-center gap-2 h-14 px-5 sm:px-6 rounded-full border-2 border-white/30 text-[#f2ede4] text-sm sm:text-[15px] font-bold tracking-wider uppercase whitespace-nowrap hover:border-accent hover:text-accent transition-colors"
               >
                 <Download
                   size={18}

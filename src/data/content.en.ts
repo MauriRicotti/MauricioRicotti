@@ -16,9 +16,9 @@ import * as es from "./content";
 export const profile: Profile = {
   ...es.profile,
   leftBio:
-    "I build web applications end to end: from fast, polished interfaces to APIs, databases and production deployment.",
+    "I build web applications **end to end**: from fast, polished interfaces to *APIs*, *databases* and *production deployment*.",
   centerBio:
-    "I work with HTML, CSS, JavaScript, React and Node.js to build websites and apps that are fast, clear and easy to maintain, with a strong focus on user experience.",
+    "I work with **HTML**, **CSS**, **JavaScript**, **React** and **Node.js** to build websites and apps that are *fast, clear and easy to maintain*, with a strong focus on user experience.",
   ctaText: "LET'S TALK",
   location: "Florencio Varela, Buenos Aires · Remote",
   hours: [

@@ -373,6 +373,38 @@ const traceRoundedRect = (path: PathLike, x: number, y: number, width: number, h
   path.bezierCurveTo(x, y + k, x + k, y, x + r, y);
 };
 
+// (Portfolio) sombra de la tarjeta: corrimiento (en unidades de la escena), opacidad y
+// margen del dibujo (el plano es un poco más grande que la tarjeta para que entre el difuminado)
+const SHADOW = { x: 0.2, y: -0.28, z: -0.5, opacity: 0.92 };
+const SHADOW_SIZE = { w: 256, h: 360, pad: 56, blur: 26 };
+const SHADOW_PAD = {
+  x: (SHADOW_SIZE.w + SHADOW_SIZE.pad * 2) / SHADOW_SIZE.w,
+  y: (SHADOW_SIZE.h + SHADOW_SIZE.pad * 2) / SHADOW_SIZE.h
+};
+
+const buildShadowTexture = () => {
+  const { w, h, pad, blur } = SHADOW_SIZE;
+  const canvas = document.createElement('canvas');
+  canvas.width = w + pad * 2;
+  canvas.height = h + pad * 2;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    // Truco compatible con todos los navegadores: se dibuja la forma fuera del lienzo y
+    // solo su sombra (desplazada) cae adentro, ya difuminada.
+    const off = 10000;
+    ctx.shadowColor = '#fff'; // blanco: el color final lo pone el material
+    ctx.shadowBlur = blur;
+    ctx.shadowOffsetX = off;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(pad - off, pad, w, h, 26);
+    else ctx.rect(pad - off, pad, w, h);
+    ctx.fill();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+};
+
 const loadImage = (
   cache: Map<string, Promise<HTMLImageElement | null>>,
   url?: string
@@ -1044,6 +1076,22 @@ const Lanyard = ({
     cardGroup.add(bodyMesh, frontMesh, backMesh, ring);
     scene.add(cardGroup);
 
+    // (Portfolio) sombra suave de la tarjeta: un plano con una sombra difuminada (dibujada una
+    // sola vez en un canvas) que va detrás de la tarjeta, corrido hacia abajo y a la derecha,
+    // y que copia su inclinación. Es casi gratis: no usa el sistema de sombras de three.js.
+    const shadowTexture = buildShadowTexture();
+    const shadowMaterial = new THREE.MeshBasicMaterial({
+      map: shadowTexture,
+      color: 0x000000,
+      transparent: true,
+      opacity: SHADOW.opacity,
+      depthWrite: false,
+      toneMapped: false
+    });
+    const shadowMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), shadowMaterial);
+    shadowMesh.renderOrder = -1;
+    scene.add(shadowMesh);
+
     const bandGeometry = buildBandGeometry(SAMPLES);
     const band = new THREE.Mesh(bandGeometry, bandMaterial);
     band.frustumCulled = false;
@@ -1305,6 +1353,12 @@ const Lanyard = ({
     const render = () => {
       cardGroup.position.copy(sim.body.position);
       cardGroup.quaternion.copy(sim.body.quaternion);
+      shadowMesh.position.copy(sim.body.position);
+      shadowMesh.position.x += SHADOW.x;
+      shadowMesh.position.y += SHADOW.y;
+      shadowMesh.position.z += SHADOW.z;
+      shadowMesh.quaternion.copy(sim.body.quaternion);
+      shadowMesh.scale.set(layout.width * SHADOW_PAD.x, layout.height * SHADOW_PAD.y, 1);
       updateBand();
       renderer.render(scene, camera);
     };
@@ -1615,7 +1669,9 @@ const Lanyard = ({
       html.classList.remove('lanyard-grab', 'lanyard-grabbing');
       [bodyMesh, frontMesh, backMesh, ring, clampMesh, eyelet, band].forEach(mesh => mesh.geometry?.dispose());
       [frontMaterial, backMaterial, edgeMaterial, metalMaterial, bandMaterial].forEach(material => material.dispose());
-      [frontTexture, backTexture, strapTexture, grain, weave].forEach(texture => texture.dispose());
+      [frontTexture, backTexture, strapTexture, grain, weave, shadowTexture].forEach(texture => texture.dispose());
+      shadowMesh.geometry.dispose();
+      shadowMaterial.dispose();
       environment.dispose();
       renderer.dispose();
       if (canvas.parentNode) canvas.parentNode.removeChild(canvas);

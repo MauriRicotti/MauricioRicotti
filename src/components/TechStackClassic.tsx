@@ -12,7 +12,7 @@ export default function TechStackClassic({ title, groups }: TechStackProps) {
     <section id="stack" className="bg-[#0e0f12] text-white pb-2 sm:pb-4">
       <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="border-y border-white/10 py-8 sm:py-10">
-          <p className="text-xs font-mono tracking-widest text-[#3cd3b7] uppercase mb-6 sm:mb-8">
+          <p className="text-xs font-mono tracking-widest text-accent uppercase mb-6 sm:mb-8">
             // {title}
           </p>
 

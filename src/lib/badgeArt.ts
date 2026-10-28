@@ -35,7 +35,12 @@ const H = 1440;
 const INK = "#0e0f12";
 const CREAM = "#eee9df";
 const LIGHT = "#f2ede4";
-const TEAL = "#3cd3b7";
+/** Color de acento: se toma de la web (--color-accent en index.css) al dibujar. */
+let TEAL = "#3cd3b7";
+const readAccent = () =>
+  getComputedStyle(document.documentElement)
+    .getPropertyValue("--color-accent")
+    .trim() || TEAL;
 
 const ANTON = '"Anton", Impact, sans-serif';
 const SANS =
@@ -366,6 +371,7 @@ export async function drawBadgeArt(
   t: BadgeTexts,
   design: BadgeDesign = "foto",
 ): Promise<BadgeArt> {
+  TEAL = readAccent();
   const photo = design === "foto" ? loadPhoto() : Promise.resolve(null);
   try {
     await Promise.all([
