@@ -50,7 +50,7 @@ export const profile: Profile = {
     { label: "Instagram", url: "https://www.instagram.com/mauri._r" },
   ],
   // CV en PDF (está en public/cv/). La versión en inglés usa su propio archivo.
-  cvUrl: "/cv/Mauricio-Ricotti-CV.pdf",
+  cvUrl: "/cv/Mauricio-Ricotti-CV.pdf?v=ef0b845c8b",
 };
 
 /* ------------------------------------------------------------------ */
@@ -143,6 +143,7 @@ export const projects: Project[] = [
       "Mi proyecto más completo: una app para escuchar la música guardada en tu teléfono, sin conexión a internet, sin cuentas y gratis. Pensada para ser rápida, simple y agradable de usar todos los días.",
     tags: ["App móvil", "100% offline", "Gratuita"],
     image: "/images/projects/offbeat.webp",
+    imageSmall: "/images/projects/offbeat-400.webp",
     // downloadUrl: "https://play.google.com/store/apps/details?id=...",
   },
   {
@@ -277,7 +278,7 @@ export const about = {
 /* ------------------------------------------------------------------ */
 /*  6b. FRANJAS DE TEXTO GIGANTE (se mueven con el scroll)            */
 /* ------------------------------------------------------------------ */
-// style: "solid" = letras rellenas · "band" = franja crema inclinada · "outline" = solo contorno
+// style: "solid" = letras rellenas · "band" = franja inclinada del color de acento · "outline" = solo contorno
 export const marqueeRows: {
   words: string[];
   style: "solid" | "band" | "outline";

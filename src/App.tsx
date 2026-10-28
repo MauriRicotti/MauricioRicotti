@@ -13,21 +13,33 @@ import ScrollTop from "./components/ScrollTop";
 // El formulario se carga aparte (no frena la carga inicial de la página)
 const ContactFlow = lazy(() => import("./components/ContactFlow"));
 import { scrollToId } from "./lib/smoothScroll";
+import { afterLoaderPaint } from "./lib/loader";
 
 export default function App() {
   const { profile, projects, techStack, techStackTitle } = useLang().c;
   const [contactOpen, setContactOpen] = useState(false);
   const [flowReady, setFlowReady] = useState(false);
 
-  // Precarga el formulario cuando el navegador queda libre, así abre al instante
+  // La precarga automática tampoco compite con el logo. Si el visitante abre el
+  // formulario, contactOpen lo carga de inmediato sin esperar al callback ocioso.
   useEffect(() => {
-    const ready = () => setFlowReady(true);
-    if ("requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(ready, { timeout: 3000 });
-      return () => window.cancelIdleCallback(id);
-    }
-    const t = setTimeout(ready, 1500);
-    return () => clearTimeout(t);
+    let alive = true;
+    let idle = 0;
+    let timer = 0;
+    void afterLoaderPaint().then(() => {
+      if (!alive) return;
+      const ready = () => { if (alive) setFlowReady(true); };
+      if (typeof window.requestIdleCallback === "function") {
+        idle = window.requestIdleCallback(ready, { timeout: 3000 });
+      } else {
+        timer = window.setTimeout(ready, 1500);
+      }
+    });
+    return () => {
+      alive = false;
+      if (idle) window.cancelIdleCallback(idle);
+      window.clearTimeout(timer);
+    };
   }, []);
 
   const scrollTo = (id: string) => scrollToId(id);

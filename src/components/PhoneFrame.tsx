@@ -35,9 +35,11 @@ export default function PhoneFrame({
           {p.image ? (
             <img
               src={p.image}
+              srcSet={p.imageSmall ? `${p.imageSmall} 400w, ${p.image} 720w` : undefined}
+              sizes="(max-width: 1023px) 218px, 240px"
               alt={fill(ui.screenshotOf, { name: p.name })}
-              width={1080}
-              height={2340}
+              width={720}
+              height={1548}
               loading="lazy"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover object-top"

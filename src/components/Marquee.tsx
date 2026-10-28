@@ -143,7 +143,7 @@ export default function Marquee() {
           return (
             <div
               key={i}
-              className="relative z-10 my-8 sm:my-10 -mx-[5vw] -rotate-3 sm:-rotate-2 bg-[#eee9df] text-[#0e0f12] py-3 sm:py-4 shadow-[0_10px_40px_rgba(0,0,0,0.45)] font-hero uppercase tracking-tight leading-none text-[15vw] sm:text-[clamp(2.4rem,6vw,5.5rem)]"
+              className="relative z-10 my-8 sm:my-10 -mx-[5vw] -rotate-3 sm:-rotate-2 bg-accent text-[#0e0f12] py-3 sm:py-4 shadow-[0_10px_40px_rgba(0,0,0,0.45)] font-hero uppercase tracking-tight leading-none text-[15vw] sm:text-[clamp(2.4rem,6vw,5.5rem)]"
             >
               {line}
             </div>

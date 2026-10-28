@@ -31,7 +31,7 @@ export const profile: Profile = {
     { label: "Saturdays", days: [6], from: "10:00", to: "14:00" },
     { label: "Sundays", days: [0] },
   ],
-  cvUrl: "/cv/Mauricio-Ricotti-CV-EN.pdf",
+  cvUrl: "/cv/Mauricio-Ricotti-CV-EN.pdf?v=c51a8ae5ff",
 };
 
 /* 2. NAVIGATION (same ids as in content.ts) */

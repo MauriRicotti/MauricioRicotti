@@ -1,0 +1,419 @@
+{
+  "date": "2026-10-28",
+  "scope": "Prioridad al loader y franja central del acento. Logo en De la idea al deploy descartado.",
+  "environment": "Chromium local, GPU SwiftShader; viewport móvil/escritorio y CPU x4/x1. No es un teléfono físico ni una nueva auditoría Lighthouse.",
+  "method": "Una muestra de orden de carga por caso. Verifica ausencia de inicialización WebGL y de importaciones 3D durante el loader; no calcula una mejora de FPS/TBT ni una mediana.",
+  "entryChecks": [
+    {
+      "variant": "before",
+      "language": "es",
+      "width": 390,
+      "cpuSlowdown": 4,
+      "stable": null,
+      "marks": {},
+      "removedAt": 2875.5999999996275,
+      "gl": [
+        {
+          "start": 2587.2999999998137,
+          "duration": 14.900000000372529,
+          "underLoader": true
+        }
+      ],
+      "resources": [
+        {
+          "name": "/assets/Lanyard-1NYC8MF-.js",
+          "start": 675.2000000001863
+        },
+        {
+          "name": "/assets/badgeArt-Dp85GHS7.js",
+          "start": 677.7000000001863
+        },
+        {
+          "name": "/assets/ContactFlow-fpPVE3dJ.js",
+          "start": 2904.7000000001863
+        }
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "canvas": {
+        "pixels": [
+          780,
+          1382
+        ],
+        "css": [
+          390,
+          691
+        ],
+        "profile": "balanced"
+      },
+      "aboutLogos": 0,
+      "bandColor": "rgb(238, 233, 223)",
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "updated",
+      "language": "es",
+      "width": 390,
+      "cpuSlowdown": 4,
+      "stable": {
+        "elapsed": 1168,
+        "opacities": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "groupOpacity": 1
+      },
+      "marks": {
+        "mr:loader-start": 404.09999999962747,
+        "mr:loader-open": 2105,
+        "mr:hero-intro": 2118.899999999441,
+        "mr:loader-done": 3086.7999999998137,
+        "mr:badge-prepare": 3116.899999999441
+      },
+      "removedAt": 3086.899999999441,
+      "gl": [
+        {
+          "start": 3766.7999999998137,
+          "duration": 13.5,
+          "underLoader": false
+        }
+      ],
+      "resources": [
+        {
+          "name": "/assets/Lanyard-DhgK636h.js",
+          "start": 3122.7999999998137
+        },
+        {
+          "name": "/assets/badgeArt-CnBndLVH.js",
+          "start": 3147.899999999441
+        },
+        {
+          "name": "/assets/ContactFlow-Mg6oMd0g.js",
+          "start": 3732.199999999255
+        }
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "canvas": {
+        "pixels": [
+          780,
+          1382
+        ],
+        "css": [
+          390,
+          691
+        ],
+        "profile": "balanced"
+      },
+      "aboutLogos": 0,
+      "bandColor": "rgb(255, 59, 59)",
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "updated",
+      "language": "en",
+      "width": 390,
+      "cpuSlowdown": 1,
+      "stable": {
+        "elapsed": 1160,
+        "opacities": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "groupOpacity": 1
+      },
+      "marks": {
+        "mr:loader-start": 134.8999999994412,
+        "mr:loader-open": 1835.199999999255,
+        "mr:hero-intro": 1843.0999999996275,
+        "mr:loader-done": 2785.5,
+        "mr:badge-prepare": 2796.0999999996275
+      },
+      "removedAt": 2785.5,
+      "gl": [
+        {
+          "start": 3218.0999999996275,
+          "duration": 4,
+          "underLoader": false
+        }
+      ],
+      "resources": [
+        {
+          "name": "/assets/Lanyard-DhgK636h.js",
+          "start": 2797.399999999441
+        },
+        {
+          "name": "/assets/badgeArt-CnBndLVH.js",
+          "start": 2797.699999999255
+        },
+        {
+          "name": "/assets/ContactFlow-Mg6oMd0g.js",
+          "start": 2833.199999999255
+        }
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "canvas": {
+        "pixels": [
+          780,
+          1336
+        ],
+        "css": [
+          390,
+          668
+        ],
+        "profile": "balanced"
+      },
+      "aboutLogos": 0,
+      "bandColor": "rgb(255, 59, 59)",
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "updated",
+      "language": "es",
+      "width": 1280,
+      "cpuSlowdown": 1,
+      "stable": {
+        "elapsed": 1159.2999999998137,
+        "opacities": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "groupOpacity": 1
+      },
+      "marks": {
+        "mr:loader-start": 110.09999999962747,
+        "mr:loader-open": 1810.3999999994412,
+        "mr:hero-intro": 1817.3999999994412,
+        "mr:loader-done": 2760.899999999441,
+        "mr:badge-prepare": 2770.5999999996275
+      },
+      "removedAt": 2761,
+      "gl": [
+        {
+          "start": 3169.399999999441,
+          "duration": 4.2999999998137355,
+          "underLoader": false
+        }
+      ],
+      "resources": [
+        {
+          "name": "/assets/Lanyard-DhgK636h.js",
+          "start": 2771.2999999998137
+        },
+        {
+          "name": "/assets/badgeArt-CnBndLVH.js",
+          "start": 2776.7999999998137
+        },
+        {
+          "name": "/assets/ContactFlow-Mg6oMd0g.js",
+          "start": 2801.7999999998137
+        }
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "canvas": {
+        "pixels": [
+          2560,
+          1688
+        ],
+        "css": [
+          1280,
+          844
+        ],
+        "profile": "balanced"
+      },
+      "aboutLogos": 0,
+      "bandColor": "rgb(255, 59, 59)",
+      "overflow": false,
+      "errors": []
+    }
+  ],
+  "functionalChecks": [
+    {
+      "test": "sin JS móvil es",
+      "ok": true
+    },
+    {
+      "test": "sin JS móvil en",
+      "ok": true
+    },
+    {
+      "test": "sin JS PC es",
+      "ok": true
+    },
+    {
+      "test": "sin JS PC en",
+      "ok": true
+    },
+    {
+      "test": "móvil ES",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "test": "móvil EN",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "test": "PC completo ES",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "test": "PC completo EN",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "test": "movimiento reducido",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "test": "sin WebGL",
+      "ok": true,
+      "errors": []
+    }
+  ],
+  "faultChecks": [
+    {
+      "scenario": "motion-change",
+      "ok": true,
+      "state": {
+        "phase": "done",
+        "started": 160.40000000037253,
+        "finished": 242.29999999981374
+      },
+      "errors": []
+    },
+    {
+      "scenario": "no-idle-callback",
+      "ok": true,
+      "state": {
+        "phase": "done",
+        "started": 135.79999999981374,
+        "finished": 2786.4000000003725
+      },
+      "errors": []
+    },
+    {
+      "scenario": "failed-3d-download",
+      "ok": true,
+      "state": {
+        "phase": "done",
+        "started": 126.40000000037253,
+        "finished": 2777.600000000559
+      },
+      "errors": []
+    },
+    {
+      "scenario": "failed-app-module",
+      "ok": true,
+      "state": {
+        "phase": "done",
+        "started": 31.799999999813735,
+        "finished": 2682.4000000003725
+      },
+      "errors": []
+    },
+    {
+      "scenario": "missing-loader-boot",
+      "ok": true,
+      "state": {
+        "phase": "done",
+        "started": null,
+        "finished": 5518.9000000003725
+      },
+      "errors": []
+    }
+  ],
+  "unchangedFiles": [
+    "src/components/Lanyard.tsx",
+    "src/lib/badgeArt.ts",
+    "src/index.css",
+    "src/components/About.tsx",
+    "src/components/Header.tsx",
+    "src/components/Footer.tsx",
+    "public/cv/Mauricio-Ricotti-CV.pdf",
+    "public/cv/Mauricio-Ricotti-CV-EN.pdf"
+  ],
+  "publicDeployment": false,
+  "realDeviceValidation": "Pendiente tras publicar esta versión. No se identificó el modelo/navegador del usuario."
+}

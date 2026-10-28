@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { loaderDelay } from "../lib/loader";
+import { afterLoaderPaint, whenHeroIntroStarts } from "../lib/loader";
 import type { BadgeArt, BadgeDesign, BadgeTexts } from "../lib/badgeArt";
 
 /**
  * Credencial 3D colgante del hero (Lanyard de React Bits).
  *
- * - La librería 3D baja en paralelo. Se prepara oculta durante la entrada y la
- *   caída arranca después del título, con texturas y shaders ya listos.
+ * - El logo del loader tiene prioridad: el 3D se importa y prepara OCULTO después
+ *   de que sale la cortina. La caída sigue siendo automática, tras el título y
+ *   con texturas y shaders listos; en equipos lentos puede aparecer más tarde.
  * - Cuelga sobre el lado derecho del título, desde arriba de la pantalla. Su lienzo
  *   cubre TODO el hero (así, al estirarla, solo se corta en el borde de la pantalla)
  *   y va por delante de todo, pero deja pasar los clics: solo atrapa el puntero
@@ -18,7 +19,8 @@ import type { BadgeArt, BadgeDesign, BadgeTexts } from "../lib/badgeArt";
  * HeroBadge.tsx y lib/badgeArt.ts; y "three" de package.json).
  */
 
-const Lanyard = lazy(() => import("./Lanyard"));
+const loadLanyard = () => import("./Lanyard");
+const Lanyard = lazy(loadLanyard);
 const loadArt = () => import("../lib/badgeArt");
 
 /** Alto de la tarjeta, en proporción al alto del título */
@@ -77,20 +79,24 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
     };
   }, []);
 
-  // Prepara el WebGL durante el loader, pero NO inicia la física hasta esta hora.
-  // Así no compila shaders ni sube texturas cuando la tarjeta ya está cayendo.
-  useEffect(() => {
-    revealAt.current = performance.now() + 1300 + loaderDelay();
-    void import("./Lanyard");
-  }, []);
-
-  // Dibuja el arte (y lo vuelve a dibujar si cambia el idioma)
+  // No importar Three, dibujar lienzos ni crear WebGL mientras el loader se anima.
+  // Los recursos mantienen toda su resolución. El canvas sigue oculto hasta estar
+  // preparado y la física empieza desde cero: no se pierde el comienzo de la caída.
   const key = JSON.stringify(texts);
   useEffect(() => {
     let alive = true;
-    loadArt()
-      .then((m) => m.drawBadgeArt(texts, SETTINGS.design))
-      .then((a) => alive && setArt(a));
+    const prepare = async () => {
+      const [, introAt] = await Promise.all([afterLoaderPaint(), whenHeroIntroStarts()]);
+      if (!alive) return;
+      revealAt.current = introAt + 1300;
+      performance.mark("mr:badge-prepare");
+      const [, module] = await Promise.all([loadLanyard(), loadArt()]);
+      if (!alive) return;
+      const next = await module.drawBadgeArt(texts, SETTINGS.design);
+      if (alive) setArt(next);
+    };
+    // Si falla la descarga de la mejora 3D, el resto del portfolio sigue funcionando.
+    void prepare().catch(() => {});
     return () => {
       alive = false;
     };

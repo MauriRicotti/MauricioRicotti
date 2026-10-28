@@ -1,7 +1,7 @@
 /**
  * Lanyard (credencial 3D colgante) — de React Bits, por David Haz
  * https://reactbits.dev/components/lanyard · Licencia MIT + Commons Clause
- * Física sin cambios. Cambios del portfolio (marcados con "(Portfolio)"): resolución máx. 1.5x,
+ * Física sin cambios. Perfil liviano automático en móviles/GPUs por software. Cambios del portfolio (marcados con "(Portfolio)"): resolución nítida hasta 2x,
  * rango de profundidad de la cámara (evita parpadeos en celulares),
  * props anchorX / cardTop (posición exacta) y passThrough (el lienzo deja pasar los clics). Solo depende de "three".
  * Se usa desde HeroBadge.tsx (prepara la GPU oculta antes de soltar la caída).
@@ -18,6 +18,8 @@ type Anchor = 'left' | 'center' | 'right';
 type ImageFit = 'cover' | 'contain';
 type Rgb = [number, number, number];
 type Point = { clientX: number; clientY: number };
+type ArtSource = string | HTMLCanvasElement;
+type ArtImage = HTMLImageElement | HTMLCanvasElement;
 
 interface PathLike {
   moveTo(x: number, y: number): unknown;
@@ -26,8 +28,8 @@ interface PathLike {
 }
 
 export interface LanyardProps {
-  frontImage?: string;
-  backImage?: string;
+  frontImage?: ArtSource;
+  backImage?: ArtSource;
   imageFit?: ImageFit;
   cardColor?: string;
   orientation?: Orientation;
@@ -36,7 +38,7 @@ export interface LanyardProps {
   size?: number;
   anchor?: Anchor;
   strapLength?: number;
-  strapImage?: string;
+  strapImage?: ArtSource;
   strapColor?: string;
   strapWidth?: number;
   metal?: Metal;
@@ -61,8 +63,8 @@ export interface LanyardProps {
 }
 
 interface Settings {
-  frontImage?: string;
-  backImage?: string;
+  frontImage?: ArtSource;
+  backImage?: ArtSource;
   imageFit: ImageFit;
   cardColor: string;
   orientation: Orientation;
@@ -71,7 +73,7 @@ interface Settings {
   size: number;
   anchor: Anchor;
   strapLength: number;
-  strapImage?: string;
+  strapImage?: ArtSource;
   strapColor: string;
   strapWidth: number;
   metal: Metal;
@@ -87,9 +89,9 @@ interface Settings {
 }
 
 interface Images {
-  front: HTMLImageElement | null;
-  back: HTMLImageElement | null;
-  strap: HTMLImageElement | null;
+  front: ArtImage | null;
+  back: ArtImage | null;
+  strap: ArtImage | null;
 }
 
 interface CardLayout {
@@ -169,7 +171,7 @@ interface Physics {
 interface Applied {
   layoutKey?: string;
   framingKey?: string;
-  imageKey?: string;
+  imageSources?: (ArtSource | undefined)[];
   faceKey?: string;
   strapColor?: string;
   strapScale?: number;
@@ -409,9 +411,10 @@ const buildShadowTexture = () => {
 
 const loadImage = (
   cache: Map<string, Promise<HTMLImageElement | null>>,
-  url?: string
-): Promise<HTMLImageElement | null> => {
+  url?: ArtSource
+): Promise<ArtImage | null> => {
   if (!url) return Promise.resolve(null);
+  if (typeof url !== 'string') return Promise.resolve(url);
   const cached = cache.get(url);
   if (cached) return cached;
   const promise = new Promise<HTMLImageElement | null>(resolve => {
@@ -545,6 +548,29 @@ const buildEnvironment = (renderer: THREE.WebGLRenderer) => {
   return target;
 };
 
+/** Reflejos de estudio livianos: seis imágenes de 64px, sin generar PMREM en el teléfono. */
+const buildBalancedEnvironment = () => {
+  const faces = Array.from({ length: 6 }, (_, i) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 64;
+    const ctx = canvas.getContext('2d')!;
+    const gradient = ctx.createLinearGradient(0, 0, 0, 64);
+    gradient.addColorStop(0, i === 2 ? '#bfc3c9' : '#33363c');
+    gradient.addColorStop(0.5, '#15171c');
+    gradient.addColorStop(1, '#08090c');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.fillStyle = i < 2 ? '#f2ede4' : '#9d9fa3';
+    ctx.fillRect(i % 2 ? 46 : 8, 4, i < 2 ? 7 : 4, 56);
+    if (i === 4) { ctx.fillStyle = '#f2ede4'; ctx.fillRect(3, 9, 58, 8); }
+    return canvas;
+  });
+  const texture = new THREE.CubeTexture(faces);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return { texture, dispose: () => texture.dispose() };
+};
+
 const makeCanvasTexture = (canvas: HTMLCanvasElement, anisotropy: number) => {
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -634,7 +660,7 @@ const buildWeaveTexture = () => {
 
 const drawFitted = (
   ctx: CanvasRenderingContext2D,
-  image: HTMLImageElement,
+  image: ArtImage,
   width: number,
   height: number,
   fit: ImageFit
@@ -645,7 +671,7 @@ const drawFitted = (
   ctx.drawImage(image, (width - w) / 2, (height - h) / 2, w, h);
 };
 
-const paintFace = (canvas: HTMLCanvasElement, image: HTMLImageElement | null, color: Rgb, fit: ImageFit) => {
+const paintFace = (canvas: HTMLCanvasElement, image: ArtImage | null, color: Rgb, fit: ImageFit) => {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   ctx.fillStyle = toCss(color);
@@ -653,8 +679,7 @@ const paintFace = (canvas: HTMLCanvasElement, image: HTMLImageElement | null, co
   if (image) drawFitted(ctx, image, canvas.width, canvas.height, fit);
 };
 
-const paintStrap = (canvas: HTMLCanvasElement, image: HTMLImageElement | null, color: Rgb) => {
-  const across = 192;
+const paintStrap = (canvas: HTMLCanvasElement, image: ArtImage | null, color: Rgb, across = 192) => {
   const along = image ? Math.max(64, Math.round((image.width / image.height) * across)) : across * 2;
   canvas.width = across;
   canvas.height = along;
@@ -990,6 +1015,8 @@ const Lanyard = ({
     applyRef.current?.();
   });
 
+  // Los acabados especiales mantienen su shader completo. Glossy/matte se adaptan a la GPU.
+  const detailedFinish = finish === 'holographic' || finish === 'metallic';
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return undefined;
@@ -1000,6 +1027,13 @@ const Lanyard = ({
     } catch {
       return undefined;
     }
+    const smallScreen = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
+    const gl = renderer.getContext();
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    const gpuName = debugInfo ? String(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)) : '';
+    // Adaptación real a móviles/GPUs por software; no se detecta Lighthouse ni el user-agent.
+    const balanced = !detailedFinish && (smallScreen || /swiftshader|llvmpipe|software rasterizer/i.test(gpuName));
+    const samples = balanced ? 36 : SAMPLES;
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.NeutralToneMapping;
@@ -1009,12 +1043,14 @@ const Lanyard = ({
     // (Portfolio) estilos en línea: si el CSS no carga, el canvas no se dibuja gigante
     canvas.style.cssText = 'display:block;width:100%;height:100%;visibility:hidden';
     canvas.setAttribute('aria-hidden', 'true');
+    canvas.dataset.graphics = balanced ? 'balanced' : 'full';
     container.appendChild(canvas);
 
     const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const scene = new THREE.Scene();
-    const environment = buildEnvironment(renderer);
-    scene.environment = environment.texture;
+    const environment = balanced ? buildBalancedEnvironment() : buildEnvironment(renderer);
+    if (!balanced) scene.environment = environment.texture;
+    else scene.add(new THREE.AmbientLight(0xffffff, 1.7));
     const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
     const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
     keyLight.position.set(-2.5, 4, 6);
@@ -1032,8 +1068,8 @@ const Lanyard = ({
     const strapTexture = makeCanvasTexture(strapCanvas, anisotropy);
     strapTexture.wrapS = THREE.ClampToEdgeWrapping;
     strapTexture.wrapT = THREE.RepeatWrapping;
-    const grain = buildGrainTexture();
-    const weave = buildWeaveTexture();
+    const grain = balanced ? null : buildGrainTexture();
+    const weave = balanced ? null : buildWeaveTexture();
     const foilUniforms = {
       foilStrength: { value: 0 },
       foilAspect: { value: 1.4 },
@@ -1051,36 +1087,32 @@ const Lanyard = ({
         .replace('#include <opaque_fragment>', `${FOIL_FRAGMENT_BODY}\n#include <opaque_fragment>`);
     };
 
-    const frontMaterial = new THREE.MeshPhysicalMaterial({
-      map: frontTexture,
-      normalMap: grain,
-      normalScale: new THREE.Vector2(0.06, 0.06)
-    });
-    const backMaterial = new THREE.MeshPhysicalMaterial({
-      map: backTexture,
-      normalMap: grain,
-      normalScale: new THREE.Vector2(0.06, 0.06)
-    });
-    frontMaterial.onBeforeCompile = injectFoil;
-    backMaterial.onBeforeCompile = injectFoil;
-    const edgeMaterial = new THREE.MeshPhysicalMaterial();
-    const metalMaterial = new THREE.MeshStandardMaterial({ metalness: 1 });
-    const bandMaterial = new THREE.MeshPhysicalMaterial({
-      map: strapTexture,
-      normalMap: weave,
-      normalScale: new THREE.Vector2(0.7, 0.7),
-      roughness: 0.68,
-      sheen: 1,
-      sheenRoughness: 0.42,
-      sheenColor: new THREE.Color(0.32, 0.32, 0.34),
-      side: THREE.DoubleSide
-    });
+    // En el perfil liviano el brillo sigue siendo 3D (Phong + reflejos de estudio),
+    // sin clearcoat, normales microscópicas ni shaders de foil que no se usan.
+    const faceMaterial = (map: THREE.Texture) => balanced
+      ? new THREE.MeshPhongMaterial({ map, specular: '#555555', shininess: 85,
+          envMap: environment.texture, combine: THREE.MixOperation, reflectivity: 0.08 })
+      : new THREE.MeshPhysicalMaterial({ map, normalMap: grain, normalScale: new THREE.Vector2(0.06, 0.06) });
+    const frontMaterial = faceMaterial(frontTexture);
+    const backMaterial = faceMaterial(backTexture);
+    const edgeMaterial = balanced
+      ? new THREE.MeshPhongMaterial({ specular: '#333333', shininess: 60 })
+      : new THREE.MeshPhysicalMaterial();
+    const metalMaterial = balanced
+      ? new THREE.MeshPhongMaterial({ specular: '#ffffff', shininess: 100,
+          envMap: environment.texture, combine: THREE.MixOperation, reflectivity: 0.55 })
+      : new THREE.MeshStandardMaterial({ metalness: 1 });
+    const bandMaterial = balanced
+      ? new THREE.MeshLambertMaterial({ map: strapTexture, side: THREE.DoubleSide })
+      : new THREE.MeshPhysicalMaterial({ map: strapTexture, normalMap: weave,
+          normalScale: new THREE.Vector2(0.7, 0.7), roughness: 0.68, sheen: 1,
+          sheenRoughness: 0.42, sheenColor: new THREE.Color(0.32, 0.32, 0.34), side: THREE.DoubleSide });
 
     const cardGroup = new THREE.Group();
     const bodyMesh = new THREE.Mesh(undefined, edgeMaterial);
     const frontMesh = new THREE.Mesh(undefined, frontMaterial);
     const backMesh = new THREE.Mesh(undefined, backMaterial);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(RING_RADIUS, RING_TUBE, 18, 72), metalMaterial);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(RING_RADIUS, RING_TUBE, balanced ? 10 : 18, balanced ? 32 : 72), metalMaterial);
     ring.rotation.y = Math.PI / 2 - 0.7;
     cardGroup.add(bodyMesh, frontMesh, backMesh, ring);
     scene.add(cardGroup);
@@ -1101,7 +1133,7 @@ const Lanyard = ({
     shadowMesh.renderOrder = -1;
     scene.add(shadowMesh);
 
-    const bandGeometry = buildBandGeometry(SAMPLES);
+    const bandGeometry = buildBandGeometry(samples);
     const band = new THREE.Mesh(bandGeometry, bandMaterial);
     band.frustumCulled = false;
     scene.add(band);
@@ -1109,7 +1141,7 @@ const Lanyard = ({
     const clampGroup = new THREE.Group();
     const clampMesh = new THREE.Mesh(buildClampGeometry(STRAP_WIDTH), metalMaterial);
     clampMesh.position.y = EYELET_RADIUS + CLAMP_BODY / 2 - 0.004;
-    const eyelet = new THREE.Mesh(new THREE.TorusGeometry(EYELET_RADIUS, 0.0105, 14, 40), metalMaterial);
+    const eyelet = new THREE.Mesh(new THREE.TorusGeometry(EYELET_RADIUS, 0.0105, balanced ? 8 : 14, balanced ? 24 : 40), metalMaterial);
     clampGroup.add(clampMesh, eyelet);
     scene.add(clampGroup);
 
@@ -1118,6 +1150,7 @@ const Lanyard = ({
     const mouth = new THREE.Vector3();
     const tuck = new THREE.Vector3();
     const curve = new THREE.CatmullRomCurve3(controls, false, 'centripetal');
+    curve.arcLengthDivisions = balanced ? 64 : 200;
     const view = { width: 1, height: 1 };
     let layout = cardLayout('portrait', 0.3);
     let applied: Applied = {};
@@ -1130,6 +1163,7 @@ const Lanyard = ({
     let alive = true;
     let ready = false;
     let warming = false;
+    let preparation = 0;
     let revealTimer = 0;
     let revealFrame = 0;
     // (Portfolio) mientras se hace scroll la tarjeta se congela (no se simula ni se redibuja):
@@ -1146,7 +1180,7 @@ const Lanyard = ({
       const s = settingsRef.current!;
       const color = parseColor(s.cardColor, [1, 1, 1]);
       const width = FACE_WIDTH;
-      const height = Math.round((FACE_WIDTH * layout.height) / layout.width);
+      const height = Math.round((width * layout.height) / layout.width);
       if (frontCanvas.width !== width || frontCanvas.height !== height) {
         frontCanvas.width = width;
         frontCanvas.height = height;
@@ -1164,8 +1198,8 @@ const Lanyard = ({
 
     const repaintStrap = () => {
       const s = settingsRef.current!;
-      tileRatio = paintStrap(strapCanvas, images.strap, parseColor(s.strapColor, [0.07, 0.07, 0.07]));
-      weave.repeat.set(2, 2 * tileRatio);
+      tileRatio = paintStrap(strapCanvas, images.strap, parseColor(s.strapColor, [0.07, 0.07, 0.07]), 192);
+      weave?.repeat.set(2, 2 * tileRatio);
       strapTexture.dispose();
       strapTexture.needsUpdate = true;
       start();
@@ -1233,8 +1267,8 @@ const Lanyard = ({
         }
       }
 
-      const imageKey = `${s.frontImage}|${s.backImage}|${s.strapImage}`;
-      if (imageKey !== applied.imageKey) {
+      const imageSources = [s.frontImage, s.backImage, s.strapImage];
+      if (!applied.imageSources || imageSources.some((image, i) => image !== applied.imageSources![i])) {
         const token = ++imageToken;
         Promise.all([
           loadImage(imageCache, s.frontImage),
@@ -1257,22 +1291,37 @@ const Lanyard = ({
       const finish = FINISHES[s.finish] || FINISHES.glossy;
       const card = parseColor(s.cardColor, [1, 1, 1]);
       [frontMaterial, backMaterial].forEach(material => {
-        material.roughness = finish.roughness;
-        material.metalness = finish.metalness;
-        material.clearcoat = finish.clearcoat;
-        material.clearcoatRoughness = finish.clearcoatRoughness;
-        material.anisotropy = finish.anisotropy;
+        if (material instanceof THREE.MeshPhysicalMaterial) {
+          material.roughness = finish.roughness;
+          material.metalness = finish.metalness;
+          material.clearcoat = finish.clearcoat;
+          material.clearcoatRoughness = finish.clearcoatRoughness;
+          material.anisotropy = finish.anisotropy;
+          // No compilar el shader holográfico si el acabado actual no lo utiliza.
+          const foil = finish.foil > 0;
+          if (material.userData.foil !== foil) {
+            material.userData.foil = foil;
+            material.onBeforeCompile = foil ? injectFoil : () => {};
+            material.customProgramCacheKey = () => foil ? 'portfolio-foil-v1' : 'portfolio-clean-v1';
+            material.needsUpdate = true;
+          }
+        } else {
+          material.shininess = s.finish === 'matte' ? 8 : 85;
+          material.reflectivity = s.finish === 'matte' ? 0.02 : 0.08;
+        }
       });
       foilUniforms.foilStrength.value = finish.foil;
       foilUniforms.foilAspect.value = layout.height / layout.width;
       edgeMaterial.color.setRGB(card[0] * 0.92, card[1] * 0.92, card[2] * 0.92, THREE.SRGBColorSpace);
-      edgeMaterial.roughness = Math.min(finish.roughness, 0.35);
-      edgeMaterial.metalness = finish.metalness;
-      edgeMaterial.clearcoat = 1;
-      edgeMaterial.clearcoatRoughness = 0.08;
+      if (edgeMaterial instanceof THREE.MeshPhysicalMaterial) {
+        edgeMaterial.roughness = Math.min(finish.roughness, 0.35);
+        edgeMaterial.metalness = finish.metalness;
+        edgeMaterial.clearcoat = 1;
+        edgeMaterial.clearcoatRoughness = 0.08;
+      }
       const metalLook = METALS[s.metal] || METALS.silver;
       metalMaterial.color.set(metalLook.color);
-      metalMaterial.roughness = metalLook.roughness;
+      if (metalMaterial instanceof THREE.MeshStandardMaterial) metalMaterial.roughness = metalLook.roughness;
       strapScale = STRAP_WIDTH * clamp(s.strapWidth, 0.4, 2);
       if (strapScale !== applied.strapScale) {
         clampMesh.geometry.dispose();
@@ -1281,12 +1330,12 @@ const Lanyard = ({
       if (s.passThrough) canvas.style.pointerEvents = 'none';
       else canvas.style.touchAction = s.interactive ? 'pan-y' : 'auto';
 
-      applied = { layoutKey, framingKey, imageKey, faceKey, strapColor: s.strapColor, strapScale };
+      applied = { layoutKey, framingKey, imageSources, faceKey, strapColor: s.strapColor, strapScale };
       start();
     };
 
-    const points = Array.from({ length: SAMPLES }, () => new THREE.Vector3());
-    const sides = Array.from({ length: SAMPLES }, () => new THREE.Vector3());
+    const points = Array.from({ length: samples }, () => new THREE.Vector3());
+    const sides = Array.from({ length: samples }, () => new THREE.Vector3());
     const bends = BAND_BEND.map((angle): [number, number] => [Math.cos(angle), Math.sin(angle)]);
     const work = {
       tangent: new THREE.Vector3(),
@@ -1312,7 +1361,7 @@ const Lanyard = ({
       for (let i = 0; i <= guide; i++) controls.push(sim.nodes[i]);
       controls.push(mouth, tuck);
       curve.updateArcLengths();
-      for (let i = 0; i < SAMPLES; i++) curve.getPointAt(i / (SAMPLES - 1), points[i]);
+      for (let i = 0; i < samples; i++) curve.getPointAt(i / (samples - 1), points[i]);
       const length = curve.getLength();
       const held = 1 - mouth.distanceTo(tuck) / Math.max(length, 0.001);
       const position = bandGeometry.getAttribute('position');
@@ -1323,8 +1372,8 @@ const Lanyard = ({
       const repeats = restLength / (strapScale * tileRatio);
       const width = strapScale / Math.pow(Math.max(1, length / Math.max(restLength, 0.001)), 0.35);
       const { tangent, toCamera, across, facing } = work;
-      for (let i = 0; i < SAMPLES; i++) {
-        tangent.subVectors(points[Math.min(SAMPLES - 1, i + 1)], points[Math.max(0, i - 1)]);
+      for (let i = 0; i < samples; i++) {
+        tangent.subVectors(points[Math.min(samples - 1, i + 1)], points[Math.max(0, i - 1)]);
         if (tangent.lengthSq() < 1e-12) tangent.set(0, -1, 0);
         tangent.normalize();
         toCamera.subVectors(camera.position, points[i]).normalize();
@@ -1332,12 +1381,12 @@ const Lanyard = ({
         if (side.lengthSq() < 1e-10) side.copy(i > 0 ? sides[i - 1] : scratch.a.set(1, 0, 0));
         side.normalize();
         if (i > 0 && side.dot(sides[i - 1]) < 0) side.negate();
-        const angle = -sim.twist * Math.pow(Math.min(1, i / (SAMPLES - 1) / held), 1.3);
+        const angle = -sim.twist * Math.pow(Math.min(1, i / (samples - 1) / held), 1.3);
         facing.crossVectors(tangent, side);
         across.copy(side).multiplyScalar(Math.cos(angle)).addScaledVector(facing, Math.sin(angle));
         facing.crossVectors(tangent, across);
         const p = points[i];
-        const v = (1 - i / (SAMPLES - 1)) * repeats;
+        const v = (1 - i / (samples - 1)) * repeats;
         for (let c = 0; c < columns; c++) {
           const k = i * columns + c;
           const offset = (BAND_COLUMNS[c] - 0.5) * width;
@@ -1410,10 +1459,10 @@ const Lanyard = ({
 
     const tick = (now: number) => {
       raf = 0;
-      if (!alive || !ready || document.hidden) return;
+      if (!alive || !ready || !visible || document.hidden) return;
       if (scrolling && !sim.grab && time > 1.6) return;
-      // (Portfolio) en pantallas de 120/144 Hz se dibuja a ~60–75 cuadros por segundo (menos trabajo)
-      if (now - last < 12) {
+      // Móvil/GPUs por software: ~30 fps. GPU de escritorio: hasta ~60–75 fps.
+      if (now - last < (balanced ? 30 : 12)) {
         raf = requestAnimationFrame(tick);
         return;
       }
@@ -1443,24 +1492,35 @@ const Lanyard = ({
     // (Portfolio) dos fases: preparar todo OCULTO y recién después soltar la física.
     // El primer render ya no muestra una tarjeta vacía ni se interrumpe al recibir el arte.
     const prepare = async () => {
-      if (ready || warming || !alive) return;
+      if (ready || warming || !alive || renderer.getContext().isContextLost()) return;
       warming = true;
+      const version = ++preparation;
+      const active = () => alive && version === preparation && !renderer.getContext().isContextLost();
       try {
         syncScene();
         // Incluye el dorso aunque todavía no mire a cámara.
-        [frontTexture, backTexture, strapTexture, grain, weave, shadowTexture].forEach(texture => renderer.initTexture(texture));
+        const textures: THREE.Texture[] = [frontTexture, backTexture, strapTexture, shadowTexture];
+        if (grain) textures.push(grain);
+        if (weave) textures.push(weave);
+        if (balanced) textures.push(environment.texture);
+        for (const texture of textures) {
+          if (!active()) return;
+          renderer.initTexture(texture);
+          // Ceder entre subidas: el navegador puede responder y pintar antes del siguiente bloque.
+          await new Promise<void>(resolve => window.setTimeout(resolve, 0));
+        }
         await renderer.compileAsync(scene, camera);
-        if (!alive) return;
+        if (!active()) return;
         render(); // sube geometrías/buffers mientras el canvas sigue oculto
       } catch {
-        if (!alive || renderer.getContext().isContextLost()) return;
+        if (!active()) return;
         // Fallback para drivers sin compilación paralela: también ocurre oculto.
         try { render(); } catch { return; }
       }
-      if (!alive) return;
+      if (!active()) return;
       const reveal = () => {
         revealFrame = requestAnimationFrame(() => {
-          if (!alive) return;
+          if (!active()) return;
           time = 0;
           ready = true;
           canvas.style.visibility = 'visible';
@@ -1591,7 +1651,7 @@ const Lanyard = ({
     };
 
     const onPointerMove = (event: PointerEvent) => {
-      if (!ready || !settingsRef.current!.interactive) return;
+      if (!ready || !visible || !settingsRef.current!.interactive) return;
       toPointer(event);
       if (sim.grab) {
         // si se soltó el botón fuera de la ventana, el navegador no avisa: se suelta acá
@@ -1654,9 +1714,10 @@ const Lanyard = ({
     const resize = () => {
       const width = Math.max(1, container.clientWidth);
       const height = Math.max(1, container.clientHeight);
-      // (Portfolio) resolución máx. 1.5x y ~1,2 millones de píxeles por cuadro.
-      const budget = Math.sqrt(1_200_000 / Math.max(1, width * height));
-      const ratio = Math.max(1, Math.min(window.devicePixelRatio || 1, 1.5, budget));
+      // La nitidez depende del DPR, no del área del hero: nunca ampliar un
+      // framebuffer de 0.65x/1x en una pantalla Retina. Los materiales y el
+      // límite de cuadros siguen livianos, pero la imagen se dibuja hasta 2x.
+      const ratio = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
       if (width === view.width && height === view.height && ratio === renderer.getPixelRatio()) return;
       view.width = width;
       view.height = height;
@@ -1671,8 +1732,31 @@ const Lanyard = ({
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       if (visible) start();
+      else {
+        if (raf) cancelAnimationFrame(raf);
+        raf = 0;
+        setCursor('');
+      }
     });
     intersectionObserver.observe(container);
+    // Un contexto recuperado vuelve a preparar la GPU OCULTO. El padre puede
+    // remontarlo; este fallback también funciona si se usa Lanyard por separado.
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      preparation++;
+      ready = false;
+      warming = false;
+      canvas.style.visibility = 'hidden';
+      cancelAnimationFrame(raf);
+      cancelAnimationFrame(revealFrame);
+      window.clearTimeout(revealTimer);
+      raf = 0;
+      release();
+      setCursor('');
+    };
+    const onContextRestored = () => { void prepare(); };
+    canvas.addEventListener('webglcontextlost', onContextLost);
+    canvas.addEventListener('webglcontextrestored', onContextRestored);
     const onVisibility = () => {
       if (!document.hidden) start();
     };
@@ -1699,6 +1783,9 @@ const Lanyard = ({
 
     return () => {
       alive = false;
+      preparation++;
+      canvas.removeEventListener('webglcontextlost', onContextLost);
+      canvas.removeEventListener('webglcontextrestored', onContextRestored);
       window.clearTimeout(revealTimer);
       cancelAnimationFrame(revealFrame);
       cancelAnimationFrame(raf);
@@ -1724,14 +1811,14 @@ const Lanyard = ({
       html.classList.remove('lanyard-grab', 'lanyard-grabbing');
       [bodyMesh, frontMesh, backMesh, ring, clampMesh, eyelet, band].forEach(mesh => mesh.geometry?.dispose());
       [frontMaterial, backMaterial, edgeMaterial, metalMaterial, bandMaterial].forEach(material => material.dispose());
-      [frontTexture, backTexture, strapTexture, grain, weave, shadowTexture].forEach(texture => texture.dispose());
+      [frontTexture, backTexture, strapTexture, grain, weave, shadowTexture].forEach(texture => texture?.dispose());
       shadowMesh.geometry.dispose();
       shadowMaterial.dispose();
       environment.dispose();
       renderer.dispose();
       if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
     };
-  }, []);
+  }, [detailedFinish]);
 
   return (
     <div ref={containerRef} className={`relative w-full h-full overflow-hidden ${className}`.trim()} style={style} />

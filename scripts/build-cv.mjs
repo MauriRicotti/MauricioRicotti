@@ -1,17 +1,28 @@
 /**
- * Genera el CV en PDF (español e inglés) a partir del MISMO contenido de la web
- * (src/data/content.ts y content.en.ts). Si cambiás un proyecto o un texto allá,
- * volvé a correr esto y el CV queda actualizado.
+ * CV A4 en español e inglés con la identidad actual del portfolio.
+ * Datos: src/data/content.ts / content.en.ts. Diseño: scripts/cv-template.html.
+ * Logo: src/lib/logoMR.ts. Acento: --color-accent en src/index.css.
  *
- *   npm i --no-save playwright && npx playwright install chromium   (solo la primera vez)
+ * Preparación (una vez):
+ *   npm i --no-save playwright && npx playwright install chromium
+ * Generar:
  *   npm run cv
+ *   CV_HTML=1 npm run cv   # además guarda HTML autónomos para revisión
  *
- * Salida: public/cv/Mauricio-Ricotti-CV.pdf y public/cv/Mauricio-Ricotti-CV-EN.pdf
+ * Solo reemplaza los PDF después de validar ambos idiomas. Actualiza ?v=hash
+ * en profile.cvUrl para no reutilizar un PDF viejo desde la caché del navegador.
  */
 import { build } from "esbuild";
-import { readFileSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
+import {
+  readFileSync, writeFileSync, mkdirSync, existsSync, mkdtempSync,
+  copyFileSync, rmSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join, basename } from "node:path";
+import { fileURLToPath } from "node:url";
 
-// ---------- Datos extra que no están en la web (completalos si querés) ----------
+// Datos extra que no están en la web. No se inventa formación ni nivel de inglés.
 const EXTRA = {
   es: {
     languages: [["Español", "Nativo"]],
@@ -25,247 +36,161 @@ const EXTRA = {
   },
 };
 
+const ROOT = fileURLToPath(new URL("../", import.meta.url));
+const read = (file) => readFileSync(join(ROOT, file), "utf8");
+const escapeHtml = (value = "") => String(value)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const json = (value) => JSON.stringify(value)
+  .replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+
+const now = new Date();
+const month = (locale) => now.toLocaleDateString(locale, {
+  month: "long", year: "numeric", timeZone: "America/Argentina/Buenos_Aires",
+});
 const LABELS = {
   es: {
-    profile: "Perfil",
-    projects: "Proyectos destacados",
-    skills: "Habilidades",
-    services: "Servicios",
-    languages: "Idiomas",
-    education: "Formación",
-    process: "Cómo trabajo",
-    contact: "Contacto",
-    updated: "Actualizado",
-    month: new Date().toLocaleDateString("es-AR", { month: "long", year: "numeric" }),
+    kicker: "Currículum vitae", profile: "Perfil", projects: "Proyectos destacados",
+    skills: "Habilidades", services: "Servicios", process: "Cómo trabajo",
+    languages: "Idiomas", education: "Formación", updated: "Actualizado", month: month("es-AR"),
   },
   en: {
-    profile: "Profile",
-    projects: "Featured projects",
-    skills: "Skills",
-    services: "Services",
-    languages: "Languages",
-    education: "Education",
-    process: "How I work",
-    contact: "Contact",
-    updated: "Updated",
-    month: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+    kicker: "Curriculum vitae", profile: "Profile", projects: "Featured projects",
+    skills: "Skills", services: "Services", process: "How I work",
+    languages: "Languages", education: "Education", updated: "Updated", month: month("en-US"),
   },
 };
 
-// ---------- Cargar el contenido (TypeScript) con esbuild ----------
 async function load(file) {
-  const out = await build({
-    entryPoints: [file],
-    bundle: true,
-    format: "esm",
-    platform: "node",
-    write: false,
-    logLevel: "silent",
+  const result = await build({
+    entryPoints: [join(ROOT, file)], bundle: true, format: "esm",
+    platform: "node", write: false, logLevel: "silent",
   });
-  const code = out.outputFiles[0].text;
-  return import("data:text/javascript;base64," + Buffer.from(code).toString("base64"));
+  return import("data:text/javascript;base64," + Buffer.from(result.outputFiles[0].text).toString("base64"));
 }
 
-const env = existsSync(".env") ? readFileSync(".env", "utf8") : "";
-const SITE = (env.match(/^VITE_SITE_URL=(.+)$/m)?.[1] || "https://example.com")
-  .trim()
-  .replace(/\/+$/, "");
+// El PDF recibe solo los campos que utiliza, no la configuración del formulario.
+function select(c) {
+  return {
+    profile: Object.fromEntries(
+      ["name", "role", "email", "phone", "whatsapp", "location", "socials"].map((key) => [key, c.profile[key]]),
+    ),
+    projects: c.projects.map((p) => Object.fromEntries(
+      ["id", "name", "subtitle", "category", "highlight", "description", "tags", "demoUrl"].map((key) => [key, p[key]]),
+    )),
+    about: { paragraphs: c.about.paragraphs, services: c.about.services.map((s) => ({ title: s.title })) },
+    techStack: c.techStack.map((g) => ({ title: g.title, items: g.items.map((i) => ({ name: i.name })) })),
+    processSteps: c.processSteps.map((s) => ({ title: s.title })),
+  };
+}
 
-const font = (p) => readFileSync(p).toString("base64");
-const ANTON = font("node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2");
-const JAKARTA = font(
-  "node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2",
-);
+const entries = [
+  { lang: "es", source: "src/data/content.ts", out: "public/cv/Mauricio-Ricotti-CV.pdf", url: "/cv/Mauricio-Ricotti-CV.pdf" },
+  { lang: "en", source: "src/data/content.en.ts", out: "public/cv/Mauricio-Ricotti-CV-EN.pdf", url: "/cv/Mauricio-Ricotti-CV-EN.pdf" },
+];
+const data = {};
+for (const entry of entries) data[entry.lang] = select(await load(entry.source));
 
-const esc = (s = "") =>
-  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const host = (u) => {
-  try {
-    return new URL(u).host.replace(/^www\./, "");
-  } catch {
-    return u;
-  }
+const env = existsSync(join(ROOT, ".env")) ? read(".env") : "";
+const SITE = (process.env.VITE_SITE_URL || env.match(/^VITE_SITE_URL=(.+)$/m)?.[1] || "https://mauricio-ricotti.vercel.app")
+  .trim().replace(/^(["'])(.*)\1$/, "$2").replace(/\/+$/, "");
+const siteUrl = new URL(SITE);
+if (!["https:", "http:"].includes(siteUrl.protocol) || siteUrl.pathname !== "/" || siteUrl.search || siteUrl.hash) {
+  throw new Error("VITE_SITE_URL debe ser el origen público del portfolio, sin rutas ni parámetros.");
+}
+const accent = read("src/index.css").match(/--color-accent:\s*(#[\da-f]{3,8})\s*;/i)?.[1];
+if (!accent) throw new Error("No se encontró --color-accent en src/index.css.");
+const { MR_VIEWBOX, MR_SIL, MR_FG } = await load("src/lib/logoMR.ts");
+const logo = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${escapeHtml(MR_VIEWBOX)}" fill-rule="evenodd"><path fill="#0b0c0f" d="${escapeHtml(MR_SIL)}"/><path fill="#f2ede4" d="${escapeHtml(MR_FG)}"/></svg>`;
+const font = (file) => readFileSync(join(ROOT, file)).toString("base64");
+const template = read("scripts/cv-template.html");
+const common = {
+  __CV_ANTON_WOFF2__: font("node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2"),
+  __CV_JAKARTA_WOFF2__: font("node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2"),
+  __CV_DATA_JSON__: json(data), __CV_SITE_JSON__: json(SITE), __CV_LOGO_JSON__: json(logo),
+  __CV_EXTRA_JSON__: json(EXTRA), __CV_LABELS_JSON__: json(LABELS), __CV_ACCENT__: accent,
 };
-const real = (u) => u && !/tu-usuario/.test(u);
-
-function html(c, lang) {
-  const L = LABELS[lang];
-  const X = EXTRA[lang];
-  const p = c.profile;
-  const site = lang === "en" ? `${SITE}/en` : SITE;
-  const github = p.socials.find((s) => s.label === "GitHub" && real(s.url));
-  const linkedin = p.socials.find((s) => s.label === "LinkedIn" && real(s.url));
-
-  const contacts = [
-    ["mailto:" + p.email, p.email],
-    ["https://wa.me/" + p.whatsapp, p.phone],
-    [site, host(site)],
-    github && [github.url, host(github.url) + new URL(github.url).pathname],
-    linkedin && [linkedin.url, "LinkedIn"],
-  ].filter(Boolean);
-
-  const projects = c.projects
-    .map(
-      (pr) => `
-      <article class="proj">
-        <div class="proj-head">
-          <h3>${esc(pr.name)}</h3>
-          <span class="cat">${esc(pr.category)}${pr.highlight ? ` · <b>${esc(pr.highlight)}</b>` : ""}</span>
-          ${pr.demoUrl ? `<a class="lnk" href="${esc(pr.demoUrl)}">${esc(host(pr.demoUrl))} ↗</a>` : ""}
-        </div>
-        <p class="desc"><b class="sub">${esc(pr.subtitle)}.</b> ${esc(pr.description)}</p>
-        <p class="tags">${pr.tags.map(esc).join(" · ")}</p>
-      </article>`,
-    )
-    .join("");
-
-  const skills = c.techStack
-    .map(
-      (g) => `
-      <div class="skill">
-        <h4>${esc(g.title)}</h4>
-        <p>${g.items.map((i) => `<span class="chip">${esc(i.name)}</span>`).join("")}</p>
-      </div>`,
-    )
-    .join("");
-
-  const list = (items) =>
-    `<ul class="plain">${items.map(([a, b]) => `<li><b>${esc(a)}</b>${b ? ` — ${esc(b)}` : ""}</li>`).join("")}</ul>`;
-
-  return `<!doctype html>
-<html lang="${lang}"><head><meta charset="utf-8" />
-<title>${esc(p.name)} — CV</title>
-<style>
-  @font-face { font-family: Anton; src: url(data:font/woff2;base64,${ANTON}) format("woff2"); }
-  @font-face { font-family: Jakarta; src: url(data:font/woff2;base64,${JAKARTA}) format("woff2"); font-weight: 200 800; }
-  @page { size: A4; margin: 0; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 210mm; }
-  body { font-family: Jakarta, sans-serif; font-size: 8.2pt; line-height: 1.4; color: #23252b;
-         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  a { color: inherit; text-decoration: none; }
-  .page { width: 210mm; height: 297mm; display: flex; flex-direction: column; overflow: hidden; }
-  header { background: #0e0f12; color: #f2ede4; padding: 10mm 14mm 8mm; display: flex; justify-content: space-between; align-items: flex-end; gap: 8mm;
-           background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
-           background-size: 7mm 7mm; }
-  .mono { font-family: Anton; font-size: 11pt; letter-spacing: .02em; color: #f2ede4; border-bottom: 1.5px solid #3cd3b7; padding-bottom: 1mm; display: inline-block; margin-bottom: 3mm; }
-  h1 { font-family: Anton; font-weight: 400; font-size: 32pt; line-height: 1; letter-spacing: .015em; text-transform: uppercase; }
-  .role { font-family: Anton; font-size: 13pt; letter-spacing: .08em; color: #3cd3b7; margin-top: 1.5mm; }
-  .contact { list-style: none; text-align: right; font-size: 8.4pt; line-height: 1.75; color: rgba(242,237,228,.85); white-space: nowrap; }
-  .contact .loc { color: rgba(242,237,228,.6); }
-  .body { flex: 1; display: grid; grid-template-columns: 1fr 52mm; gap: 7mm; padding: 7.5mm 14mm 0; }
-  h2 { font-family: Anton; font-weight: 400; font-size: 12pt; letter-spacing: .05em; text-transform: uppercase; color: #0e0f12;
-       display: flex; align-items: center; gap: 2.5mm; margin-bottom: 3mm; }
-  h2::before { content: ""; width: 5mm; height: 2px; background: #3cd3b7; }
-  section + section { margin-top: 4.5mm; }
-  .intro { color: #3b3e46; }
-  .intro + .intro { margin-top: 1.6mm; }
-  .proj { padding: 1.7mm 0; border-top: 1px solid #e6e3dc; break-inside: avoid; }
-  .proj:first-of-type { border-top: 0; padding-top: 0; }
-  .proj-head { display: flex; align-items: baseline; gap: 2.5mm; }
-  h3 { font-family: Anton; font-weight: 400; font-size: 11.5pt; letter-spacing: .03em; text-transform: uppercase; color: #0e0f12; }
-  .cat { font-size: 7.6pt; color: #7a7d86; text-transform: uppercase; letter-spacing: .06em; }
-  .cat b { color: #1f9c86; font-weight: 700; }
-  .lnk { margin-left: auto; font-size: 7.8pt; color: #1f9c86; font-weight: 600; white-space: nowrap; }
-  .sub { font-weight: 700; color: #23252b; }
-  .desc { color: #4a4d55; margin-top: .4mm; }
-  .tags { margin-top: .8mm; font-size: 7.5pt; color: #7a7d86; letter-spacing: .02em; }
-  aside { border-left: 1px solid #e6e3dc; padding-left: 6mm; }
-  .skill + .skill { margin-top: 3mm; }
-  h4 { font-size: 7.6pt; text-transform: uppercase; letter-spacing: .08em; color: #7a7d86; font-weight: 700; margin-bottom: 1.4mm; }
-  .chip { display: inline-block; border: 1px solid #d9d5cc; border-radius: 99px; padding: .5mm 2.2mm; margin: 0 1.2mm 1.4mm 0; font-size: 7.8pt; color: #23252b; }
-  .plain { list-style: none; }
-  .plain li { padding: 1mm 0; border-top: 1px solid #eeebe5; }
-  .plain li:first-child { border-top: 0; padding-top: 0; }
-  .steps { list-style: none; counter-reset: s; }
-  .steps li { counter-increment: s; padding: .8mm 0; }
-  .steps li::before { content: counter(s, decimal-leading-zero); font-size: 7.4pt; color: #1f9c86; font-weight: 700; margin-right: 2mm; }
-  footer { margin: 4mm 14mm 7mm; padding-top: 3mm; border-top: 1px solid #e6e3dc; display: flex; justify-content: space-between; font-size: 7.6pt; color: #8a8d95; }
-  footer b { font-family: Anton; font-weight: 400; color: #0e0f12; letter-spacing: .04em; font-size: 9pt; }
-</style></head>
-<body><div class="page">
-  <header>
-    <div>
-      <span class="mono">MR</span>
-      <h1>${esc(p.name)}</h1>
-      <p class="role">${esc(p.role)}</p>
-    </div>
-    <ul class="contact">
-      ${contacts.map(([href, label]) => `<li><a href="${esc(href)}">${esc(label)}</a></li>`).join("")}
-      <li class="loc">${esc(p.location)}</li>
-    </ul>
-  </header>
-
-  <div class="body">
-    <main>
-      <section>
-        <h2>${L.profile}</h2>
-        ${c.about.paragraphs.map((t) => `<p class="intro">${esc(t)}</p>`).join("")}
-      </section>
-      <section>
-        <h2>${L.projects}</h2>
-        ${projects}
-      </section>
-    </main>
-    <aside>
-      <section>
-        <h2>${L.skills}</h2>
-        ${skills}
-      </section>
-      <section>
-        <h2>${L.services}</h2>
-        <ul class="plain">${c.about.services.map((s) => `<li>${esc(s.title)}</li>`).join("")}</ul>
-      </section>
-      <section>
-        <h2>${L.process}</h2>
-        <ol class="steps">${c.processSteps.map((s) => `<li>${esc(s.title)}</li>`).join("")}</ol>
-      </section>
-      ${X.education.length ? `<section><h2>${L.education}</h2>${list(X.education)}</section>` : ""}
-      <section>
-        <h2>${L.languages}</h2>
-        ${list(X.languages)}
-      </section>
-    </aside>
-  </div>
-
-  <footer>
-    <span><b>MR</b>&nbsp;&nbsp;${esc(p.name)} · <a href="${esc(site)}">${esc(host(site))}</a></span>
-    <span>${L.updated}: ${esc(L.month)}</span>
-  </footer>
-</div></body></html>`;
+function html(lang) {
+  let result = template;
+  const values = {
+    ...common, __CV_LANG_JSON__: json(lang), __CV_LANG__: lang,
+    __CV_TITLE__: escapeHtml(`${data[lang].profile.name} — CV — ${lang.toUpperCase()}`),
+  };
+  for (const [token, value] of Object.entries(values)) result = result.replaceAll(token, () => value);
+  if (/__CV_[A-Z_]+__/.test(result)) throw new Error("Quedaron campos sin completar en cv-template.html.");
+  return result;
 }
 
-// ---------- Generar los PDF ----------
 let chromium;
 try {
   ({ chromium } = await import("playwright"));
 } catch {
-  console.error(
-    "Falta Playwright. Instalalo una vez con:\n  npm i --no-save playwright && npx playwright install chromium",
-  );
+  console.error("Falta Playwright. Instalalo una vez con:\n  npm i --no-save playwright && npx playwright install chromium");
   process.exit(1);
 }
 
-mkdirSync("public/cv", { recursive: true });
-const browser = await chromium.launch();
-for (const [lang, file, out] of [
-  ["es", "src/data/content.ts", "public/cv/Mauricio-Ricotti-CV.pdf"],
-  ["en", "src/data/content.en.ts", "public/cv/Mauricio-Ricotti-CV-EN.pdf"],
-]) {
-  const c = await load(file);
-  const page = await browser.newPage();
-  const doc = html(c, lang);
-  if (process.env.CV_HTML) writeFileSync(out.replace(/\.pdf$/, ".html"), doc); // para revisar el diseño
-  await page.setContent(doc, { waitUntil: "load" });
-  await page.evaluate(() => document.fonts.ready);
-  // Aviso si el contenido no entra en una sola página
-  const over = await page.evaluate(() => {
-    const pg = document.querySelector(".page");
-    return pg.scrollHeight - pg.clientHeight;
-  });
-  if (over > 1) console.warn(`⚠️  ${out}: el contenido se pasa ${over}px de una hoja A4 (se recorta).`);
-  await page.pdf({ path: out, format: "A4", printBackground: true, preferCSSPageSize: true });
-  await page.close();
-  console.log(`✓ ${out}`);
+const temp = mkdtempSync(join(tmpdir(), "portfolio-cv-"));
+const plans = [];
+let browser;
+try {
+  browser = await chromium.launch();
+  for (const entry of entries) {
+    const page = await browser.newPage({ viewport: { width: 794, height: 1123 } });
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(String(error)));
+    // Fuentes, logo y datos están embebidos. No se permite depender de una red/CDN.
+    await page.route(/^https?:\/\//, (route) => route.abort());
+    await page.emulateMedia({ media: "print" });
+    const doc = html(entry.lang);
+    await page.setContent(doc, { waitUntil: "load" });
+    await page.waitForFunction(() => window.__cvReady === true);
+    await page.evaluate(() => document.fonts.ready);
+    if (errors.length) throw new Error(`${entry.lang}: ${errors.join("\n")}`);
+    const metrics = await page.evaluate(() => {
+      const sheet = document.getElementById("sheet");
+      const main = document.querySelector(".cv-main").getBoundingClientRect();
+      const side = document.querySelector(".cv-side").getBoundingClientRect();
+      const footer = document.querySelector(".cv-footer").getBoundingClientRect();
+      const name = document.querySelector(".cv-name").getBoundingClientRect();
+      const contacts = document.querySelector(".cv-contact").getBoundingClientRect();
+      const overflow = [...document.querySelectorAll(".cv-body, .project-heading, .cv-contact")]
+        .some((el) => el.scrollWidth > el.clientWidth + 1);
+      return {
+        width: sheet.getBoundingClientRect().width, height: sheet.getBoundingClientRect().height,
+        pageOverflow: sheet.scrollHeight - sheet.clientHeight,
+        bottomGap: footer.top - Math.max(main.bottom, side.bottom),
+        headerGap: contacts.left - name.right, overflow,
+        projects: document.querySelectorAll(".project").length,
+      };
+    });
+    if (metrics.pageOverflow > 1 || metrics.bottomGap < 8 || metrics.headerGap < 6 || metrics.overflow) {
+      throw new Error(`${entry.lang}: el contenido no entra con seguridad en una hoja A4. No se reemplazaron los PDF. Revisá tamaños/espaciados en scripts/cv-template.html. ${JSON.stringify(metrics)}`);
+    }
+    if (metrics.projects !== data[entry.lang].projects.length) throw new Error(`${entry.lang}: falta contenido de proyectos.`);
+    const staged = join(temp, basename(entry.out));
+    const bytes = await page.pdf({ path: staged, format: "A4", printBackground: true, preferCSSPageSize: true, tagged: true });
+    if (bytes.subarray(0, 5).toString() !== "%PDF-") throw new Error(`${entry.lang}: PDF inválido.`);
+    const version = createHash("sha256").update(bytes).digest("hex").slice(0, 10);
+    const cvUrl = `${entry.url}?v=${version}`;
+    const source = read(entry.source);
+    const field = /(\bcvUrl\s*:\s*)(["'])([^"']+)\2/;
+    const found = source.match(field);
+    if (!found || new URL(found[3], SITE).pathname !== entry.url) {
+      throw new Error(`${entry.source}: no se encontró el cvUrl local esperado. No se reemplazaron los PDF.`);
+    }
+    const updatedSource = source.replace(field, (_all, prefix, quote) => `${prefix}${quote}${cvUrl}${quote}`);
+    plans.push({ ...entry, staged, updatedSource, doc, version, metrics });
+    await page.close();
+  }
+  // Publicar solo cuando los DOS idiomas se hayan generado y validado sin recortes.
+  mkdirSync(join(ROOT, "public/cv"), { recursive: true });
+  for (const plan of plans) copyFileSync(plan.staged, join(ROOT, plan.out));
+  for (const plan of plans) {
+    writeFileSync(join(ROOT, plan.source), plan.updatedSource);
+    if (process.env.CV_HTML && process.env.CV_HTML !== "0") writeFileSync(join(ROOT, plan.out.replace(/\.pdf$/, ".html")), plan.doc);
+    console.log(`✓ ${plan.out}: A4, ${plan.metrics.projects} proyectos, sin recortes, logo MR y acento ${accent}; descarga ?v=${plan.version}`);
+  }
+} finally {
+  await browser?.close();
+  rmSync(temp, { recursive: true, force: true });
 }
-await browser.close();

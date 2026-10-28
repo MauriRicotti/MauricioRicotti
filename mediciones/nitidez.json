@@ -1,0 +1,377 @@
+{
+  "note": "Visual resolution verification of the corrected build, not a Lighthouse score. Reduced motion enabled for comparable poses. WebGL2 enabled with SwiftShader. Before: previous low-resolution optimized build; after: full-resolution corrected build.",
+  "faceTexture": [
+    1024,
+    1440
+  ],
+  "strapAcross": 192,
+  "maxAnisotropy": 8,
+  "maxRenderDPR": 2,
+  "resolutionTests": [
+    {
+      "case": "before-mobile",
+      "ok": true,
+      "dpr": 2,
+      "css": [
+        412,
+        682
+      ],
+      "buffer": [
+        412,
+        682
+      ],
+      "profile": "balanced",
+      "textures": [
+        [
+          512,
+          720
+        ],
+        [
+          512,
+          720
+        ],
+        [
+          96,
+          594
+        ],
+        [
+          368,
+          472
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ]
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "errors": []
+    },
+    {
+      "case": "after-mobile",
+      "ok": true,
+      "dpr": 2,
+      "css": [
+        412,
+        682
+      ],
+      "buffer": [
+        824,
+        1364
+      ],
+      "profile": "balanced",
+      "textures": [
+        [
+          1024,
+          1440
+        ],
+        [
+          1024,
+          1440
+        ],
+        [
+          192,
+          1188
+        ],
+        [
+          368,
+          472
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ]
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "errors": []
+    },
+    {
+      "case": "before-desktop",
+      "ok": true,
+      "dpr": 2,
+      "css": [
+        1280,
+        800
+      ],
+      "buffer": [
+        832,
+        520
+      ],
+      "profile": "balanced",
+      "textures": [
+        [
+          512,
+          720
+        ],
+        [
+          512,
+          720
+        ],
+        [
+          96,
+          594
+        ],
+        [
+          368,
+          472
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ]
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "errors": []
+    },
+    {
+      "case": "after-desktop",
+      "ok": true,
+      "dpr": 2,
+      "css": [
+        1280,
+        800
+      ],
+      "buffer": [
+        2560,
+        1600
+      ],
+      "profile": "balanced",
+      "textures": [
+        [
+          1024,
+          1440
+        ],
+        [
+          1024,
+          1440
+        ],
+        [
+          192,
+          1188
+        ],
+        [
+          368,
+          472
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ]
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "errors": []
+    },
+    {
+      "case": "after-mobile-3x",
+      "ok": true,
+      "dpr": 3,
+      "css": [
+        390,
+        691
+      ],
+      "buffer": [
+        780,
+        1382
+      ],
+      "profile": "balanced",
+      "textures": [
+        [
+          1024,
+          1440
+        ],
+        [
+          1024,
+          1440
+        ],
+        [
+          192,
+          1188
+        ],
+        [
+          368,
+          472
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ]
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "errors": []
+    },
+    {
+      "case": "after-desktop-1x",
+      "ok": true,
+      "dpr": 1,
+      "css": [
+        1280,
+        800
+      ],
+      "buffer": [
+        1280,
+        800
+      ],
+      "profile": "balanced",
+      "textures": [
+        [
+          1024,
+          1440
+        ],
+        [
+          1024,
+          1440
+        ],
+        [
+          192,
+          1188
+        ],
+        [
+          368,
+          472
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ]
+      ],
+      "visibleUploads": 0,
+      "visibleCompiles": 0,
+      "errors": []
+    }
+  ],
+  "interactionTests": {
+    "touchDrag": true,
+    "tapToFlip": true,
+    "automatic3D": true,
+    "contextRestoration": true,
+    "languages": [
+      "es",
+      "en"
+    ],
+    "pageErrors": []
+  }
+}

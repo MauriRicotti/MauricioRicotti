@@ -17,9 +17,9 @@ import { MR_FG, MR_SIL, MR_VIEWBOX } from "./logoMR";
 export type BadgeDesign = "foto" | "credencial";
 
 export interface BadgeArt {
-  front: string;
-  back: string;
-  strap: string;
+  front: HTMLCanvasElement;
+  back: HTMLCanvasElement;
+  strap: HTMLCanvasElement;
 }
 
 export interface BadgeTexts {
@@ -29,6 +29,7 @@ export interface BadgeTexts {
   year: string; // "2026"
 }
 
+// Frente y dorso conservan su detalle original también en teléfonos.
 const W = 1024;
 const H = 1440;
 
@@ -51,9 +52,9 @@ type Ctx = CanvasRenderingContext2D & { letterSpacing?: string };
 
 function canvas(w: number, h: number) {
   const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  const ctx = c.getContext("2d") as Ctx;
+  c.width = Math.max(1, Math.round(w));
+  c.height = Math.max(1, Math.round(h));
+  const ctx = c.getContext("2d", { alpha: false }) as Ctx;
   return { c, ctx };
 }
 
@@ -195,7 +196,8 @@ function drawFront(t: BadgeTexts) {
   text(ctx, "Nº 001", M, fy + 138, `600 32px ${MONO}`, TEAL, { spacing: 5 });
   barcode(ctx, W - M - 300, fy + 52, 300, 96, LIGHT);
 
-  return c.toDataURL("image/png");
+  // Entrega el lienzo directamente: sin codificar PNG y volver a decodificarlo.
+  return c;
 }
 
 /** Frente con retrato: "MR" verde gigante detrás de la figura recortada y panel
@@ -256,7 +258,8 @@ function drawFrontPhoto(t: BadgeTexts, photo: HTMLImageElement) {
   });
   barcode(ctx, W - M - 270, PANEL + 296, 270, 88, LIGHT);
 
-  return c.toDataURL("image/png");
+  // Entrega el lienzo directamente: sin codificar PNG y volver a decodificarlo.
+  return c;
 }
 
 function loadPhoto(): Promise<HTMLImageElement | null> {
@@ -329,7 +332,8 @@ function drawBack(t: BadgeTexts) {
     spacing: 5,
   });
 
-  return c.toDataURL("image/png");
+  // Entrega el lienzo directamente: sin codificar PNG y volver a decodificarlo.
+  return c;
 }
 
 /** Cinta: se repite a lo largo; el alto de la imagen ocupa el ancho de la cinta. */
@@ -363,7 +367,8 @@ function drawStrap(t: BadgeTexts) {
   ctx.fillStyle = LIGHT;
   ctx.fillText(label, gap / 2 + lw + gap, base);
   ctx.letterSpacing = "0px";
-  return c.toDataURL("image/png");
+  // Entrega el lienzo directamente: sin codificar PNG y volver a decodificarlo.
+  return c;
 }
 
 /** Espera las tipografías y dibuja las tres imágenes. */

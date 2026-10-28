@@ -34,7 +34,7 @@ export interface Project {
   description: string;
   tags: string[];
   image: string;
-  /** Versión chica de la captura (800px de ancho) para celulares. Opcional. */
+  /** Versión chica de la captura (800px web / 400px teléfono). Opcional. */
   imageSmall?: string;
   demoUrl?: string;
   githubUrl?: string;

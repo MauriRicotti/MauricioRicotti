@@ -1,0 +1,329 @@
+{
+  "date": "2026-10-28",
+  "note": "LOCAL laboratory results, not a new public PageSpeed result. Excludes first setup/warmup run. Before: median of 3 clean runs. Final after: one final-build audit; previous after runs document tuning variability. Historical: superseded by the sharpness correction (1024x1440 art, DPR up to 2, no area downscaling). These metrics are not claimed for the corrected version.",
+  "publicBaseline": {
+    "url": "https://pagespeed.web.dev/analysis/https-mauricio-ricotti-vercel-app/0lw7u669k1?form_factor=mobile&hl=es",
+    "performanceScore": 51,
+    "tbtMs": 20043
+  },
+  "conditions": {
+    "lighthouseVersion": "12.8.2",
+    "viewport": [
+      412,
+      823
+    ],
+    "deviceScaleFactor": 1.75,
+    "rttMs": 150,
+    "throughputKbps": 1638.4,
+    "cpuSlowdownMultiplier": 1.2,
+    "gpu": "SwiftShader",
+    "server": "same local gzip server; independent immutable baseline build",
+    "throttlingMethod": "simulate"
+  },
+  "beforeMedian": {
+    "first-contentful-paint": 1685.889,
+    "largest-contentful-paint": 3368.8334999999997,
+    "total-blocking-time": 3119.5,
+    "speed-index": 4279.84390757917,
+    "cumulative-layout-shift": 0.004735881676408363,
+    "mainthread-work-breakdown": 5003.175599999997,
+    "bootup-time": 4352.127599999996
+  },
+  "finalBuild": {
+    "run": "optimized-final",
+    "phase": "after",
+    "fetchTime": "2026-10-28T21:19:45.791Z",
+    "lighthouseVersion": "12.8.2",
+    "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+    "categories": {
+      "performance": 71,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": 1699.388,
+      "largest-contentful-paint": 3263.582,
+      "total-blocking-time": 804.2090000000001,
+      "speed-index": 3728.3350461338714,
+      "cumulative-layout-shift": 0.004735881676408363,
+      "mainthread-work-breakdown": 2620.337999999978,
+      "bootup-time": 478.9764000000001
+    }
+  },
+  "improvements": {
+    "tbtReductionPct": 74.21993909280333,
+    "mainThreadReductionPct": 47.62650345512599
+  },
+  "runs": [
+    {
+      "run": "baseline-2",
+      "phase": "before",
+      "fetchTime": "2026-10-28T21:06:42.420Z",
+      "lighthouseVersion": "12.8.2",
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "categories": {
+        "performance": 59,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1692.4339999999997,
+        "largest-contentful-paint": 3383.151,
+        "total-blocking-time": 3119.5,
+        "speed-index": 4212.877373136249,
+        "cumulative-layout-shift": 0.004735881676408363,
+        "mainthread-work-breakdown": 4595.710800000001,
+        "bootup-time": 4024.7111999999956
+      }
+    },
+    {
+      "run": "baseline-3",
+      "phase": "before",
+      "fetchTime": "2026-10-28T21:10:14.675Z",
+      "lighthouseVersion": "12.8.2",
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "categories": {
+        "performance": 59,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1685.889,
+        "largest-contentful-paint": 3368.8334999999997,
+        "total-blocking-time": 3458.5000000000005,
+        "speed-index": 4279.84390757917,
+        "cumulative-layout-shift": 0.004735881676408363,
+        "mainthread-work-breakdown": 5003.175599999997,
+        "bootup-time": 4352.127599999996
+      }
+    },
+    {
+      "run": "baseline-4",
+      "phase": "before",
+      "fetchTime": "2026-10-28T21:19:12.047Z",
+      "lighthouseVersion": "12.8.2",
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "categories": {
+        "performance": 57,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1684.351,
+        "largest-contentful-paint": 3352.5265,
+        "total-blocking-time": 2829.5,
+        "speed-index": 6062.683172270766,
+        "cumulative-layout-shift": 0.004735881676408363,
+        "mainthread-work-breakdown": 5191.632,
+        "bootup-time": 4616.060399999989
+      }
+    },
+    {
+      "run": "optimized-1",
+      "phase": "after",
+      "fetchTime": "2026-10-28T21:07:14.386Z",
+      "lighthouseVersion": "12.8.2",
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "categories": {
+        "performance": 72,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1685.199,
+        "largest-contentful-paint": 3436.2985,
+        "total-blocking-time": 703.9005000000002,
+        "speed-index": 3908.545301442514,
+        "cumulative-layout-shift": 0.004735881676408363,
+        "mainthread-work-breakdown": 2542.0439999999676,
+        "bootup-time": 492.9599999999977
+      }
+    },
+    {
+      "run": "optimized-2",
+      "phase": "after",
+      "fetchTime": "2026-10-28T21:07:36.277Z",
+      "lighthouseVersion": "12.8.2",
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "categories": {
+        "performance": 73,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1672.313,
+        "largest-contentful-paint": 3248.4695,
+        "total-blocking-time": 713.3435,
+        "speed-index": 3887.4617341097255,
+        "cumulative-layout-shift": 0.004735881676408363,
+        "mainthread-work-breakdown": 2507.2247999999636,
+        "bootup-time": 541.0895999999998
+      }
+    },
+    {
+      "run": "optimized-3",
+      "phase": "after",
+      "fetchTime": "2026-10-28T21:10:47.353Z",
+      "lighthouseVersion": "12.8.2",
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "categories": {
+        "performance": 70,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1717.524,
+        "largest-contentful-paint": 3463.786,
+        "total-blocking-time": 750.2379999999998,
+        "speed-index": 3923.416668213342,
+        "cumulative-layout-shift": 0.004735881676408363,
+        "mainthread-work-breakdown": 2612.2151999999746,
+        "bootup-time": 562.468799999998
+      }
+    },
+    {
+      "run": "optimized-final",
+      "phase": "after",
+      "fetchTime": "2026-10-28T21:19:45.791Z",
+      "lighthouseVersion": "12.8.2",
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "categories": {
+        "performance": 71,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1699.388,
+        "largest-contentful-paint": 3263.582,
+        "total-blocking-time": 804.2090000000001,
+        "speed-index": 3728.3350461338714,
+        "cumulative-layout-shift": 0.004735881676408363,
+        "mainthread-work-breakdown": 2620.337999999978,
+        "bootup-time": 478.9764000000001
+      }
+    }
+  ],
+  "complementaryRenderingTest": [
+    {
+      "label": "baseline",
+      "readyMs": 5629,
+      "steadyWindowMs": 8011,
+      "mainThreadMs": 137.44299999999976,
+      "scriptMs": 39.101,
+      "effectiveFps": 6.116589689177382,
+      "profile": "original",
+      "canvas": [
+        618,
+        1023
+      ],
+      "cssCanvas": [
+        412,
+        682
+      ],
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 49,
+      "longTasks": 0,
+      "blockingTime": 0,
+      "maxTask": 0,
+      "uploadsWhileVisible": 0,
+      "shaderCompilesWhileVisible": 0,
+      "startupLongTasks": [
+        {
+          "start": 3167.5999999999767,
+          "duration": 1223
+        },
+        {
+          "start": 5078.599999999977,
+          "duration": 530
+        },
+        {
+          "start": 4696.29999999993,
+          "duration": 224
+        },
+        {
+          "start": 572.5999999999767,
+          "duration": 66
+        },
+        {
+          "start": 4920.5,
+          "duration": 63
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 672
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 672
+        }
+      ],
+      "offscreenFrames": 0,
+      "errors": []
+    },
+    {
+      "label": "optimized",
+      "readyMs": 3746,
+      "steadyWindowMs": 8010,
+      "mainThreadMs": 279.62,
+      "scriptMs": 60.809999999999974,
+      "effectiveFps": 21.098626716604244,
+      "profile": "balanced",
+      "canvas": [
+        412,
+        682
+      ],
+      "cssCanvas": [
+        412,
+        682
+      ],
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 169,
+      "longTasks": 0,
+      "blockingTime": 0,
+      "maxTask": 0,
+      "uploadsWhileVisible": 0,
+      "shaderCompilesWhileVisible": 0,
+      "startupLongTasks": [
+        {
+          "start": 3478.8000000000466,
+          "duration": 95
+        },
+        {
+          "start": 3617.3000000000466,
+          "duration": 95
+        },
+        {
+          "start": 574.4000000000233,
+          "duration": 59
+        },
+        {
+          "start": 1741.4000000000233,
+          "duration": 50
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 664
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 664
+        }
+      ],
+      "offscreenFrames": 0,
+      "errors": []
+    }
+  ],
+  "supersededBySharpnessCorrection": true
+}

@@ -13,7 +13,7 @@ experiencia, contacto y footer. No hace falta tocar los componentes.
 npm install
 npm run dev      # desarrollo (más lento, con recarga instantánea)
 npm run live     # versión final optimizada, se reconstruye sola al guardar (puerto 5173)
-npm run build    # genera dist/index.html (un solo archivo)
+npm run build    # genera dist/ con HTML ES/EN y recursos separados
 npm run build:preview  # genera preview.html (con imágenes incrustadas, se abre sin servidor)
 ```
 
@@ -101,7 +101,7 @@ Solo los links del menú y el botón "volver arriba" se desplazan con una animac
 (`src/lib/smoothScroll.ts`). Para que salten de golpe, cambiá `behavior: "smooth"` por `"auto"`.
 
 Las **franjas de palabras** (`Marquee.tsx`) tienen inercia: siguen al scroll con un pequeño retraso y frenan
-de a poco. Ajustá `EASE` (más bajo = frenan más lento).
+de a poco. Ajustá `EASE` (más bajo = frenan más lento). La franja central usa `bg-accent` con texto oscuro; las otras dos conservan el relleno crema y el contorno.
 
 ## Color de acento
 
@@ -117,7 +117,7 @@ sale de **una sola línea** en `src/index.css`:
 
 En el código se usa como `bg-accent`, `text-accent`, `border-accent`, `ring-accent/60`,
 `shadow-[3px_3px_0_var(--color-accent)]` o `var(--color-accent)`.
-No cambian: la maqueta de la app OffBeat (`PhoneFrame.tsx`, tiene sus propios colores) ni el CV (`scripts/build-cv.mjs`).
+La maqueta de la app OffBeat (`PhoneFrame.tsx`) conserva sus propios colores. El CV también usa el acento de la web: `npm run cv` lo toma de `--color-accent` al regenerar los PDF.
 
 ## Barra de navegación
 
@@ -133,7 +133,7 @@ No cambian: la maqueta de la app OffBeat (`PhoneFrame.tsx`, tiene sus propios co
 ## Credencial 3D del hero
 
 Tarjeta colgante interactiva (componente **Lanyard** de [React Bits](https://reactbits.dev), licencia
-MIT + Commons Clause; usa `three`). La librería se carga aparte y prepara texturas y shaders oculta durante el loader; la caída empieza después de la animación del título, cuando la GPU ya está lista.
+MIT + Commons Clause; usa `three`). La librería se carga aparte: **después de retirar el loader y ceder un pintado al navegador**, se importa el 3D y se dibuja el arte. Las texturas y shaders se preparan con el canvas oculto. La caída sigue siendo automática, después de la entrada del título y cuando la GPU está lista. En teléfonos lentos la tarjeta puede aparecer un poco más tarde; no se baja su resolución ni se prolonga el loader para esperarla.
 
 - **Ajustes:** `SETTINGS` en `src/components/HeroBadge.tsx`: `design` (`"foto"` con tu retrato o
   `"credencial"` solo tipografía), acabado, metal, gravedad, viento (`breeze`, 0 = quieta), etc.
@@ -150,9 +150,22 @@ MIT + Commons Clause; usa `three`). La librería se carga aparte y prepara textu
   Corrimiento y opacidad: `SHADOW` al principio de `Lanyard.tsx`. La tarjeta no tiene sonido.
 - **Si se pierde el gráfico** (en celulares pasa al ir a otra app, por ejemplo WhatsApp, y volver):
   `HeroBadge.tsx` vuelve a crear la tarjeta sola, así no queda negra.
-- **Entrada sin cortes:** las imágenes se decodifican, las texturas se suben y los shaders se preparan antes de mostrar el canvas. La primera caída no se pausa por scroll restoration/layout; al cambiar de tamaño no se repite trabajo si las medidas son iguales.
+- **Entrada sin cortes:** el arte se pasa como lienzos directamente (sin codificar y decodificar PNG); las texturas se suben por etapas y los shaders se preparan antes de mostrar el canvas. La primera caída no se pausa por scroll restoration/layout; al cambiar de tamaño no se repite trabajo si las medidas son iguales.
 - **Fluidez:** después de la caída inicial, mientras se hace scroll la tarjeta se queda quieta (no se dibuja) y retoma el
-  balanceo al parar. En pantallas de 120/144 Hz se dibuja a ~60–75 cuadros por segundo.
+  balanceo al parar. También cancela los cuadros al salir de pantalla o esconderse la pestaña.
+- **Perfil móvil / GPU por software:** conserva la caída automática, el giro, el arrastre, el viento y la sombra.
+  Usa materiales Phong/Lambert con reflejos de estudio pequeños, en vez de generar un entorno PMREM y
+  calcular clearcoat/normal maps microscópicos en cada cara. Menos subdivisiones de cinta y un objetivo
+  de ~30 fps. En GPU de escritorio se conserva el perfil físico, hasta ~60–75 fps.
+- **Nitidez corregida:** frente y dorso de 1024 × 1440, cinta de 192px y anisotropía hasta 8x en ambos perfiles.
+  El lienzo usa el DPR real de la pantalla hasta 2x, sin el anterior presupuesto que podía bajarlo a 0,65x.
+  El arte ya no se rasteriza a la mitad en celulares. La optimización no se apoya en emborronar la tarjeta.
+  Los acabados opcionales holográfico/metálico mantienen sus materiales completos.
+- **Shader de foil:** solo se inyecta para el acabado holográfico, no para glossy/matte.
+- **Adaptación por capacidad:** se usan tamaño/puntero táctil y, si está disponible, el nombre del renderer
+  gráfico. No hay detección de Lighthouse ni de bots. Si el navegador oculta ese dato, se adapta por pantalla.
+- **Recuperación de contexto:** pausa y oculta el canvas perdido; vuelve a preparar los recursos antes de
+  mostrarlo de nuevo, sin recompilar una tarjeta que todavía esté visible.
 
 ## SEO, favicon y vista previa al compartir
 
@@ -174,12 +187,13 @@ MIT + Commons Clause; usa `three`). La librería se carga aparte y prepara textu
 
 - `npm run build` genera archivos separados (lo que usa Vercel). `npm run build:preview` arma además
   `preview.html` en un solo archivo (`SINGLEFILE=1`).
-- Imágenes de proyectos en WebP, con versión chica `-800.webp` (campo `imageSmall`) para celulares.
+- Imágenes de proyectos en WebP, con versión chica `-800.webp` (campo `imageSmall`) para webs y `offbeat-400.webp` para el teléfono (srcset de 400/720px).
   En celular cada imagen se descarga recién al abrir el proyecto.
-- El formulario de contacto se carga aparte, cuando el navegador queda libre.
+- La precarga automática del formulario de contacto espera a que salga el loader y a un momento libre. Una apertura solicitada por el visitante no espera a esa precarga.
 - La sección de proyectos dibuja solo el diseño de la pantalla actual (paneles en PC, franjas en celular).
 - Transiciones: proyectos en PC 320 ms (contenido estable de ancho para evitar reflow de párrafos), proyectos en celular 280 ms y FAQ 240 ms, con curva de salida rápida y frenada suave. Sin las demoras largas del contenido.
 - La franja de tecnologías se anima con `html.intro-go` al cargar la web, no al entrar en pantalla ni al hacer scroll. Respeta "reducir movimiento".
+- Comparativa y límites de la medición: [INFORME-RENDIMIENTO.md](INFORME-RENDIMIENTO.md).
 - Las puntuaciones de herramientas como Lighthouse dependen del dispositivo y las condiciones de la prueba; no se garantizan valores fijos.
 
 ## Pantalla de carga y logo
@@ -189,7 +203,12 @@ MIT + Commons Clause; usa `three`). La librería se carga aparte y prepara textu
   `loader:start` / `loader-markup:start`), así aparece al instante sin esperar a que cargue nada.
   - Se muestra **cada vez que se carga o recarga la página**.
   - Con "reducir movimiento" activado en el sistema no se muestra.
-  - El título del hero y la credencial esperan a que las franjas empiecen a abrirse (`src/lib/loader.ts`).
+  - La animación arranca tras un primer pintado del fondo (dos `requestAnimationFrame`), no con un reloj que corre desde el `<head>` antes de mostrar el SVG.
+  - El logo se ensambla en ≈1,05 s y queda completo ≈0,4 s antes de empezar a desaparecer, sin alargar la secuencia de cortinas (≈2,65 s desde su arranque).
+  - El título espera a la apertura real de las franjas. Three, el dibujo de las caras y la precarga automática del formulario esperan al final del loader (`src/lib/loader.ts`). La física no avanza mientras se prepara el canvas oculto.
+  - Sin JavaScript no se activa el overlay. Hay salidas de seguridad, limpieza del bloqueo de scroll y cancelación si se activa «reducir movimiento» durante la entrada.
+  - Para comprobar el orden en DevTools: marcas `mr:loader-start`, `mr:loader-open`, `mr:loader-done`, `mr:hero-intro` y `mr:badge-prepare`.
+  - El logo completo no se agrega a «De la idea al deploy»; esa ubicación fue descartada. Los MR del menú, el footer, la tarjeta y los CV no cambian.
 - **Logo MR** en la barra (solo el logo, sin el nombre, en PC y celular): `src/components/LogoMark.tsx`.
   El mismo logo se usa en la **credencial 3D** (detrás del retrato, en el dorso y en la cinta).
   Los trazos están en un solo lugar: `src/lib/logoMR.ts`.
@@ -257,11 +276,16 @@ Alternativa sin GitHub: `npm i -g vercel` y, dentro de la carpeta, `vercel` (y d
 
 - Archivos: `public/cv/Mauricio-Ricotti-CV.pdf` (español) y `public/cv/Mauricio-Ricotti-CV-EN.pdf` (inglés).
   Los botones "Descargar CV" (hero, footer y menú del celular) bajan el del idioma actual (`profile.cvUrl`).
+- **Identidad:** logo MR vectorial, acento del portfolio, Anton + Plus Jakarta Sans y fondo crema. Una hoja A4 por idioma, texto seleccionable, PDF etiquetado y enlaces clicables. No se convierte el CV en una imagen.
+- **Diseño:** `scripts/cv-template.html`. El generador carga el logo desde `src/lib/logoMR.ts` y el color desde `src/index.css`; fuentes, logo y datos quedan embebidos, sin depender de un CDN.
 - Se arman solos con el **mismo contenido de la web** (perfil, proyectos, habilidades, servicios y proceso):
   `scripts/build-cv.mjs`. Si cambiás algo en `content.ts` / `content.en.ts`, regeneralos:
   ```bash
   npm i --no-save playwright && npx playwright install chromium   # solo la primera vez
   npm run cv
   ```
+- El generador comprueba ambos idiomas antes de reemplazar los PDF y falla si el contenido se recorta o se superpone. Si agregás mucho texto, ajustá la plantilla o revisá la extensión del contenido.
+- Cada generación actualiza automáticamente el `?v=` de `profile.cvUrl` en `content.ts` / `content.en.ts` con un hash del PDF: evita descargar una copia vieja de la caché.
+- `CV_HTML=1 npm run cv` guarda también HTML autónomos junto a los PDF para revisar el diseño (ES/EN).
 - Formación e idiomas extra: completalos arriba de todo en `scripts/build-cv.mjs` (bloque `EXTRA`).
-- ¿Preferís usar tu propio CV? Reemplazá los PDF por los tuyos con el mismo nombre.
+- ¿Preferís usar tu propio CV? Reemplazá los PDF por los tuyos con el mismo nombre y cambiá el `?v=` en `profile.cvUrl` de ambos idiomas (por ejemplo, `?v=personal-2026-11`). No corras `npm run cv` después, porque vuelve a generar los PDF con el contenido de la web.

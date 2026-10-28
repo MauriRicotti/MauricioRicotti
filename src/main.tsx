@@ -4,25 +4,23 @@ import "@fontsource-variable/plus-jakarta-sans";
 import "./index.css";
 import App from "./App";
 import { LangProvider } from "./i18n";
-import { loaderDelay } from "./lib/loader";
+import { markHeroIntro, whenLoaderOpens } from "./lib/loader";
 
-// Animación de entrada: arranca cuando la tipografía del título ya cargó
-// (si no, se animaría con las letras todavía invisibles). Máximo 1,5 s de espera.
-// Si se está mostrando la pantalla de carga, espera a que empiece a abrirse.
+// La fuente tiene como máximo 1,5 s de espera. El título arranca al abrirse
+// realmente la cortina; la tarjeta no compite con el logo mientras se arma.
 {
   const root = document.documentElement;
   let started = false;
   const go = () => {
     if (started) return;
     started = true;
-    setTimeout(
-      () =>
-        requestAnimationFrame(() => {
-          root.classList.remove("intro-wait");
-          root.classList.add("intro-go");
-        }),
-      loaderDelay(),
-    );
+    void whenLoaderOpens().then(() => {
+      requestAnimationFrame(() => {
+        root.classList.remove("intro-wait");
+        root.classList.add("intro-go");
+        markHeroIntro();
+      });
+    });
   };
   document.fonts?.load('400 1em "Anton"').then(go, go);
   setTimeout(go, 1500);
