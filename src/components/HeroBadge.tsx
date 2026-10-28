@@ -5,8 +5,8 @@ import type { BadgeArt, BadgeDesign, BadgeTexts } from "../lib/badgeArt";
 /**
  * Credencial 3D colgante del hero (Lanyard de React Bits).
  *
- * - Se carga DESPUÉS de la animación del título: la librería 3D (three.js) baja
- *   en paralelo, así que no frena la primera carga de la página.
+ * - La librería 3D baja en paralelo. Se prepara oculta durante la entrada y la
+ *   caída arranca después del título, con texturas y shaders ya listos.
  * - Cuelga sobre el lado derecho del título, desde arriba de la pantalla. Su lienzo
  *   cubre TODO el hero (así, al estirarla, solo se corta en el borde de la pantalla)
  *   y va por delante de todo, pero deja pasar los clics: solo atrapa el puntero
@@ -40,7 +40,7 @@ const SETTINGS = {
 export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [art, setArt] = useState<BadgeArt | null>(null);
-  const [show, setShow] = useState(false);
+  const revealAt = useRef(0);
   const [box, setBox] = useState({
     ready: false,
     size: 0.3,
@@ -77,11 +77,11 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
     };
   }, []);
 
-  // Espera a que termine la entrada del título; mientras, baja three.js en paralelo
+  // Prepara el WebGL durante el loader, pero NO inicia la física hasta esta hora.
+  // Así no compila shaders ni sube texturas cuando la tarjeta ya está cayendo.
   useEffect(() => {
-    import("./Lanyard");
-    const t = window.setTimeout(() => setShow(true), 1300 + loaderDelay());
-    return () => clearTimeout(t);
+    revealAt.current = performance.now() + 1300 + loaderDelay();
+    void import("./Lanyard");
   }, []);
 
   // Dibuja el arte (y lo vuelve a dibujar si cambia el idioma)
@@ -147,7 +147,7 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
       // en línea también: si el CSS no carga, la tarjeta no tapa la página
       style={{ position: "absolute", inset: 0 }}
     >
-      {show && art && box.ready && (
+      {art && box.ready && (
         <Suspense fallback={null}>
           <Lanyard
             key={gen}
@@ -162,6 +162,7 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
             size={box.size}
             passThrough
             intro={gen === 0}
+            revealAt={gen === 0 ? revealAt.current : 0}
             interactive
             finish={SETTINGS.finish}
             metal={SETTINGS.metal}

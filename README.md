@@ -133,7 +133,7 @@ No cambian: la maqueta de la app OffBeat (`PhoneFrame.tsx`, tiene sus propios co
 ## Credencial 3D del hero
 
 Tarjeta colgante interactiva (componente **Lanyard** de [React Bits](https://reactbits.dev), licencia
-MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación del título.
+MIT + Commons Clause; usa `three`). La librería se carga aparte y prepara texturas y shaders oculta durante el loader; la caída empieza después de la animación del título, cuando la GPU ya está lista.
 
 - **Ajustes:** `SETTINGS` en `src/components/HeroBadge.tsx`: `design` (`"foto"` con tu retrato o
   `"credencial"` solo tipografía), acabado, metal, gravedad, viento (`breeze`, 0 = quieta), etc.
@@ -150,7 +150,8 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
   Corrimiento y opacidad: `SHADOW` al principio de `Lanyard.tsx`. La tarjeta no tiene sonido.
 - **Si se pierde el gráfico** (en celulares pasa al ir a otra app, por ejemplo WhatsApp, y volver):
   `HeroBadge.tsx` vuelve a crear la tarjeta sola, así no queda negra.
-- **Fluidez:** mientras se hace scroll la tarjeta se queda quieta (no se dibuja) y retoma el
+- **Entrada sin cortes:** las imágenes se decodifican, las texturas se suben y los shaders se preparan antes de mostrar el canvas. La primera caída no se pausa por scroll restoration/layout; al cambiar de tamaño no se repite trabajo si las medidas son iguales.
+- **Fluidez:** después de la caída inicial, mientras se hace scroll la tarjeta se queda quieta (no se dibuja) y retoma el
   balanceo al parar. En pantallas de 120/144 Hz se dibuja a ~60–75 cuadros por segundo.
 
 ## SEO, favicon y vista previa al compartir
@@ -159,8 +160,10 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
   De ahí salen la URL canónica, la imagen al compartir (`og:image`), `sitemap.xml` y `robots.txt`
   (se generan solos al compilar; ver el plugin `seo` en `vite.config.ts`).
   En Vercel también podés cargarla en *Settings → Environment Variables*.
-- **Etiquetas:** título, descripción, Open Graph (WhatsApp, LinkedIn, Facebook, Discord), Twitter/X y datos
-  estructurados de Google (persona + profesión) están en `index.html`.
+- **HTML completo:** `vite.config.ts` pre-renderiza el mismo React de la interfaz durante el build (`src/entry-server.tsx`), tanto para `/` como para `/en`. No hace falta ejecutar JavaScript para que el contenido exista en el HTML. El cliente usa `hydrateRoot` para hacerlo interactivo.
+- **Etiquetas y datos estructurados:** `src/lib/seo.ts` comparte títulos/descripciones de `content.ts` y `content.en.ts`, canonical, Open Graph y JSON-LD (`Person` + `WebSite` + `ProfilePage`). El cambio de idioma actualiza los metadatos sin recargar.
+- **Search Console:** ver [GUIA-SEO-SEARCH-CONSOLE.md](GUIA-SEO-SEARCH-CONSOLE.md). La etiqueta se agrega en el HTML de build al configurar `GOOGLE_SITE_VERIFICATION` (solo el valor de `content`, no la etiqueta completa). Sin valor no se emite ninguna etiqueta falsa.
+- **Comprobación:** `npm run check` valida TypeScript, compila y prueba ambos HTML, metadatos, recursos, sitemap, enlaces e IDs. No verifica propiedad ni solicita indexación en Google: eso se hace desde tu cuenta.
 - **Imagen al compartir:** `public/og-image.jpg` (1200×630). Reemplazala por otra del mismo tamaño si querés.
 - **Favicon (logo MR):** `public/favicon.ico` (16 a 256 px), `apple-touch-icon.png`, `icon-192.png`,
   `icon-512.png`, `icon-maskable-512.png` y `site.webmanifest`.
@@ -175,13 +178,14 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
   En celular cada imagen se descarga recién al abrir el proyecto.
 - El formulario de contacto se carga aparte, cuando el navegador queda libre.
 - La sección de proyectos dibuja solo el diseño de la pantalla actual (paneles en PC, franjas en celular).
-- Lighthouse (local): celular 98 · 100 · 100 · 100 — PC 100 · 100 · 100 · 100
-  (rendimiento · accesibilidad · buenas prácticas · SEO).
+- Transiciones: proyectos en PC 320 ms (contenido estable de ancho para evitar reflow de párrafos), proyectos en celular 280 ms y FAQ 240 ms, con curva de salida rápida y frenada suave. Sin las demoras largas del contenido.
+- La franja de tecnologías se anima con `html.intro-go` al cargar la web, no al entrar en pantalla ni al hacer scroll. Respeta "reducir movimiento".
+- Las puntuaciones de herramientas como Lighthouse dependen del dispositivo y las condiciones de la prueba; no se garantizan valores fijos.
 
 ## Pantalla de carga y logo
 
 - **Pantalla de carga** (al entrar a la web): el logo MAURTTI se arma pieza por pieza y la pantalla
-  se va en franjas verticales (negras y después turquesas, como una ola; ≈2,5 s). Está **dentro de `index.html`** (bloques
+  se va en franjas verticales (negras y después rojas, como una ola; ≈2,5 s). Está **dentro de `index.html`** (bloques
   `loader:start` / `loader-markup:start`), así aparece al instante sin esperar a que cargue nada.
   - Se muestra **cada vez que se carga o recarga la página**.
   - Con "reducir movimiento" activado en el sistema no se muestra.
@@ -189,7 +193,7 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
 - **Logo MR** en la barra (solo el logo, sin el nombre, en PC y celular): `src/components/LogoMark.tsx`.
   El mismo logo se usa en la **credencial 3D** (detrás del retrato, en el dorso y en la cinta).
   Los trazos están en un solo lugar: `src/lib/logoMR.ts`.
-  Con el mouse encima, el borde y las letras se ponen turquesa.
+  Con el mouse encima, el borde y las letras se ponen rojas.
 - **Favicon e íconos:** `public/favicon.ico` (el de la pestaña), `apple-touch-icon.png`, `icon-192.png`,
   `icon-512.png`, `icon-maskable-512.png` (todos con el logo MR). Si los cambiás, subí el número
   `?v=3` de los enlaces en `index.html` (y en `site.webmanifest`) para que los navegadores no usen el viejo.
@@ -215,7 +219,7 @@ El footer está "detrás" del contenido y queda pegado con `position: sticky` (`
 ```
 
 - `--fh` es el alto real del footer; lo mide un `ResizeObserver` en `Footer.tsx` (sin JS, el footer se ve normal).
-- `<main>` (en `App.tsx`) va por encima: `relative z-10` con fondo, esquinas inferiores redondeadas y sombra. Al llegar abajo, la página se "levanta" y descubre el footer.
+- `<main>` (en `App.tsx`) va por encima: `relative z-10` con fondo, esquinas inferiores redondeadas, borde inferior gris claro sutil de 1 px y sombra. Al llegar abajo, la página se "levanta" y descubre el footer. El borde distingue FAQ y footer sin alterar el reveal nativo.
 - Todo lo resuelve el navegador al hacer scroll (no hay listeners de scroll ni `requestAnimationFrame`), así que no hay tirones.
 - Si el footer es más alto que la pantalla, queda fijo arriba hasta descubrirse y después acompaña el scroll normal.
 - Extra opcional (solo navegadores con `animation-timeline: scroll()` y sin `prefers-reduced-motion`): el contenido sube apenas y se aclara mientras se descubre (`.footer-inner` / keyframes `footer-rise`). En el resto queda solo el reveal, igual de fluido.
@@ -244,8 +248,8 @@ Alternativa sin GitHub: `npm i -g vercel` y, dentro de la carpeta, `vercel` (y d
 - `content.en.ts` solo tiene los **textos**: fotos, links, email, WhatsApp y redes se toman de `content.ts`.
   Si cambiás un texto en español, actualizá también su traducción.
 - Los textos chicos de la interfaz (botones, etiquetas, mensajes del formulario) están en el bloque `ui` de cada archivo.
-- Al compilar se genera `dist/en/index.html` con título, descripción y vista previa al compartir en inglés,
-  y `sitemap.xml` incluye las dos versiones (con `hreflang` para Google). `vercel.json` sirve `/en` con esa página.
+- Al compilar se genera `dist/en/index.html` con TODO el contenido en inglés y sus metadatos,
+  y `sitemap.xml` incluye las dos versiones (con `hreflang` para Google). `vercel.json` sirve `/en` con esa página y redirige variantes duplicadas. El preview de Vite también sirve la ruta `/en` correctamente.
 - Los mensajes del formulario te llegan en español; si la persona escribió desde la versión en inglés,
   el asunto empieza con **[EN]** y se agrega el campo "Idioma".
 

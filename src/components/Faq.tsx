@@ -4,7 +4,7 @@ import WanderingEyes, { type WanderingEyesHandle } from "./WanderingEyes";
 import { useLang } from "../i18n";
 import { sound } from "../lib/sound";
 
-const EASE = "ease-[cubic-bezier(0.65,0,0.25,1)]";
+const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 export default function Faq({ onOpenContact }: { onOpenContact: () => void }) {
   const { faqs, faqSection } = useLang().c;
@@ -54,7 +54,9 @@ export default function Faq({ onOpenContact }: { onOpenContact: () => void }) {
                   <button
                     type="button"
                     onClick={() => toggle(i)}
+                    id={`faq-trigger-${i}`}
                     aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${i}`}
                     className="group w-full flex items-start gap-4 sm:gap-6 py-5 sm:py-6 text-left cursor-pointer"
                   >
                     <span
@@ -76,7 +78,7 @@ export default function Faq({ onOpenContact }: { onOpenContact: () => void }) {
                       {f.q}
                     </span>
                     <span
-                      className={`w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-[transform,background-color,color,border-color] duration-300 ${
+                      className={`w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-[transform,background-color,color,border-color] duration-200 ${
                         isOpen
                           ? "rotate-45 bg-accent border-accent text-[#0e0f12]"
                           : "border-white/15 text-neutral-400 group-hover:border-white/40"
@@ -86,7 +88,10 @@ export default function Faq({ onOpenContact }: { onOpenContact: () => void }) {
                     </span>
                   </button>
                   <div
-                    className={`grid transition-[grid-template-rows] duration-400 ${EASE} ${
+                    id={`faq-answer-${i}`}
+                    role="region"
+                    aria-labelledby={`faq-trigger-${i}`}
+                    className={`grid transition-[grid-template-rows] duration-[240ms] ${EASE} ${
                       isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                     }`}
                   >

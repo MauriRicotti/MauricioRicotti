@@ -49,7 +49,7 @@ export default function Hero({ profile, onOpenContact }: HeroProps) {
       <div className="relative w-full max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 lg:flex-1 lg:flex lg:flex-col lg:justify-center">
         <div className="hero-wrap mb-8 sm:mb-10 lg:mb-[clamp(2.5rem,7svh,5rem)]">
           {/* Tamaño fluido: ocupa casi todo el ancho en celulares, con tope de 12.2rem en escritorio */}
-          <HeroTitle role={profile.role} roll={profile.roleRoll} />
+          <HeroTitle name={profile.name} role={profile.role} roll={profile.roleRoll} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 xl:grid-cols-[1fr_1fr_auto] gap-6 sm:gap-8 lg:gap-x-12 xl:gap-x-16 items-start pb-2">

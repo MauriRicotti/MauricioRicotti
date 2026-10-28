@@ -161,9 +161,14 @@ export default function Header({
             {navLinks.map((link) => {
               const on = link.id === active;
               return (
-                <button
+                <a
                   key={link.id}
-                  onClick={() => handleNav(link.id)}
+                  href={`#${link.id}`}
+                  onClick={(e) => {
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                    e.preventDefault();
+                    handleNav(link.id);
+                  }}
                   aria-current={on ? "true" : undefined}
                   className={`group/link relative py-1.5 text-sm font-medium whitespace-nowrap cursor-pointer rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
                     on ? "text-white" : "text-white/65 hover:text-white"
@@ -179,7 +184,7 @@ export default function Header({
                         : "scale-x-0 bg-white group-hover/link:scale-x-100"
                     }`}
                   />
-                </button>
+                </a>
               );
             })}
           </nav>
@@ -192,19 +197,25 @@ export default function Header({
               className="hidden md:flex items-center h-9 p-1 rounded-full border border-white/20 font-mono text-[11px]"
             >
               {(["es", "en"] as const).map((l) => (
-                <button
+                <a
                   key={l}
+                  href={l === "en" ? "/en" : "/"}
+                  hrefLang={l}
                   lang={l}
-                  onClick={() => changeLang(l)}
-                  aria-pressed={lang === l}
-                  className={`h-full px-2.5 rounded-full uppercase tracking-wider transition-colors cursor-pointer ${
+                  onClick={(e) => {
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                    e.preventDefault();
+                    changeLang(l);
+                  }}
+                  aria-current={lang === l ? "page" : undefined}
+                  className={`inline-flex items-center justify-center h-full px-2.5 rounded-full uppercase tracking-wider transition-colors cursor-pointer ${
                     lang === l
                       ? "bg-[#f2ede4] text-[#0e0f12]"
                       : "text-white/65 hover:text-white"
                   }`}
                 >
                   {l}
-                </button>
+                </a>
               ))}
             </div>
 
@@ -288,9 +299,14 @@ export default function Header({
         >
           <nav className="px-6 pt-4">
             {navLinks.map((link, i) => (
-              <button
+              <a
                 key={link.id}
-                onClick={() => handleNav(link.id)}
+                href={`#${link.id}`}
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                  e.preventDefault();
+                  handleNav(link.id);
+                }}
                 aria-current={link.id === active ? "true" : undefined}
                 className="w-full flex items-center gap-4 py-3.5 text-left cursor-pointer group"
               >
@@ -316,7 +332,7 @@ export default function Header({
                   size={22}
                   className="ml-auto text-[#0e0f12]/40 group-active:text-[#0e0f12] transition-colors"
                 />
-              </button>
+              </a>
             ))}
           </nav>
 
@@ -352,19 +368,25 @@ export default function Header({
               className="flex items-center h-10 p-1 rounded-full border-2 border-[#0e0f12] font-mono text-xs font-semibold"
             >
               {(["es", "en"] as const).map((l) => (
-                <button
+                <a
                   key={l}
+                  href={l === "en" ? "/en" : "/"}
+                  hrefLang={l}
                   lang={l}
-                  onClick={() => changeLang(l)}
-                  aria-pressed={lang === l}
-                  className={`h-full px-3.5 rounded-full uppercase tracking-wider transition-colors ${
+                  onClick={(e) => {
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                    e.preventDefault();
+                    changeLang(l);
+                  }}
+                  aria-current={lang === l ? "page" : undefined}
+                  className={`inline-flex items-center justify-center h-full px-3.5 rounded-full uppercase tracking-wider transition-colors ${
                     lang === l
                       ? "bg-[#0e0f12] text-[#f2ede4]"
                       : "text-[#0e0f12]/60 active:bg-[#0e0f12]/10"
                   }`}
                 >
                   {l}
-                </button>
+                </a>
               ))}
             </div>
           </div>

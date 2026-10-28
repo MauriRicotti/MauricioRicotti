@@ -1,5 +1,5 @@
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import "@fontsource-variable/plus-jakarta-sans";
 import "./index.css";
 import App from "./App";
@@ -28,10 +28,16 @@ import { loaderDelay } from "./lib/loader";
   setTimeout(go, 1500);
 }
 
-createRoot(document.getElementById("root")!).render(
+const container = document.getElementById("root")!;
+const app = (
   <StrictMode>
     <LangProvider>
       <App />
     </LangProvider>
-  </StrictMode>,
+  </StrictMode>
 );
+
+// Producción sirve el contenido completo ya renderizado; React solo lo hace interactivo.
+// El preview en un único archivo y el servidor de desarrollo siguen usando createRoot.
+if (container.dataset.prerendered === "true") hydrateRoot(container, app);
+else createRoot(container).render(app);

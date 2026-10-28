@@ -241,7 +241,7 @@
   .bio-accent { animation: none; }
 }
 
-/* Palabra del h1 solo con borde (sin relleno) */
+/* DEVELOPER: relleno rojo, borde y reflejo ocasional. */
 .hero-outline {
   color: var(--color-accent);
   -webkit-text-stroke: max(1.5px, 0.009em) var(--color-accent);
@@ -305,6 +305,8 @@
   }
 }
 .work-wrap .work-panels {
+  /* Ancho final del contenido: no recalcula los párrafos en cada cuadro al abrir. */
+  --panel-open: calc(100cqw - var(--closed) * (var(--panel-closed) + 12px) - 2px);
   height: clamp(
     460px,
     calc(
@@ -313,6 +315,10 @@
     ),
     800px
   );
+}
+
+.work-panel-content {
+  width: var(--panel-open);
 }
 
 /* Marco de teléfono (apps de celular): referencia para las unidades cqw de la pantalla */
@@ -379,23 +385,15 @@
   animation: step-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-/* ── Banner de tecnologías: animación de entrada ──────────────────────────
-   Solo la franja se desliza desde el borde izquierdo (con las tecnologías
-   adentro, quietas). Una sola vez por carga de la página (TechStack.tsx
-   agrega "is-in").
-   Solo transform y opacity: el navegador las mueve sin redibujar la página.
-   Para quitarla: borra este bloque (y el useEffect de TechStack.tsx). */
+/* ── Banner de tecnologías: solo al cargar la web ─────────────────────────
+   Usa la misma clase intro-go del hero. Se ejecuta aunque esté debajo del pliegue;
+   no hay IntersectionObserver ni listener de scroll que vuelva a dispararla. */
 .tech-label {
   transform: rotate(var(--tilt, 0deg));
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* Franja */
-  .tech-anim:not(.is-in) .tech-band {
-    transform: translateX(-101%);
-  }
-  .tech-anim.is-in .tech-band {
-    animation: tech-band 0.8s cubic-bezier(0.65, 0, 0.35, 1) var(--base, 0s)
-      backwards;
+  html.intro-go .tech-band {
+    animation: tech-band 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.8s backwards;
   }
 }
 @keyframes tech-band {

@@ -6,8 +6,6 @@
  *  Para personalizar el portfolio con tus datos, editá solo esto:
  *  no hace falta tocar los componentes.
  *
- *  ⚠️ Los textos actuales son DE EJEMPLO. Reemplazalos por los tuyos.
- *
  *  🌐 VERSIÓN EN INGLÉS: está en content.en.ts. Si cambiás un texto acá,
  *     cambiá también su traducción allá. Las fotos, links y datos de contacto
  *     se toman de este archivo (no hace falta repetirlos).
@@ -47,7 +45,7 @@ export const profile: Profile = {
   ],
   socials: [
     { label: "Email", url: "mailto:ricottim4@gmail.com" },
-    { label: "GitHub", url: "https://github.com/tu-usuario" },
+    { label: "GitHub", url: "https://github.com/MauriRicotti" },
     { label: "WhatsApp", url: "https://wa.me/5491141948773" },
     { label: "Instagram", url: "https://www.instagram.com/mauri._r" },
   ],
@@ -455,9 +453,9 @@ export const footer = {
 /*  9. SEO — título y descripción de la pestaña (por idioma)          */
 /* ------------------------------------------------------------------ */
 export const seo = {
-  title: "Mauricio Ricotti | Full Stack Developer",
+  title: "Mauricio Ricotti | Desarrollador web Full Stack",
   description:
-    "Portfolio de Mauricio Ricotti, Full Stack Developer en Buenos Aires, Argentina. Desarrollo sitios y aplicaciones web rápidas con React, TypeScript y Node.js.",
+    "Desarrollador web Full Stack en Florencio Varela, Buenos Aires. Sitios y aplicaciones con React y Node.js. Conocé mis proyectos y pedí tu presupuesto.",
 };
 
 /* ------------------------------------------------------------------ */

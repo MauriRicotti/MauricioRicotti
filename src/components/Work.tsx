@@ -1,6 +1,7 @@
 import {
   memo,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -18,7 +19,7 @@ interface WorkProps {
   projects: Project[];
 }
 
-const EASE = "ease-[cubic-bezier(0.65,0,0.25,1)]";
+const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 const num = (i: number) => String(i + 1).padStart(2, "0");
 
 /* ---------- Partes compartidas ---------- */
@@ -205,7 +206,7 @@ const DesktopPanel = memo(function DesktopPanel({
   return (
     <article
       style={{ flexBasis: "var(--panel-closed)", contain: "layout paint" }}
-      className={`relative shrink-0 overflow-hidden rounded-xl border transition-[flex-grow,border-color,background-color] duration-500 ${EASE} ${
+      className={`relative shrink-0 overflow-hidden rounded-xl border transition-[flex-grow,border-color,background-color] duration-[320ms] ${EASE} ${
         open
           ? "grow border-white/20 bg-[#14151b]"
           : "grow-0 border-white/10 bg-[#111216] hover:border-white/30 hover:bg-[#15161c]"
@@ -216,9 +217,10 @@ const DesktopPanel = memo(function DesktopPanel({
         type="button"
         onClick={() => onOpen(i)}
         aria-expanded={open}
+        aria-controls={`work-desktop-${p.id}`}
         tabIndex={open ? -1 : 0}
-        className={`group absolute inset-0 flex flex-col items-center justify-between py-6 cursor-pointer transition-opacity duration-200 ${
-          open ? "opacity-0 pointer-events-none" : "opacity-100 delay-200"
+        className={`group absolute inset-0 flex flex-col items-center justify-between py-6 cursor-pointer transition-opacity duration-150 ${
+          open ? "opacity-0 pointer-events-none" : "opacity-100 delay-100"
         }`}
       >
         <span className="flex flex-col items-center gap-2">
@@ -249,11 +251,12 @@ const DesktopPanel = memo(function DesktopPanel({
 
       {/* Abierta: app de celular (teléfono + info) o web (captura en marco de navegador + info) */}
       <div
+        id={`work-desktop-${p.id}`}
         inert={!open}
-        className={`absolute inset-0 flex flex-col p-3 transition-opacity ${
+        className={`work-panel-content absolute inset-0 flex flex-col p-3 transition-opacity ${
           open
-            ? "opacity-100 duration-300 delay-[260ms]"
-            : "opacity-0 duration-150 pointer-events-none"
+            ? "opacity-100 duration-200 delay-[60ms]"
+            : "opacity-0 duration-100 pointer-events-none"
         }`}
       >
         {p.type === "mobile" ? (
@@ -327,7 +330,7 @@ const MobileRow = memo(function MobileRow({
   return (
     <article
       ref={ref}
-      className={`rounded-xl border transition-colors duration-300 ${
+      className={`rounded-xl border transition-colors duration-200 ${
         open ? "border-white/20 bg-[#14151b]" : "border-white/10 bg-[#111216]"
       }`}
     >
@@ -335,6 +338,7 @@ const MobileRow = memo(function MobileRow({
         type="button"
         onClick={() => onToggle(i, ref.current)}
         aria-expanded={open}
+        aria-controls={`work-mobile-${p.id}`}
         className="w-full flex items-center gap-4 px-4 sm:px-6 py-4 text-left cursor-pointer"
       >
         <span
@@ -357,7 +361,7 @@ const MobileRow = memo(function MobileRow({
           {p.year ? ` · ${p.year}` : ""}
         </span>
         <span
-          className={`ml-auto sm:ml-0 w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-[transform,background-color,color,border-color] duration-300 ${
+          className={`ml-auto sm:ml-0 w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-[transform,background-color,color,border-color] duration-200 ${
             open
               ? "rotate-45 bg-accent border-accent text-[#0e0f12]"
               : "border-white/15 text-neutral-400"
@@ -368,7 +372,8 @@ const MobileRow = memo(function MobileRow({
       </button>
 
       <div
-        className={`grid transition-[grid-template-rows] duration-500 ${EASE} ${
+        id={`work-mobile-${p.id}`}
+        className={`grid transition-[grid-template-rows] duration-[280ms] ${EASE} ${
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
@@ -434,6 +439,13 @@ const subscribeDesktop = (cb: () => void) => {
   return () => mq.removeEventListener("change", cb);
 };
 const getDesktop = () => window.matchMedia(DESKTOP_MQ).matches;
+const REDUCED_MQ = "(prefers-reduced-motion: reduce)";
+const subscribeReduced = (cb: () => void) => {
+  const mq = window.matchMedia(REDUCED_MQ);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
+const getReduced = () => window.matchMedia(REDUCED_MQ).matches;
 
 export default function Work({ projects }: WorkProps) {
   const { workSection } = useLang().c;
@@ -443,7 +455,7 @@ export default function Work({ projects }: WorkProps) {
   const isDesktop = useSyncExternalStore(
     subscribeDesktop,
     getDesktop,
-    () => true,
+    () => null,
   );
   const count = projects.length;
 
@@ -451,13 +463,9 @@ export default function Work({ projects }: WorkProps) {
      La barra de progreso de la tarjeta abierta se llena y al terminar pasa a la siguiente.
      Se pausa (vía CSS, sin volver a dibujar la sección) con el mouse encima,
      cuando la sección no está en pantalla o la pestaña está oculta. */
-  const [autoplayMs] = useState(() => {
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const ms = (workSection.autoplaySeconds ?? 0) * 1000;
-    return reduced || count < 2 ? 0 : ms;
-  });
+  // Snapshot de servidor estable: evita diferencias de hidratación si el SO reduce movimiento.
+  const reduced = useSyncExternalStore(subscribeReduced, getReduced, () => false);
+  const autoplayMs = reduced || count < 2 ? 0 : (workSection.autoplaySeconds ?? 0) * 1000;
   const panelsRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -500,7 +508,13 @@ export default function Work({ projects }: WorkProps) {
     setOpenIdx(i);
   }, []);
 
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (scrollTimer.current) clearTimeout(scrollTimer.current);
+  }, []);
+
   const toggleMobile = useCallback((i: number, el: HTMLElement | null) => {
+    if (scrollTimer.current) clearTimeout(scrollTimer.current);
     const nextIdx = openRef.current === i ? -1 : i;
     setOpenIdx(nextIdx);
     if (nextIdx < 0) {
@@ -509,11 +523,11 @@ export default function Work({ projects }: WorkProps) {
     }
     sound.playPop(480);
     // Si al cerrarse otra tarjeta la elegida quedó fuera de vista, la acomoda
-    setTimeout(() => {
-      if (!el) return;
+    scrollTimer.current = setTimeout(() => {
+      if (!el || openRef.current !== i) return;
       const top = el.getBoundingClientRect().top;
       if (top < 80) window.scrollBy({ top: top - 90, behavior: "smooth" });
-    }, 520);
+    }, 290);
   }, []);
 
   return (
@@ -529,8 +543,8 @@ export default function Work({ projects }: WorkProps) {
         </div>
 
         {/* ===== Escritorio: paneles verticales ===== */}
-        {isDesktop ? (
-          <div className="work-wrap">
+        {isDesktop !== false && (
+          <div className="work-wrap hidden lg:block">
             <div
               ref={panelsRef}
               className="work-panels flex gap-3"
@@ -549,9 +563,10 @@ export default function Work({ projects }: WorkProps) {
               ))}
             </div>
           </div>
-        ) : (
-          /* ===== Celular y tablet: franjas apiladas ===== */
-          <div className="flex flex-col gap-3">
+        )}
+        {/* ===== Celular y tablet: franjas apiladas ===== */}
+        {isDesktop !== true && (
+          <div className="flex flex-col gap-3 lg:hidden">
             {projects.map((p, i) => (
               <MobileRow
                 key={p.id}

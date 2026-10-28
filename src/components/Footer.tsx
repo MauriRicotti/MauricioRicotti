@@ -166,8 +166,11 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
               <ul className="space-y-2.5">
                 {navLinks.map((link) => (
                   <li key={link.id}>
-                    <button
-                      onClick={() => {
+                    <a
+                      href={`#${link.id}`}
+                      onClick={(e) => {
+                        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                        e.preventDefault();
                         sound.playClick();
                         if (link.id === "contact") onOpenContact();
                         else scrollToId(link.id);
@@ -175,7 +178,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
                       className="text-neutral-300 hover:text-white transition-colors cursor-pointer"
                     >
                       {link.label}
-                    </button>
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -192,7 +195,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
                       <a
                         href={s.url}
                         {...(s.url.startsWith("http")
-                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          ? { target: "_blank", rel: "me noopener noreferrer" }
                           : {})}
                         onClick={() => sound.playClick()}
                         className="group inline-flex items-center gap-2.5 text-neutral-300 hover:text-white transition-colors"

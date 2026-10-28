@@ -44,7 +44,7 @@ export default function App() {
 
       {/* main va por encima del footer (que queda detrás, "pegado"): esquinas de abajo
           redondeadas y una sombra, para que se vea cómo la página se levanta */}
-      <main className="relative z-10 bg-[#0e0f12] overflow-clip rounded-b-[32px] sm:rounded-b-[56px] shadow-[0_24px_48px_rgba(0,0,0,0.55)]">
+      <main className="relative z-10 bg-[#0e0f12] overflow-clip rounded-b-[32px] sm:rounded-b-[56px] border-b border-[#d9dde5]/25 shadow-[0_24px_48px_rgba(0,0,0,0.55)]">
         <Hero profile={profile} onOpenContact={openContact} />
         <TechStack title={techStackTitle} groups={techStack} />
         <Work projects={projects} />

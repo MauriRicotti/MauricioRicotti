@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import type { TechGroup } from "../types";
 import { techIcons } from "../lib/techIcons";
 
@@ -26,60 +26,11 @@ function colorOnLight(hex: string): string {
 }
 
 export default function TechStack({ title, groups }: TechStackProps) {
-  const ref = useRef<HTMLElement>(null);
-
-  // Animación de entrada: una sola vez por carga de la página (como la del título).
-  // Cuando la sección entra en pantalla, la franja se desliza desde el borde (solo transform).
-  // Las tecnologías (etiquetas y pastillas) llegan quietas, junto con la franja: no tienen
-  // animación propia. El movimiento lo hace el CSS (index.css → "tech-anim"); acá solo se
-  // agrega la clase "is-in".
-  useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
-    if (
-      !("IntersectionObserver" in window) ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      root.classList.add("is-in");
-      return;
-    }
-
-    const html = document.documentElement;
-    const timers: number[] = [];
-
-    const begin = () => {
-      // Si se ve recién cargada la página, espera a que termine la entrada del título
-      const delay = performance.now() < 2500 ? 800 : 0;
-      root.style.setProperty("--base", `${delay}ms`);
-      root.classList.add("is-in");
-    };
-
-    const sectionIO = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting)) return;
-        sectionIO.disconnect();
-        // Espera (máx. ~2 s) a que arranque la animación del título
-        let tries = 0;
-        const ready = () => {
-          if (html.classList.contains("intro-wait") && tries++ < 20)
-            timers.push(window.setTimeout(ready, 100));
-          else begin();
-        };
-        ready();
-      },
-      { threshold: 0.1 },
-    );
-    sectionIO.observe(root);
-
-    return () => {
-      sectionIO.disconnect();
-      timers.forEach(clearTimeout);
-    };
-  }, []);
+  // La franja comparte el reloj de entrada del hero (html.intro-go).
+  // No espera a entrar en pantalla: al hacer scroll ya está en su posición final.
 
   return (
     <section
-      ref={ref}
       id="stack"
       aria-label={title}
       className="tech-anim bg-[#0e0f12] pb-2 sm:pb-4 overflow-hidden"

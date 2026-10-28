@@ -1,5 +1,5 @@
 import type React from "react";
-import { Fragment, useEffect, useLayoutEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { loaderDelay } from "../lib/loader";
 
 /**
@@ -29,9 +29,11 @@ function fillLetters(el: HTMLElement, word: string) {
 
 export default function HeroTitle({
   role,
+  name,
   roll = [],
 }: {
   role: string;
+  name: string;
   roll?: string[];
 }) {
   const words = role.trim().split(/\s+/);
@@ -53,19 +55,8 @@ export default function HeroTitle({
   const outRef = useRef<HTMLSpanElement>(null);
   const key = role + "|" + roll.join("|");
 
-  // Letras iniciales (antes de pintar: sin parpadeo)
-  useLayoutEffect(() => {
-    slots.current.forEach((slot, i) => {
-      if (!slot) return;
-      slot.textContent = "";
-      const layer = document.createElement("span");
-      layer.className = "hero-roll-layer";
-      fillLetters(layer, words[i] ?? "");
-      slot.appendChild(layer);
-    });
-    if (outRef.current) fillLetters(outRef.current, last);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  // Las letras iniciales ya vienen renderizadas en el HTML. El rodillo posterior
+  // solo reemplaza sus capas, sin dejar un hero vacío antes de hidratar React.
 
   useEffect(() => {
     const h1 = h1Ref.current;
@@ -173,12 +164,12 @@ export default function HeroTitle({
       className="hero-title font-hero font-black uppercase tracking-tight leading-[0.88] text-[#f2ede4] text-left"
     >
       {/* Texto real (lectores de pantalla y Google) */}
-      <span className="sr-only">{role}</span>
+      <span className="sr-only">{name} — {role}</span>
       {/* Versión visual animada. Celular: una palabra por línea. Escritorio: "FULL STACK"
-          arriba a la izquierda y "DEVELOPER" abajo a la derecha, solo con contorno. */}
+          arriba a la izquierda y "DEVELOPER" rojo abajo a la derecha. */}
       <span aria-hidden="true" key={key}>
         <span className="sm:whitespace-nowrap">
-          {words.map((_, i) => (
+          {words.map((word, i) => (
             <Fragment key={i}>
               <span
                 data-intro="up"
@@ -190,7 +181,11 @@ export default function HeroTitle({
                   ref={(el) => {
                     slots.current[i] = el;
                   }}
-                />
+                >
+                  <span className="hero-roll-layer">
+                    {Array.from(word).map((ch, j) => <span key={j} className="hl">{ch}</span>)}
+                  </span>
+                </span>
               </span>
               {i < words.length - 1 ? " " : null}
             </Fragment>
@@ -201,7 +196,9 @@ export default function HeroTitle({
           data-intro="draw"
           style={{ "--d": "0.28s" } as React.CSSProperties}
           className="hero-outline block lg:text-right"
-        />
+        >
+          {Array.from(last).map((ch, j) => <span key={j} className="hl">{ch}</span>)}
+        </span>
       </span>
     </h1>
   );

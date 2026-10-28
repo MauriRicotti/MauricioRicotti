@@ -326,9 +326,9 @@ export const footer = {
 
 /* 9. SEO */
 export const seo = {
-  title: "Mauricio Ricotti | Full Stack Developer",
+  title: "Mauricio Ricotti | Full Stack Web Developer",
   description:
-    "Portfolio of Mauricio Ricotti, Full Stack Developer based in Buenos Aires, Argentina. I build fast websites and web apps with React, TypeScript and Node.js.",
+    "Full Stack Web Developer in Buenos Aires, Argentina. I build fast websites and apps with React and Node.js. Explore my projects and get in touch.",
 };
 
 /* 10. INTERFACE TEXTS */

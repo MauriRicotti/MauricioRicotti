@@ -18,6 +18,7 @@ import {
 import * as es from "./data/content";
 import * as en from "./data/content.en";
 import LangCurtain from "./components/LangCurtain";
+import { jsonLd, pageSeo, structuredData } from "./lib/seo";
 
 export type Lang = "es" | "en";
 export type Content = typeof es;
@@ -38,8 +39,8 @@ interface LangCtx {
 
 const Ctx = createContext<LangCtx>({ lang: "es", setLang: () => {}, c: es });
 
-export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(langFromPath);
+export function LangProvider({ children, initialLang }: { children: ReactNode; initialLang?: Lang }) {
+  const [lang, setLangState] = useState<Lang>(() => initialLang ?? langFromPath());
   // Cortina animada en curso (idioma de destino) y si está ocupada
   const [curtain, setCurtain] = useState<{ from: Lang; to: Lang } | null>(null);
   const langRef = useRef(lang);
@@ -53,14 +54,25 @@ export function LangProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // Idioma del documento, título y descripción de la pestaña
+  // Mantiene también canonical, Open Graph y JSON-LD coherentes al cambiar sin recargar.
   useEffect(() => {
-    const c = dict[lang];
+    const base = import.meta.env.VITE_SITE_URL || "https://mauricio-ricotti.vercel.app";
+    const meta = pageSeo(lang, base);
     document.documentElement.lang = lang;
-    document.title = c.seo.title;
-    document
-      .querySelector('meta[name="description"]')
-      ?.setAttribute("content", c.seo.description);
+    document.title = meta.title;
+    const update = (selector: string, content: string) =>
+      document.querySelector(selector)?.setAttribute("content", content);
+    update('meta[name="description"]', meta.description);
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", meta.canonical);
+    update('meta[property="og:title"]', meta.title);
+    update('meta[property="og:description"]', meta.description);
+    update('meta[property="og:url"]', meta.canonical);
+    update('meta[property="og:locale"]', meta.locale);
+    update('meta[property="og:locale:alternate"]', meta.alternateLocale);
+    update('meta[name="twitter:title"]', meta.title);
+    update('meta[name="twitter:description"]', meta.description);
+    const schema = document.querySelector('#portfolio-schema');
+    if (schema) schema.textContent = jsonLd(structuredData(lang, base));
   }, [lang]);
 
   // Cambia el idioma y la dirección (/ o /en). En el visor de archivos puede no estar permitido.

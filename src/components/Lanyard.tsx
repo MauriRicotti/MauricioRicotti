@@ -4,7 +4,7 @@
  * Física sin cambios. Cambios del portfolio (marcados con "(Portfolio)"): resolución máx. 1.5x,
  * rango de profundidad de la cámara (evita parpadeos en celulares),
  * props anchorX / cardTop (posición exacta) y passThrough (el lienzo deja pasar los clics). Solo depende de "three".
- * Se usa desde HeroBadge.tsx (que lo carga recién después de la animación del título).
+ * Se usa desde HeroBadge.tsx (prepara la GPU oculta antes de soltar la caída).
  */
 
 import { useEffect, useRef } from 'react';
@@ -46,6 +46,8 @@ export interface LanyardProps {
   breeze?: number;
   interactive?: boolean;
   intro?: boolean;
+  /** (Portfolio) instante mínimo de entrada (performance.now), tras preparar la GPU. */
+  revealAt?: number;
   /** (Portfolio) posición horizontal del enganche, 0–1 del ancho (reemplaza `anchor`) */
   anchorX?: number;
   /** (Portfolio) borde superior de la tarjeta en reposo, 0–1 del alto (reemplaza el cálculo con `strapLength`) */
@@ -416,7 +418,11 @@ const loadImage = (
     const image = new Image();
     image.crossOrigin = 'anonymous';
     image.decoding = 'async';
-    image.onload = () => resolve(image);
+    image.onload = async () => {
+      // No dejar la decodificación PNG/WebP para el primer cuadro de la caída.
+      try { await image.decode(); } catch { /* onload ya confirmó la imagen */ }
+      resolve(image);
+    };
     image.onerror = () => resolve(null);
     image.src = url;
   });
@@ -938,6 +944,7 @@ const Lanyard = ({
   breeze = 0.5,
   interactive = true,
   intro = true,
+  revealAt = 0,
   anchorX,
   cardTop,
   passThrough = false,
@@ -948,6 +955,8 @@ const Lanyard = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<Settings | null>(null);
   const applyRef = useRef<(() => void) | null>(null);
+  const revealAtRef = useRef(revealAt);
+  revealAtRef.current = revealAt;
   const onGrabRef = useRef(onGrab);
   onGrabRef.current = onGrab;
 
@@ -998,7 +1007,7 @@ const Lanyard = ({
     const canvas = renderer.domElement;
     canvas.className = 'block w-full h-full';
     // (Portfolio) estilos en línea: si el CSS no carga, el canvas no se dibuja gigante
-    canvas.style.cssText = 'display:block;width:100%;height:100%';
+    canvas.style.cssText = 'display:block;width:100%;height:100%;visibility:hidden';
     canvas.setAttribute('aria-hidden', 'true');
     container.appendChild(canvas);
 
@@ -1119,6 +1128,10 @@ const Lanyard = ({
     let time = 0;
     let visible = true;
     let alive = true;
+    let ready = false;
+    let warming = false;
+    let revealTimer = 0;
+    let revealFrame = 0;
     // (Portfolio) mientras se hace scroll la tarjeta se congela (no se simula ni se redibuja):
     // así el navegador solo desplaza la página y el scroll va fluido. Retoma al parar.
     let scrolling = false;
@@ -1234,6 +1247,7 @@ const Lanyard = ({
           images.strap = strap;
           paintFaces();
           repaintStrap();
+          void prepare();
         });
       }
       const faceKey = `${layoutKey}|${s.cardColor}|${s.imageFit}`;
@@ -1350,7 +1364,7 @@ const Lanyard = ({
       clampGroup.position.copy(hang);
     };
 
-    const render = () => {
+    const syncScene = () => {
       cardGroup.position.copy(sim.body.position);
       cardGroup.quaternion.copy(sim.body.quaternion);
       shadowMesh.position.copy(sim.body.position);
@@ -1360,6 +1374,10 @@ const Lanyard = ({
       shadowMesh.quaternion.copy(sim.body.quaternion);
       shadowMesh.scale.set(layout.width * SHADOW_PAD.x, layout.height * SHADOW_PAD.y, 1);
       updateBand();
+    };
+
+    const render = () => {
+      syncScene();
       renderer.render(scene, camera);
     };
 
@@ -1392,8 +1410,8 @@ const Lanyard = ({
 
     const tick = (now: number) => {
       raf = 0;
-      if (!alive) return;
-      if (scrolling && !sim.grab) return;
+      if (!alive || !ready || document.hidden) return;
+      if (scrolling && !sim.grab && time > 1.6) return;
       // (Portfolio) en pantallas de 120/144 Hz se dibuja a ~60–75 cuadros por segundo (menos trabajo)
       if (now - last < 12) {
         raf = requestAnimationFrame(tick);
@@ -1415,11 +1433,42 @@ const Lanyard = ({
     };
 
     const start = () => {
-      if (raf || !visible || !alive) return;
-      if (scrolling && !sim.grab) return;
+      if (raf || !visible || !alive || !ready || document.hidden) return;
+      if (scrolling && !sim.grab && time > 1.6) return;
       sim.calm = 0;
       last = performance.now();
       raf = requestAnimationFrame(tick);
+    };
+
+    // (Portfolio) dos fases: preparar todo OCULTO y recién después soltar la física.
+    // El primer render ya no muestra una tarjeta vacía ni se interrumpe al recibir el arte.
+    const prepare = async () => {
+      if (ready || warming || !alive) return;
+      warming = true;
+      try {
+        syncScene();
+        // Incluye el dorso aunque todavía no mire a cámara.
+        [frontTexture, backTexture, strapTexture, grain, weave, shadowTexture].forEach(texture => renderer.initTexture(texture));
+        await renderer.compileAsync(scene, camera);
+        if (!alive) return;
+        render(); // sube geometrías/buffers mientras el canvas sigue oculto
+      } catch {
+        if (!alive || renderer.getContext().isContextLost()) return;
+        // Fallback para drivers sin compilación paralela: también ocurre oculto.
+        try { render(); } catch { return; }
+      }
+      if (!alive) return;
+      const reveal = () => {
+        revealFrame = requestAnimationFrame(() => {
+          if (!alive) return;
+          time = 0;
+          ready = true;
+          canvas.style.visibility = 'visible';
+          start();
+        });
+      };
+      const delay = Math.max(0, revealAtRef.current - performance.now());
+      revealTimer = window.setTimeout(reveal, delay);
     };
 
     const raycaster = new THREE.Raycaster();
@@ -1482,7 +1531,7 @@ const Lanyard = ({
     };
 
     const onPointerDown = (event: PointerEvent) => {
-      if (!settingsRef.current!.interactive || event.button > 0) return;
+      if (!ready || !settingsRef.current!.interactive || event.button > 0) return;
       if (pass && (!visible || !insideCanvas(event))) return;
       toPointer(event);
       const hit = pickCard();
@@ -1542,7 +1591,7 @@ const Lanyard = ({
     };
 
     const onPointerMove = (event: PointerEvent) => {
-      if (!settingsRef.current!.interactive) return;
+      if (!ready || !settingsRef.current!.interactive) return;
       toPointer(event);
       if (sim.grab) {
         // si se soltó el botón fuera de la ventana, el navegador no avisa: se suelta acá
@@ -1573,7 +1622,7 @@ const Lanyard = ({
     };
 
     const onTouchStart = (event: TouchEvent) => {
-      if (!settingsRef.current!.interactive || event.touches.length !== 1) return;
+      if (!ready || !settingsRef.current!.interactive || event.touches.length !== 1) return;
       if (pass && (!visible || !insideCanvas(event.touches[0]))) return;
       toPointer(event.touches[0]);
       if (pickCard()) event.preventDefault();
@@ -1603,15 +1652,18 @@ const Lanyard = ({
     }
 
     const resize = () => {
-      view.width = Math.max(1, container.clientWidth);
-      view.height = Math.max(1, container.clientHeight);
-      // (Portfolio) resolución máx. 1.5x y como mucho ~1,2 millones de píxeles por cuadro
-      // (lienzos grandes en pantallas de alta densidad): casi igual de nítido y más liviano
-      const budget = Math.sqrt(1_200_000 / Math.max(1, view.width * view.height));
-      renderer.setPixelRatio(Math.max(1, Math.min(window.devicePixelRatio || 1, 1.5, budget)));
-      renderer.setSize(view.width, view.height, false);
+      const width = Math.max(1, container.clientWidth);
+      const height = Math.max(1, container.clientHeight);
+      // (Portfolio) resolución máx. 1.5x y ~1,2 millones de píxeles por cuadro.
+      const budget = Math.sqrt(1_200_000 / Math.max(1, width * height));
+      const ratio = Math.max(1, Math.min(window.devicePixelRatio || 1, 1.5, budget));
+      if (width === view.width && height === view.height && ratio === renderer.getPixelRatio()) return;
+      view.width = width;
+      view.height = height;
+      renderer.setPixelRatio(ratio);
+      renderer.setSize(width, height, false);
       apply();
-      render();
+      if (ready) render();
     };
 
     const resizeObserver = new ResizeObserver(resize);
@@ -1627,7 +1679,8 @@ const Lanyard = ({
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('blur', release);
     const onScroll = () => {
-      if (sim.grab) return;
+      // No cortar la caída inicial por scroll restoration/layout al abrir la web.
+      if (!ready || time < 1.6 || sim.grab) return;
       scrolling = true;
       if (raf) {
         cancelAnimationFrame(raf);
@@ -1646,6 +1699,8 @@ const Lanyard = ({
 
     return () => {
       alive = false;
+      window.clearTimeout(revealTimer);
+      cancelAnimationFrame(revealFrame);
       cancelAnimationFrame(raf);
       applyRef.current = null;
       resizeObserver.disconnect();
