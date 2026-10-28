@@ -391,7 +391,10 @@ export const contact = {
 export const faqSection = {
   title: "PREGUNTAS FRECUENTES",
   subtitle: "Respuestas rápidas a las dudas más comunes.",
-  ctaText: "¿Otra duda? Escribime",
+  // Bloque con ojitos al final de las preguntas (abre el formulario de contacto)
+  helpTitle: "¿No encontraste lo que buscabas?",
+  helpText: "Contame tu caso y te respondo personalmente.",
+  helpCta: "Preguntame directo",
 };
 
 export const faqs = [

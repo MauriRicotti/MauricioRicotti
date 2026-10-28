@@ -268,7 +268,9 @@ export const contact = {
 export const faqSection = {
   title: "FREQUENTLY ASKED QUESTIONS",
   subtitle: "Quick answers to the most common questions.",
-  ctaText: "Another question? Message me",
+  helpTitle: "Didn't find what you were looking for?",
+  helpText: "Tell me about your project and I'll get back to you personally.",
+  helpCta: "Ask me directly",
 };
 
 export const faqs = [

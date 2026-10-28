@@ -63,18 +63,27 @@ en la web publicada o en `npm run live`.
 - **Cómo trabajo** (`Process.tsx`): tarjetas que se apilan al hacer scroll (solo CSS, `position: sticky`).
   Los pasos están en `processSteps` (content.ts).
 
-## Título del hero (rodillo + letras vivas)
+## Título del hero (rodillo)
 
 `src/components/HeroTitle.tsx`:
 
 - **Rodillo:** la primera parte del título (“FULL STACK”) va cambiando letra por letra por las frases de
   `roleRoll` en `content.ts` (FRONT END → BACK END) y vuelve. Cada frase debe tener la
   misma cantidad de palabras que “FULL STACK” (2). `roleRoll: []` = no cambia. Velocidad: `ROLL_EVERY`.
-  Se pausa fuera de pantalla, con la pestaña oculta y mientras el mouse está sobre el título.
-- **Letras vivas:** en PC las letras cerca del cursor se levantan y se tiñen de turquesa (`LIVE_RADIUS`);
-  en celular, al tocar el título las letras saltan en onda. Solo se calcula cuando hay interacción.
+  Se pausa fuera de pantalla y con la pestaña oculta.
 - Con “reducir movimiento” activado, el título queda quieto. Para Google y lectores de pantalla el h1
   siempre dice el rol original (`role`).
+
+## Preguntas frecuentes: bloque con ojitos
+
+Al final de las preguntas hay un bloque “¿No encontraste lo que buscabas?” con unos ojos que miran
+a los costados y parpadean (`src/components/WanderingEyes.tsx`, basado en *Wandering eyes* de
+Loading UI). Al pasar el mouse por el botón “Preguntame directo”, los ojos lo miran; el botón abre
+el formulario de contacto.
+
+- Textos: `faqSection.helpTitle`, `helpText` y `helpCta` en `content.ts` / `content.en.ts`.
+- Estilos y animación: bloque “Ojos que miran” al final de `src/index.css` (solo transform; en pausa
+  fuera de pantalla; quietos con “reducir movimiento”). Velocidad: `--duration` (10s por defecto).
 
 ## Fondo del hero
 

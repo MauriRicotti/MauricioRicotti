@@ -141,7 +141,7 @@
   }
 }
 
-/* Título del hero: rodillo + letras vivas (ver HeroTitle.tsx) */
+/* Título del hero: rodillo (ver HeroTitle.tsx) */
 .hero-roll {
   display: inline-grid;
 }
@@ -157,14 +157,8 @@
   padding-inline: 0.06em;
   margin-inline: -0.06em;
 }
-.hero-live .hl,
-.hero-live .hv {
+.hero-title .hl {
   display: inline-block;
-}
-.hero-live .hv {
-  transition:
-    transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1),
-    color 0.3s;
 }
 
 /* Palabra del h1 solo con borde (sin relleno) */
@@ -299,9 +293,9 @@
 }
 
 /* ── Banner de tecnologías: animación de entrada ──────────────────────────
-   La franja se desliza desde el borde izquierdo, las etiquetas caen como
-   stickers y las pastillas aparecen una tras otra. Una sola vez por carga
-   de la página (TechStack.tsx agrega "is-in").
+   Solo la franja se desliza desde el borde izquierdo (con las tecnologías
+   adentro, quietas). Una sola vez por carga de la página (TechStack.tsx
+   agrega "is-in").
    Solo transform y opacity: el navegador las mueve sin redibujar la página.
    Para quitarla: borra este bloque (y el useEffect de TechStack.tsx). */
 .tech-label {
@@ -316,55 +310,12 @@
     animation: tech-band 0.8s cubic-bezier(0.65, 0, 0.35, 1) var(--base, 0s)
       backwards;
   }
-  /* Etiquetas (stickers) y pastillas: cada grupo arranca al verse */
-  .tech-group:not(.is-in) .tech-label,
-  .tech-group:not(.is-in) .tech-pill {
-    opacity: 0;
-  }
-  .tech-group.is-in .tech-label {
-    animation: tech-sticker 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) var(--gd, 0s)
-      backwards;
-  }
-  .tech-group.is-in .tech-pill {
-    animation: tech-pill 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)
-      calc(var(--gd, 0s) + 0.22s + var(--j) * 0.035s) backwards;
-  }
-}
-/* En PC los 4 grupos están en una fila: caen uno tras otro */
-@media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
-  .tech-group {
-    --gd: calc(var(--i) * 0.1s);
-  }
 }
 @keyframes tech-band {
   from {
     transform: translateX(-101%);
   }
   to {
-    transform: none;
-  }
-}
-@keyframes tech-sticker {
-  from {
-    opacity: 0;
-    transform: translateY(-28px) rotate(calc(var(--tilt, 0deg) - 12deg))
-      scale(1.15);
-  }
-  45% {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-    transform: rotate(var(--tilt, 0deg));
-  }
-}
-@keyframes tech-pill {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
     transform: none;
   }
 }
@@ -470,4 +421,110 @@
     0 0,
     center top,
     center top;
+}
+
+/* ── Ojos que miran (WanderingEyes.tsx, bloque al final de las preguntas frecuentes) ──
+   Solo transform: se mueve la pupila y el ojo se achica en el parpadeo.
+   Fuera de pantalla quedan en pausa; con "reducir movimiento", quietos. */
+.wandering-eyes {
+  container-type: size;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+/* (las medidas en cqmin se calculan dentro del contenedor, por eso van en el hijo) */
+.we-pair {
+  --we-eye: 62cqmin;
+  --we-travel: calc(var(--we-eye) * 0.3125);
+  display: inline-flex;
+  align-items: center;
+  gap: 9cqmin;
+}
+.we-eye {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: var(--we-eye);
+  height: var(--we-eye);
+  border-radius: 50%;
+  overflow: hidden;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+.we-pupil {
+  width: calc(var(--we-eye) * 0.64);
+  height: calc(var(--we-eye) * 0.64);
+  border-radius: 50%;
+  background: currentColor;
+  transition: transform 0.35s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .we-eye {
+    animation: we-blink var(--duration, 10s) infinite;
+  }
+  .we-pupil {
+    animation: we-move var(--duration, 10s) infinite;
+  }
+  .wandering-eyes:not(.is-on) .we-eye,
+  .wandering-eyes:not(.is-on) .we-pupil {
+    animation-play-state: paused;
+  }
+}
+/* Mirando un punto (ej. el botón, al pasar el mouse) */
+.wandering-eyes.is-looking .we-pupil {
+  animation: none;
+  transform: translate(
+    calc(var(--look-x, 0) * var(--we-travel)),
+    calc(var(--look-y, 0) * var(--we-travel))
+  );
+}
+@keyframes we-move {
+  0%,
+  10% {
+    transform: none;
+  }
+  13%,
+  40% {
+    transform: translateX(calc(var(--we-travel) * -1));
+  }
+  43%,
+  70% {
+    transform: translateX(var(--we-travel));
+  }
+  73%,
+  90% {
+    transform: translateY(var(--we-travel));
+  }
+  93%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes we-blink {
+  0%,
+  10%,
+  12%,
+  20%,
+  22%,
+  40%,
+  42%,
+  60%,
+  62%,
+  70%,
+  72%,
+  90%,
+  92%,
+  98%,
+  100% {
+    transform: none;
+  }
+  11%,
+  21%,
+  41%,
+  61%,
+  71%,
+  91%,
+  99% {
+    transform: scaleY(0.375);
+  }
 }

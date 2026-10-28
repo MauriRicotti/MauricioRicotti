@@ -29,58 +29,29 @@ export default function TechStack({ title, groups }: TechStackProps) {
   const ref = useRef<HTMLElement>(null);
 
   // Animación de entrada: una sola vez por carga de la página (como la del título).
-  // 1) Cuando la sección entra en pantalla, la franja se desliza desde el borde (solo transform).
-  // 2) Cuando la franja terminó de llegar, cada grupo (sticker + pastillas) se anima al verse.
-  // El movimiento lo hace el CSS (index.css → "tech-anim"); acá solo se agrega la clase "is-in".
+  // Cuando la sección entra en pantalla, la franja se desliza desde el borde (solo transform).
+  // Las tecnologías (etiquetas y pastillas) llegan quietas, junto con la franja: no tienen
+  // animación propia. El movimiento lo hace el CSS (index.css → "tech-anim"); acá solo se
+  // agrega la clase "is-in".
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const band = root.querySelector<HTMLElement>(".tech-band");
-    const groups = Array.from(
-      root.querySelectorAll<HTMLElement>(".tech-group"),
-    );
-    const showAll = () => {
-      root.classList.add("is-in");
-      groups.forEach((g) => g.classList.add("is-in"));
-    };
     if (
-      !band ||
       !("IntersectionObserver" in window) ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
-      showAll();
+      root.classList.add("is-in");
       return;
     }
 
     const html = document.documentElement;
     const timers: number[] = [];
-    let groupIO: IntersectionObserver | null = null;
-
-    // Grupos: se observan recién con la franja quieta (medidas exactas)
-    const startGroups = () => {
-      if (groupIO) return;
-      groupIO = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (!e.isIntersecting) continue;
-            e.target.classList.add("is-in");
-            groupIO?.unobserve(e.target);
-          }
-        },
-        { threshold: 0.15 },
-      );
-      groups.forEach((g) => groupIO?.observe(g));
-    };
 
     const begin = () => {
       // Si se ve recién cargada la página, espera a que termine la entrada del título
       const delay = performance.now() < 2500 ? 800 : 0;
       root.style.setProperty("--base", `${delay}ms`);
       root.classList.add("is-in");
-      band.addEventListener("animationend", (e) => {
-        if (e.target === band) startGroups();
-      });
-      timers.push(window.setTimeout(startGroups, delay + 950)); // respaldo
     };
 
     const sectionIO = new IntersectionObserver(
@@ -102,7 +73,6 @@ export default function TechStack({ title, groups }: TechStackProps) {
 
     return () => {
       sectionIO.disconnect();
-      groupIO?.disconnect();
       timers.forEach(clearTimeout);
     };
   }, []);
