@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { loaderDelay } from "../lib/loader";
+import { sound } from "../lib/sound";
 import type { BadgeArt, BadgeDesign, BadgeTexts } from "../lib/badgeArt";
 
 /**
@@ -131,6 +132,7 @@ export default function HeroBadge({ texts }: { texts: BadgeTexts }) {
             cardTop={box.top}
             size={box.size}
             passThrough
+            onGrab={() => sound.playMetal()}
             intro
             interactive
             finish={SETTINGS.finish}

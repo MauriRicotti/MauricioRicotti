@@ -22,6 +22,9 @@ export const profile: Profile = {
   name: "Mauricio Ricotti",
   // Texto gigante del hero. Corto = más impacto (2–3 palabras).
   role: "FULL STACK DEVELOPER",
+  // Rodillo del hero: la primera parte del título va cambiando por estas frases (y vuelve).
+  // Cada una con la MISMA cantidad de palabras que "FULL STACK" (2). Dejá [] para que no cambie.
+  roleRoll: ["FRONT END", "BACK END"],
   leftBio:
     "Desarrollo aplicaciones web de punta a punta: desde interfaces rápidas y cuidadas hasta APIs, bases de datos y el deploy en producción.",
   centerBio:

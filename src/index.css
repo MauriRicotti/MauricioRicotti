@@ -141,6 +141,32 @@
   }
 }
 
+/* Título del hero: rodillo + letras vivas (ver HeroTitle.tsx) */
+.hero-roll {
+  display: inline-grid;
+}
+.hero-roll-layer {
+  grid-area: 1 / 1;
+  justify-self: start;
+  white-space: pre;
+}
+/* Solo mientras cambia la palabra: recorta las letras que entran y salen. El ancho se ajusta
+   de a poco (HeroTitle.tsx), así la palabra de al lado se corre suave, sin saltos ni encimarse. */
+.hero-roll.is-rolling {
+  overflow: hidden;
+  padding-inline: 0.06em;
+  margin-inline: -0.06em;
+}
+.hero-live .hl,
+.hero-live .hv {
+  display: inline-block;
+}
+.hero-live .hv {
+  transition:
+    transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1),
+    color 0.3s;
+}
+
 /* Palabra del h1 solo con borde (sin relleno) */
 .hero-outline {
   color: transparent;

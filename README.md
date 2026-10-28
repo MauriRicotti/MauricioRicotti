@@ -22,7 +22,7 @@ npm run build:preview  # genera preview.html (con imágenes incrustadas, se abre
 src/
   data/content.ts        ← tus textos
   types.ts
-  lib/sound.ts           ← efectos de sonido
+  lib/sound.ts           ← efectos de sonido (Web Audio, sin archivos). playMetal() = "clinc" al tocar la tarjeta 3D
   components/
     Header, Hero, Work, About, Footer,
     ContactModal
@@ -63,6 +63,19 @@ en la web publicada o en `npm run live`.
 - **Cómo trabajo** (`Process.tsx`): tarjetas que se apilan al hacer scroll (solo CSS, `position: sticky`).
   Los pasos están en `processSteps` (content.ts).
 
+## Título del hero (rodillo + letras vivas)
+
+`src/components/HeroTitle.tsx`:
+
+- **Rodillo:** la primera parte del título (“FULL STACK”) va cambiando letra por letra por las frases de
+  `roleRoll` en `content.ts` (FRONT END → BACK END) y vuelve. Cada frase debe tener la
+  misma cantidad de palabras que “FULL STACK” (2). `roleRoll: []` = no cambia. Velocidad: `ROLL_EVERY`.
+  Se pausa fuera de pantalla, con la pestaña oculta y mientras el mouse está sobre el título.
+- **Letras vivas:** en PC las letras cerca del cursor se levantan y se tiñen de turquesa (`LIVE_RADIUS`);
+  en celular, al tocar el título las letras saltan en onda. Solo se calcula cuando hay interacción.
+- Con “reducir movimiento” activado, el título queda quieto. Para Google y lectores de pantalla el h1
+  siempre dice el rol original (`role`).
+
 ## Fondo del hero
 
 El fondo del hero es CSS puro (`.hero-bg` en `src/index.css`): cuadrícula que se desvanece (sin grano),
@@ -90,7 +103,7 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
   `"credencial"` solo tipografía), acabado, metal, gravedad, viento (`breeze`, 0 = quieta), etc.
   Tamaño: `CARD` en el mismo archivo.
 - **Retrato:** `src/assets/badge-portrait.webp` (PNG/WebP con fondo transparente, vertical 3:4).
-- **Diseños** (frente, dorso y cinta): `src/lib/badgeArt.ts`.
+- **Diseños** (frente, dorso y cinta): `src/lib/badgeArt.ts`. El dorso muestra logo, nombre, rol y “Hablemos” (sin redes).
 - **Interacción:** el lienzo cubre todo el hero y va por delante, pero deja pasar los clics
   (`passThrough`): solo atrapa el puntero sobre la tarjeta.
 - **Quitarla:** borrá `<HeroBadge … />` en `Hero.tsx`, los archivos `Lanyard.tsx`, `HeroBadge.tsx`,
@@ -134,9 +147,12 @@ MIT + Commons Clause; usa `three`). Se carga aparte, después de la animación d
   - Con "reducir movimiento" activado en el sistema no se muestra.
   - El título del hero y la credencial esperan a que las franjas empiecen a abrirse (`src/lib/loader.ts`).
 - **Logo MR** en la barra (solo el logo, sin el nombre, en PC y celular): `src/components/LogoMark.tsx`.
+  El mismo logo se usa en la **credencial 3D** (detrás del retrato, en el dorso y en la cinta).
+  Los trazos están en un solo lugar: `src/lib/logoMR.ts`.
   Con el mouse encima, el borde y las letras se ponen turquesa.
 - **Favicon e íconos:** `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`,
-  `icon-512.png`, `icon-maskable-512.png` (todos con el logo MR).
+  `icon-512.png`, `icon-maskable-512.png` (todos con el logo MR). Si los cambiás, subí el número
+  `?v=2` de los enlaces en `index.html` (y en `site.webmanifest`) para que los navegadores no usen el viejo.
 - Los dos logos en vector (para usar donde quieras): `src/assets/logo/logo-mauritti.svg` y `logo-mr.svg`.
 
 ## Footer

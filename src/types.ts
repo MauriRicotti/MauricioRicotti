@@ -6,6 +6,8 @@ export interface SocialLink {
 export interface Profile {
   name: string;
   role: string;
+  /** Frases que van rotando en lugar de la primera parte del rol (efecto rodillo del hero) */
+  roleRoll?: string[];
   leftBio: string;
   centerBio: string;
   ctaText: string;

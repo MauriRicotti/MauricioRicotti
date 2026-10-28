@@ -52,6 +52,8 @@ export interface LanyardProps {
   cardTop?: number;
   /** (Portfolio) el lienzo deja pasar los clics: solo atrapa el puntero cuando está sobre la tarjeta */
   passThrough?: boolean;
+  /** (Portfolio) se llama al agarrar/tocar la tarjeta (para el sonido metálico) */
+  onGrab?: () => void;
   className?: string;
   style?: CSSProperties;
 }
@@ -907,12 +909,15 @@ const Lanyard = ({
   anchorX,
   cardTop,
   passThrough = false,
+  onGrab,
   className = '',
   style
 }: LanyardProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<Settings | null>(null);
   const applyRef = useRef<(() => void) | null>(null);
+  const onGrabRef = useRef(onGrab);
+  onGrabRef.current = onGrab;
 
   settingsRef.current = {
     frontImage,
@@ -1439,6 +1444,7 @@ const Lanyard = ({
       if (pass) suppressClick = true;
       else canvas.setPointerCapture?.(event.pointerId);
       setCursor('grabbing');
+      onGrabRef.current?.();
       event.preventDefault();
       start();
     };
