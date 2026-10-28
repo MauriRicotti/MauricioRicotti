@@ -375,8 +375,8 @@ const traceRoundedRect = (path: PathLike, x: number, y: number, width: number, h
 
 // (Portfolio) sombra de la tarjeta: corrimiento (en unidades de la escena), opacidad y
 // margen del dibujo (el plano es un poco más grande que la tarjeta para que entre el difuminado)
-const SHADOW = { x: 0.2, y: -0.28, z: -0.5, opacity: 0.92 };
-const SHADOW_SIZE = { w: 256, h: 360, pad: 56, blur: 26 };
+const SHADOW = { x: 0.2, y: -0.28, z: -0.5, opacity: 0.52 };
+const SHADOW_SIZE = { w: 256, h: 360, pad: 56, blur: 20 };
 const SHADOW_PAD = {
   x: (SHADOW_SIZE.w + SHADOW_SIZE.pad * 2) / SHADOW_SIZE.w,
   y: (SHADOW_SIZE.h + SHADOW_SIZE.pad * 2) / SHADOW_SIZE.h

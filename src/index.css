@@ -147,8 +147,10 @@
       backwards;
   }
   html.intro-go [data-intro="draw"] {
-    animation: intro-draw 0.85s cubic-bezier(0.65, 0, 0.35, 1) var(--d, 0s)
-      backwards;
+    /* El barrido de entrada y, en paralelo, el reflejo rojo permanente de DEVELOPER */
+    animation:
+      intro-draw 0.85s cubic-bezier(0.65, 0, 0.35, 1) var(--d, 0s) backwards,
+      bio-sheen 9s ease-in-out infinite;
   }
   html.intro-go [data-intro="fade"] {
     animation: intro-fade 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s)
@@ -243,6 +245,13 @@
 .hero-outline {
   color: var(--color-accent);
   -webkit-text-stroke: max(1.5px, 0.009em) var(--color-accent);
+  /* Relleno con un "reflejo": una luz cruza la palabra cada ~9 s (mismo ritmo que .bio-accent) */
+  background-image: linear-gradient(110deg, var(--color-accent) 38%, #ffe4e6 50%, var(--color-accent) 62%);
+  background-size: 240% 100%;
+  background-position: 130% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   /* Un poco de aire entre letras para que los contornos no se crucen */
   letter-spacing: 0.012em;
 }
