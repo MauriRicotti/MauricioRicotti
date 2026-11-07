@@ -28,6 +28,17 @@ src/
     ContactModal
 ```
 
+### Sonido y preferencia entre visitas
+
+- El interruptor comparte una única preferencia con el motor de audio; no vuelve a `true` al montar el header.
+- Se guarda en `localStorage` con la clave **`mr:sound-enabled`** (`"true"` / `"false"`). Se conserva al recargar, cerrar pestañas o reiniciar el navegador con el mismo perfil y origen.
+- El motor lee el valor antes de crear un `AudioContext`. Si está apagado, no programa los efectos; apagarlo también detiene un efecto que estuviera activo.
+- Los cambios se sincronizan entre pestañas del mismo origen y se releen al volver desde la caché de navegación. Se mantiene el ajuste inicial anterior si todavía no hay una elección guardada.
+- SSR no accede al almacenamiento del visitante: el header usa `useSyncExternalStore` para hidratar sin diferencias entre servidor y cliente y sin anunciar sonido activo antes de leer la preferencia.
+- Si el almacenamiento está bloqueado (por ejemplo, en el visor HTML aislado de Arena), el interruptor funciona en memoria pero no se promete persistencia entre aperturas. Borrar los datos, cerrar una sesión privada, cambiar de navegador/dispositivo o pasar a otro dominio puede reiniciar la elección.
+- `npm run check` incluye `scripts/check-sound.mjs`: pruebas de persistencia, silencio, SSR, sincronización y almacenamiento no disponible.
+- **Sonido de entrada:** las muestras están fuera del proyecto. No se incorpora ninguna hasta elegirla; tampoco se intenta eludir las restricciones de reproducción automática del navegador.
+
 ### Banda de tecnologías
 Se edita en `src/data/content.ts` → `techStackTitle` y `techStack` (grupos con título e ítems).
 Cada ítem tiene `name` y, opcionalmente, `icon` con la clave de un logo de `src/lib/techIcons.ts`

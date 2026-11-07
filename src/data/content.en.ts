@@ -61,6 +61,9 @@ export const techStack: TechGroup[] = es.techStack.map((g) => ({
 export const workSection = {
   ...es.workSection,
   title: "FEATURED WORK",
+  titleAccent: "FEATURED",
+  subtitle:
+    "A selection of real-world projects: web applications, custom software, and platforms built end-to-end with a focus on performance, usability, and clean code.",
 };
 
 // Translations by project id (images and links come from content.ts)
@@ -167,9 +170,12 @@ const aboutServices = [
 ];
 export const about = {
   title: "FROM IDEA TO DEPLOY",
+  titleAccent: "TO DEPLOY",
+  servicesTitle: "Services I offer",
   paragraphs: [
-    "I'm Mauricio, a full stack developer. I like taking a problem from start to finish: understanding what the business needs, designing the architecture and building every layer, from the interface to the database.",
-    "I write clean, maintainable code, I care about performance and SEO, and I don't consider a project finished until it's live and working well.",
+    "I'm Mauricio, a Full Stack Developer and Computer Engineering student at Universidad Nacional Arturo Jauretche (UNAJ). I blend solid engineering fundamentals —logic, algorithms, and system architecture— with the agility and eye for detail required by modern software.",
+    "My journey in tech began in a 100% self-taught way through online courses and hands-on projects: first mastering web essentials with HTML, CSS, and JavaScript to build clean, responsive interfaces; then deepening my programming logic and algorithms with Python; and leveling up to the modern full-stack ecosystem with TypeScript, React, Node.js, and databases.",
+    "I enjoy taking ownership of challenges from end to end: understanding the real need, architecting scalable solutions, writing clean and maintainable code, and not calling anything done until it is deployed, SEO-optimized, and running smoothly in production.",
   ],
   // Same colors as content.ts
   services: es.about.services.map((s, i) => ({
@@ -188,6 +194,7 @@ export const marqueeRows: typeof es.marqueeRows = [
 /* 6c. PROCESS */
 export const processSection = {
   title: "HOW I WORK",
+  titleAccent: "WORK",
   subtitle: "Four clear steps, from our first chat until your website is live.",
 };
 
@@ -267,6 +274,7 @@ export const contact = {
 /* 7b. FAQ */
 export const faqSection = {
   title: "FREQUENTLY ASKED QUESTIONS",
+  titleAccent: "FREQUENTLY ASKED",
   subtitle: "Quick answers to the most common questions.",
   helpTitle: "Didn't find what you were looking for?",
   helpText: "Tell me about your project and I'll get back to you personally.",

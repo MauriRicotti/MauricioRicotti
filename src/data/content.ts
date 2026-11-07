@@ -115,6 +115,9 @@ export const techStack: TechGroup[] = [
 /* ------------------------------------------------------------------ */
 export const workSection = {
   title: "TRABAJOS DESTACADOS",
+  titleAccent: "DESTACADOS",
+  subtitle:
+    "Una selección de proyectos reales: aplicaciones web, software a medida y plataformas con foco en rendimiento, usabilidad y código limpio.",
   /** Segundos que se muestra cada proyecto antes de pasar al siguiente (0 = sin pase automático) */
   autoplaySeconds: 6,
 };
@@ -224,9 +227,12 @@ export const projects: Project[] = [
 /* ------------------------------------------------------------------ */
 export const about = {
   title: "DE LA IDEA AL DEPLOY",
+  titleAccent: "AL DEPLOY",
+  servicesTitle: "Servicios que ofrezco",
   paragraphs: [
-    "Soy Mauricio, desarrollador full stack. Me gusta tomar un problema de punta a punta: entender qué necesita el negocio, diseñar la arquitectura y construir cada capa, desde la interfaz hasta la base de datos.",
-    "Escribo código prolijo y fácil de mantener, cuido el rendimiento y el SEO, y no doy un proyecto por terminado hasta que está online y funcionando bien.",
+    "Soy Mauricio, desarrollador Full Stack y estudiante de Ingeniería en Informática en la Universidad Nacional Arturo Jauretche (UNAJ). Combino la base sólida de la ingeniería —lógica, algoritmos y visión de sistemas— con el dinamismo que exige el software moderno.",
+    "Mi formación técnica comenzó de forma 100% autodidacta a través de cursos y proyectos prácticos por internet: empecé dominando las bases de la web con HTML, CSS y JavaScript para dar vida a interfaces limpias y responsivas; luego profundicé en la programación con Python para automatización y backend; y di el salto al desarrollo full stack profesional con TypeScript, React, Node.js y bases de datos.",
+    "Me gusta tomar cada desafío de punta a punta: entender el problema, diseñar la arquitectura adecuada, escribir código prolijo y fácil de mantener, y no dar nada por terminado hasta que esté desplegado, optimizado para SEO y funcionando al 100% en producción.",
   ],
   // Lista numerada de la derecha: qué hacés
   services: [
@@ -296,6 +302,7 @@ export const marqueeRows: {
 /* ------------------------------------------------------------------ */
 export const processSection = {
   title: "CÓMO TRABAJO",
+  titleAccent: "TRABAJO",
   subtitle:
     "Cuatro pasos claros, de la primera charla hasta que tu web está online.",
 };
@@ -389,6 +396,7 @@ export const contact = {
 /* ------------------------------------------------------------------ */
 export const faqSection = {
   title: "PREGUNTAS FRECUENTES",
+  titleAccent: "FRECUENTES",
   subtitle: "Respuestas rápidas a las dudas más comunes.",
   // Bloque con ojitos al final de las preguntas (abre el formulario de contacto)
   helpTitle: "¿No encontraste lo que buscabas?",

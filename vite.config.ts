@@ -128,6 +128,9 @@ const previewRoutes: Plugin = {
       if (/^\/en\/?(?:\?|$)/.test(req.url || "")) {
         req.url = req.url!.replace(/^\/en\/?/, "/en/index.html");
       }
+      if (/^\/404\/?(?:\?|$)/.test(req.url || "")) {
+        req.url = req.url!.replace(/^\/404\/?/, "/404.html");
+      }
       next();
     });
   },
@@ -157,7 +160,11 @@ export default defineConfig(({ mode }) => {
       seo(siteUrl, single, env.GOOGLE_SITE_VERIFICATION || ""),
       ...(single ? [viteSingleFile()] : []),
     ],
-    build: { chunkSizeWarningLimit: 600 },
+    build: {
+      chunkSizeWarningLimit: 600,
+      rollupOptions: { input: path.resolve(__dirname, "index.html") },
+    },
+    optimizeDeps: { entries: ["index.html"] },
     resolve: { alias: { "@": path.resolve(__dirname, "src") } },
     server: { host: "0.0.0.0", allowedHosts: true },
     preview: { host: "0.0.0.0", allowedHosts: true },

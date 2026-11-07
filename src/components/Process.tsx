@@ -1,3 +1,4 @@
+import SectionTitle from "./SectionTitle";
 import type { CSSProperties } from "react";
 import { useLang } from "../i18n";
 
@@ -13,12 +14,12 @@ export default function Process() {
   return (
     <section
       id="process"
-      className="py-20 sm:py-28 bg-[#0e0f12] text-white scroll-mt-16"
+      className="py-20 sm:py-28 bg-[#0e0f12] text-white border-t border-white/[0.06] scroll-mt-16"
     >
       <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 sm:mb-16 grid lg:grid-cols-12 gap-6 items-end">
-          <h2 className="lg:col-span-7 font-hero text-6xl sm:text-7xl xl:text-8xl uppercase tracking-tight leading-[0.9] text-[#f2ede4]">
-            {processSection.title}
+        <div data-reveal className="mb-10 sm:mb-16 grid lg:grid-cols-12 gap-6 items-end">
+          <h2 className="lg:col-span-7 font-hero text-6xl sm:text-7xl xl:text-8xl uppercase tracking-[-0.03em] leading-[0.9] text-[#f2ede4]">
+            <SectionTitle title={processSection.title} accent={processSection.titleAccent} />
           </h2>
           <p className="lg:col-span-5 text-base sm:text-lg text-neutral-400 leading-relaxed lg:text-right">
             {processSection.subtitle}
@@ -29,34 +30,36 @@ export default function Process() {
           {processSteps.map((s, i) => (
             <li
               key={s.title}
+              data-reveal
+              data-reveal-delay={String(Math.min(i + 1, 3))}
               className="process-card"
               style={{ "--i": i } as CSSProperties}
             >
               <article
-                className="rounded-xl p-6 sm:p-10 lg:p-14 text-[#0e0f12] grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 shadow-[0_-16px_40px_rgba(0,0,0,0.45)] min-h-[min(440px,calc(100svh-140px))]"
+                className="rounded-2xl p-6 sm:p-10 lg:p-14 text-[#0e0f12] grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 shadow-[0_-16px_40px_rgba(0,0,0,0.45)] border border-black/10 min-h-[min(440px,calc(100svh-140px))]"
                 style={{ background: s.color }}
               >
                 <div className="lg:col-span-5 flex lg:flex-col justify-between items-start gap-4">
                   <span className="font-mono text-xs sm:text-sm font-semibold uppercase tracking-widest opacity-90">
                     {ui.step} {String(i + 1).padStart(2, "0")} / {total}
                   </span>
-                  <span className="font-hero leading-[0.8] text-[clamp(5rem,16vw,13rem)] tracking-tight">
+                  <span className="font-hero leading-[0.8] text-[clamp(5rem,16vw,13rem)] tracking-[-0.04em]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
 
                 <div className="lg:col-span-7 flex flex-col justify-end">
-                  <h3 className="font-hero uppercase tracking-tight leading-[0.92] text-[clamp(2.6rem,5.5vw,5.5rem)]">
+                  <h3 className="font-hero uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.6rem,5.5vw,5.5rem)]">
                     {s.title}
                   </h3>
-                  <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-relaxed max-w-xl opacity-85">
+                  <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-relaxed max-w-xl opacity-90">
                     {s.text}
                   </p>
                   <ul className="mt-6 sm:mt-8 flex flex-wrap gap-2">
                     {s.items.map((t) => (
                       <li
                         key={t}
-                        className="px-3 py-1.5 rounded-full border-[1.5px] border-[#0e0f12]/80 text-sm font-medium"
+                        className="px-3 py-1 rounded-full border border-[#0e0f12]/20 bg-[#0e0f12]/[0.06] text-xs sm:text-sm font-medium tracking-tight"
                       >
                         {t}
                       </li>

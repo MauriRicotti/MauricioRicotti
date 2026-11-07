@@ -12,13 +12,32 @@ import Footer from "./components/Footer";
 import ScrollTop from "./components/ScrollTop";
 // El formulario se carga aparte (no frena la carga inicial de la página)
 const ContactFlow = lazy(() => import("./components/ContactFlow"));
-import { scrollToId } from "./lib/smoothScroll";
+import { scrollToId, initSmoothScroll, getLenis } from "./lib/smoothScroll";
+import { initScrollReveal } from "./lib/scrollReveal";
 import { afterLoaderPaint } from "./lib/loader";
 
 export default function App() {
   const { profile, projects, techStack, techStackTitle } = useLang().c;
   const [contactOpen, setContactOpen] = useState(false);
   const [flowReady, setFlowReady] = useState(false);
+
+  // Inicializa Lenis smooth scroll y micro-animaciones al hacer scroll
+  useEffect(() => {
+    const cleanupScroll = initSmoothScroll();
+    const cleanupReveal = initScrollReveal();
+    return () => {
+      cleanupScroll();
+      cleanupReveal();
+    };
+  }, []);
+
+  // Pausa el scroll suave de fondo cuando el formulario de contacto está abierto
+  useEffect(() => {
+    const lenis = getLenis();
+    if (!lenis) return;
+    if (contactOpen) lenis.stop();
+    else lenis.start();
+  }, [contactOpen]);
 
   // La precarga automática tampoco compite con el logo. Si el visitante abre el
   // formulario, contactOpen lo carga de inmediato sin esperar al callback ocioso.

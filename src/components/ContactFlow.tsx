@@ -6,6 +6,7 @@ import {
   type FormEvent,
 } from "react";
 import { flushSync } from "react-dom";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -320,6 +321,7 @@ export default function ContactFlow({
       role="dialog"
       aria-modal="true"
       aria-label={ui.contactDialog}
+      data-lenis-prevent
       className="fixed inset-0 z-[60] bg-[#0e0f12] text-white overflow-y-auto overscroll-contain animate-flow-in"
       style={vv ? { top: vv.top, height: vv.h, bottom: "auto" } : undefined}
     >
@@ -385,22 +387,27 @@ export default function ContactFlow({
               </button>
             </div>
           ) : (
-            <form
-              key={id}
-              onSubmit={onSubmit}
-              className={`animate-step-in ${kb ? "flex-1 flex flex-col" : ""}`}
-              noValidate
-            >
-              <p
-                className={`font-mono text-sm text-accent mb-4 items-center gap-2 ${kb ? "hidden" : "flex"}`}
+            <AnimatePresence mode="wait">
+              <motion.form
+                key={id}
+                onSubmit={onSubmit}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className={kb ? "flex-1 flex flex-col" : ""}
+                noValidate
               >
-                {String(step + 1).padStart(2, "0")} <ArrowRight size={14} />
-              </p>
-              <h2
-                className={`font-hero uppercase tracking-tight leading-[0.92] text-[#f2ede4] ${kb ? "text-3xl" : "text-5xl sm:text-7xl lg:text-8xl"}`}
-              >
-                {question}
-              </h2>
+                <p
+                  className={`font-mono text-sm text-accent mb-4 items-center gap-2 ${kb ? "hidden" : "flex"}`}
+                >
+                  {String(step + 1).padStart(2, "0")} <ArrowRight size={14} />
+                </p>
+                <h2
+                  className={`font-hero uppercase tracking-tight leading-[0.92] text-[#f2ede4] ${kb ? "text-3xl" : "text-5xl sm:text-7xl lg:text-8xl"}`}
+                >
+                  {question}
+                </h2>
 
               <div className={kb ? "mt-5" : "mt-10 sm:mt-14"}>
                 {(id === "name" || id === "email") && (
@@ -422,7 +429,7 @@ export default function ContactFlow({
                         ? contact.emailPlaceholder
                         : contact.namePlaceholder
                     }
-                    className="w-full bg-transparent border-0 border-b-2 border-white/15 focus:border-accent outline-none pb-3 text-2xl sm:text-4xl font-medium text-white placeholder:text-neutral-600 transition-colors"
+                    className="w-full bg-transparent border-0 border-b-2 border-white/20 focus:border-accent outline-none pb-3 text-2xl sm:text-4xl font-medium text-white placeholder:text-neutral-400 transition-colors"
                   />
                 )}
 
@@ -444,7 +451,7 @@ export default function ContactFlow({
                       }
                     }}
                     placeholder={contact.messagePlaceholder}
-                    className="w-full bg-transparent border-0 border-b-2 border-white/15 focus:border-accent outline-none pb-3 text-xl sm:text-3xl font-medium text-white placeholder:text-neutral-600 resize-none leading-snug transition-colors"
+                    className="w-full bg-transparent border-0 border-b-2 border-white/20 focus:border-accent outline-none pb-3 text-xl sm:text-3xl font-medium text-white placeholder:text-neutral-400 resize-none leading-snug transition-colors"
                   />
                 )}
 
@@ -457,12 +464,13 @@ export default function ContactFlow({
                         <button
                           key={opt}
                           type="button"
+                          aria-pressed={selected}
                           onClick={() =>
                             choose(id as "projectType" | "budget", opt)
                           }
-                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left text-base sm:text-lg transition-colors cursor-pointer ${
+                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left text-base sm:text-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                             selected
-                              ? "border-accent bg-accent/10 text-white"
+                              ? "border-accent bg-accent/10 text-white font-medium"
                               : "border-white/15 text-neutral-200 hover:border-white/40 hover:bg-white/[0.03]"
                           }`}
                         >
@@ -584,7 +592,8 @@ export default function ContactFlow({
                   </>
                 )}
               </div>
-            </form>
+            </motion.form>
+          </AnimatePresence>
           )}
         </div>
 

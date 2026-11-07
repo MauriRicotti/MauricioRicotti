@@ -1,3 +1,4 @@
+import SectionTitle from "./SectionTitle";
 import {
   memo,
   useCallback,
@@ -30,7 +31,7 @@ function Tags({ tags }: { tags: string[] }) {
       {tags.map((t) => (
         <li
           key={t}
-          className="px-2.5 py-1 rounded-full text-[11px] font-mono text-neutral-300 bg-white/[0.06] border border-white/10"
+          className="px-2.5 py-0.5 rounded-full text-[11px] font-mono text-neutral-300 bg-white/[0.04] border border-white/[0.08] hover:border-white/20 transition-colors"
         >
           {t}
         </li>
@@ -44,15 +45,16 @@ function Links({ project }: { project: Project }) {
   if (!project.demoUrl && !project.githubUrl && !project.downloadUrl)
     return null;
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {project.downloadUrl && (
         <a
           href={project.downloadUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-[#0e0f12] text-sm font-semibold hover:bg-[#f2ede4] transition-colors"
+          className="group inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-[#0e0f12] text-xs sm:text-sm font-semibold hover:bg-[#f2ede4] active:scale-[0.97] transition-[transform,background-color,color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0f12]"
         >
-          <Download size={16} /> {ui.download}
+          <Download size={15} className="transition-transform duration-150 group-hover:translate-y-0.5" />
+          <span>{ui.download}</span>
         </a>
       )}
       {project.demoUrl && (
@@ -60,9 +62,13 @@ function Links({ project }: { project: Project }) {
           href={project.demoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-accent transition-colors"
+          className="group inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f2ede4] text-[#0e0f12] text-xs sm:text-sm font-semibold hover:bg-accent active:scale-[0.97] transition-[transform,background-color,color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0f12]"
         >
-          {ui.viewDemo} <ArrowUpRight size={16} />
+          <span>{ui.viewDemo}</span>
+          <ArrowUpRight
+            size={15}
+            className="transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          />
         </a>
       )}
       {project.githubUrl && (
@@ -70,16 +76,16 @@ function Links({ project }: { project: Project }) {
           href={project.githubUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-sm font-semibold text-[#f2ede4] hover:border-white/50 hover:bg-white/5 transition-colors"
+          className="group inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/[0.04] text-xs sm:text-sm font-semibold text-[#f2ede4] hover:border-white/50 hover:bg-white/[0.08] active:scale-[0.97] transition-[transform,background-color,border-color,color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0f12]"
         >
           <svg
             viewBox="0 0 24 24"
-            className="w-4 h-4 fill-current"
+            className="w-3.5 h-3.5 fill-current opacity-85 group-hover:opacity-100 transition-opacity"
             aria-hidden="true"
           >
             <path d={siGithub.path} />
           </svg>
-          {ui.code}
+          <span>{ui.code}</span>
         </a>
       )}
     </div>
@@ -99,20 +105,20 @@ function BrowserFrame({ project: p }: { project: Project }) {
     host = "";
   }
   return (
-    <div className="flex-1 min-h-0 flex flex-col rounded-lg border border-white/10 bg-[#1a1b21] overflow-hidden">
-      <div className="h-7 shrink-0 flex items-center gap-3 px-3 border-b border-white/[0.06]">
+    <div className="flex-1 min-h-0 flex flex-col rounded-lg border border-white/[0.08] bg-[#14151a] overflow-hidden">
+      <div className="h-7 shrink-0 flex items-center gap-3 px-3 border-b border-white/[0.06] bg-[#111216]">
         <div className="flex gap-1.5" aria-hidden="true">
           <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]/80" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/80" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
         </div>
         <div className="flex-1 flex justify-center pr-10">
-          <span className="h-[18px] w-full max-w-[260px] rounded-md bg-white/[0.06] text-[10px] font-mono text-[#8c8c8c] flex items-center justify-center truncate px-2">
-            {host}
+          <span className="h-[18px] w-full max-w-[260px] rounded-md bg-white/[0.04] border border-white/[0.04] text-[10px] font-mono text-neutral-400 flex items-center justify-center truncate px-2 select-none">
+            {host || p.name.toLowerCase().replace(/\s+/g, "") + ".app"}
           </span>
         </div>
       </div>
-      <div className="relative flex-1 min-h-0 bg-neutral-900">
+      <div className="relative flex-1 min-h-0 bg-[#0c0d10]">
         <img
           src={p.image}
           srcSet={srcSetOf(p)}
@@ -132,8 +138,8 @@ function BrowserFrame({ project: p }: { project: Project }) {
 /** Etiqueta destacada (ej. "App estrella") */
 function Highlight({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent text-[#0e0f12] text-[11px] font-bold uppercase tracking-wider">
-      <Star size={12} className="fill-current" />
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent text-[#0e0f12] text-[10px] font-bold uppercase tracking-wider select-none">
+      <Star size={11} className="fill-current" />
       {label}
     </span>
   );
@@ -148,28 +154,28 @@ function MobileAppOpen({
   index: number;
 }) {
   return (
-    <div className="absolute inset-0 flex gap-3 p-3">
+    <div className="absolute inset-0 flex gap-4 p-3">
       {/* Escenario con cuadrícula suave; el teléfono se ajusta al espacio disponible */}
-      <div className="phone-stage relative flex-1 min-w-0 rounded-lg border border-white/10 bg-[#15161b] p-4 flex items-center justify-center overflow-hidden">
+      <div className="phone-stage relative flex-1 min-w-0 rounded-lg border border-white/[0.08] bg-[#14151a] p-4 flex items-center justify-center overflow-hidden">
         <PhoneFrame project={p} />
       </div>
 
-      <div className="w-[200px] xl:w-[300px] shrink-0 flex flex-col justify-between gap-5 px-2 py-3">
+      <div className="w-[220px] xl:w-[320px] shrink-0 flex flex-col justify-between gap-5 px-3 py-3">
         <div className="min-w-0">
           {p.highlight && <Highlight label={p.highlight} />}
-          <p className="mt-4 font-mono text-xs text-[#8c8c8c]">
-            <span className="text-accent">{num(i)}</span>
+          <p className="mt-3 font-mono text-xs text-neutral-400 tracking-wide">
+            <span className="text-accent font-semibold">{num(i)}</span>
             <span className="mx-2 text-neutral-700">/</span>
             {p.category}
             {p.year ? ` · ${p.year}` : ""}
           </p>
-          <h3 className="mt-2 font-hero text-5xl xl:text-7xl uppercase tracking-tight leading-[0.9] text-[#f2ede4] break-words">
+          <h3 className="mt-2 font-hero text-4xl xl:text-6xl uppercase tracking-[-0.03em] leading-[0.92] text-[#f2ede4] break-words">
             {p.name}
           </h3>
-          <p className="mt-3 text-sm xl:text-base text-neutral-200 font-medium">
+          <p className="mt-2.5 text-sm xl:text-base text-neutral-200 font-medium tracking-tight">
             {p.subtitle}
           </p>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-400 line-clamp-4 xl:line-clamp-none">
+          <p className="mt-2.5 text-xs xl:text-sm leading-relaxed text-neutral-400 line-clamp-4 xl:line-clamp-none">
             {p.description}
           </p>
         </div>
@@ -208,8 +214,8 @@ const DesktopPanel = memo(function DesktopPanel({
       style={{ flexBasis: "var(--panel-closed)", contain: "layout paint" }}
       className={`relative shrink-0 overflow-hidden rounded-xl border transition-[flex-grow,border-color,background-color] duration-[320ms] ${EASE} ${
         open
-          ? "grow border-white/20 bg-[#14151b]"
-          : "grow-0 border-white/10 bg-[#111216] hover:border-white/30 hover:bg-[#15161c]"
+          ? "grow border-white/20 bg-[#131419]"
+          : "grow-0 border-white/[0.08] bg-[#0f1014] hover:border-white/25 hover:bg-[#14151b]"
       }`}
     >
       {/* Cerrada: número + nombre en vertical */}
@@ -226,26 +232,26 @@ const DesktopPanel = memo(function DesktopPanel({
         <span className="flex flex-col items-center gap-2">
           <span
             aria-hidden="true"
-            className="font-mono text-xs text-[#8c8c8c] group-hover:text-accent transition-colors"
+            className="font-mono text-xs text-neutral-400 group-hover:text-accent transition-colors"
           >
             {num(i)}
           </span>
           {p.highlight && (
             <Star
-              size={14}
+              size={13}
               className="text-accent fill-current"
               aria-hidden="true"
             />
           )}
         </span>
-        <span className="font-hero text-4xl uppercase tracking-tight text-[#f2ede4] whitespace-nowrap [writing-mode:vertical-rl] rotate-180">
+        <span className="font-hero text-3xl xl:text-4xl uppercase tracking-[-0.02em] text-[#f2ede4]/80 group-hover:text-[#f2ede4] whitespace-nowrap [writing-mode:vertical-rl] rotate-180 transition-colors">
           {p.name}
         </span>
         <span className="sr-only">
           {p.highlight ? ` (${p.highlight})` : ""}, {ui.openProject}
         </span>
-        <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-neutral-400 group-hover:text-[#0e0f12] group-hover:bg-accent group-hover:border-accent transition-colors">
-          <Plus size={16} />
+        <span className="w-8 h-8 rounded-full border border-white/15 bg-white/[0.02] flex items-center justify-center text-neutral-400 group-hover:text-[#0e0f12] group-hover:bg-accent group-hover:border-accent active:scale-90 transition-all duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]">
+          <Plus size={15} />
         </span>
       </button>
 
@@ -265,21 +271,21 @@ const DesktopPanel = memo(function DesktopPanel({
           <>
             <BrowserFrame project={p} />
 
-            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] items-end gap-x-8 gap-y-3 px-3 pt-5 pb-4">
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] items-end gap-x-8 gap-y-3 px-3 pt-4 pb-3">
               <div className="min-w-0">
-                <p className="font-mono text-xs text-[#8c8c8c]">
-                  <span className="text-accent">{num(i)}</span>
+                <p className="font-mono text-xs text-neutral-400 tracking-wide">
+                  <span className="text-accent font-semibold">{num(i)}</span>
                   <span className="mx-2 text-neutral-700">/</span>
                   {p.category}
                   {p.year ? ` · ${p.year}` : ""}
                 </p>
-                <h3 className="mt-2 font-hero text-3xl xl:text-5xl uppercase tracking-tight leading-[0.95] text-[#f2ede4] truncate">
+                <h3 className="mt-1.5 font-hero text-3xl xl:text-5xl uppercase tracking-[-0.03em] leading-[0.95] text-[#f2ede4] truncate">
                   {p.name}
                 </h3>
-                <p className="mt-1.5 text-sm xl:text-base text-neutral-200 font-medium">
+                <p className="mt-1 text-sm xl:text-base text-neutral-200 font-medium tracking-tight">
                   {p.subtitle}
                 </p>
-                <p className="hidden xl:block mt-2 text-sm leading-relaxed text-neutral-400 line-clamp-2 max-w-2xl">
+                <p className="hidden xl:block mt-1.5 text-xs xl:text-sm leading-relaxed text-neutral-400 line-clamp-2 max-w-2xl">
                   {p.description}
                 </p>
               </div>
@@ -296,7 +302,7 @@ const DesktopPanel = memo(function DesktopPanel({
 
       {/* Barra de progreso del pase automático (la pausa se maneja por CSS, sin re-render) */}
       {autoplayMs > 0 && open && (
-        <div className="absolute left-6 right-6 bottom-0 h-[3px] rounded-full bg-white/5 overflow-hidden pointer-events-none">
+        <div className="absolute left-6 right-6 bottom-0 h-[2.5px] rounded-full bg-white/[0.04] overflow-hidden pointer-events-none">
           <div
             onAnimationEnd={onProgressEnd}
             className="h-full bg-accent origin-left animate-progress"
@@ -331,7 +337,7 @@ const MobileRow = memo(function MobileRow({
     <article
       ref={ref}
       className={`rounded-xl border transition-colors duration-200 ${
-        open ? "border-white/20 bg-[#14151b]" : "border-white/10 bg-[#111216]"
+        open ? "border-white/20 bg-[#131419]" : "border-white/[0.08] bg-[#0f1014]"
       }`}
     >
       <button
@@ -339,35 +345,35 @@ const MobileRow = memo(function MobileRow({
         onClick={() => onToggle(i, ref.current)}
         aria-expanded={open}
         aria-controls={`work-mobile-${p.id}`}
-        className="w-full flex items-center gap-4 px-4 sm:px-6 py-4 text-left cursor-pointer"
+        className="w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 text-left cursor-pointer active:bg-white/[0.02] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
       >
         <span
-          className={`font-mono text-xs ${open ? "text-accent" : "text-[#8c8c8c]"}`}
+          className={`font-mono text-xs ${open ? "text-accent font-semibold" : "text-neutral-400"}`}
         >
           {num(i)}
         </span>
-        <span className="font-hero text-3xl uppercase tracking-tight text-[#f2ede4] leading-none">
+        <span className="font-hero text-2xl sm:text-3xl uppercase tracking-[-0.02em] text-[#f2ede4] leading-none">
           {p.name}
         </span>
         {p.highlight && (
           <Star
-            size={14}
-            className="text-accent fill-current shrink-0 -ml-2"
+            size={13}
+            className="text-accent fill-current shrink-0 -ml-1 sm:-ml-2"
             aria-hidden="true"
           />
         )}
-        <span className="ml-auto font-mono text-[11px] text-[#8c8c8c] hidden sm:inline">
+        <span className="ml-auto font-mono text-[11px] text-neutral-400 hidden sm:inline">
           {p.category}
           {p.year ? ` · ${p.year}` : ""}
         </span>
         <span
-          className={`ml-auto sm:ml-0 w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-[transform,background-color,color,border-color] duration-200 ${
+          className={`ml-auto sm:ml-0 w-8 h-8 shrink-0 rounded-full border flex items-center justify-center active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             open
               ? "rotate-45 bg-accent border-accent text-[#0e0f12]"
-              : "border-white/15 text-neutral-400"
+              : "border-white/15 bg-white/[0.02] text-neutral-400"
           }`}
         >
-          <Plus size={16} />
+          <Plus size={15} />
         </span>
       </button>
 
@@ -380,11 +386,11 @@ const MobileRow = memo(function MobileRow({
         <div className="overflow-hidden" inert={!open}>
           <div className="px-3 pb-3 sm:px-4 sm:pb-4 grid md:grid-cols-2 gap-4 md:gap-6">
             {p.type === "mobile" ? (
-              <div className="rounded-md border border-white/10 bg-[#15161b] flex justify-center py-6 sm:py-8">
-                <PhoneFrame project={p} className="w-[min(230px,62vw)]" />
+              <div className="rounded-lg border border-white/[0.08] bg-[#14151a] flex justify-center py-6 sm:py-8">
+                <PhoneFrame project={p} className="w-[min(220px,60vw)]" />
               </div>
             ) : (
-              <div className="relative aspect-[16/10] rounded-md overflow-hidden bg-neutral-900">
+              <div className="relative aspect-[16/10] rounded-lg border border-white/[0.08] overflow-hidden bg-[#0c0d10]">
                 {everOpen && (
                   <img
                     src={p.image}
@@ -395,7 +401,7 @@ const MobileRow = memo(function MobileRow({
                     height={627}
                     loading="lazy"
                     decoding="async"
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover object-top"
                   />
                 )}
               </div>
@@ -407,11 +413,11 @@ const MobileRow = memo(function MobileRow({
                     <Highlight label={p.highlight} />
                   </div>
                 )}
-                <p className="font-mono text-[11px] text-[#8c8c8c] sm:hidden mb-1">
+                <p className="font-mono text-[11px] text-neutral-400 sm:hidden mb-1">
                   {p.category}
                   {p.year ? ` · ${p.year}` : ""}
                 </p>
-                <p className="text-base text-neutral-200 font-medium">
+                <p className="text-base text-neutral-200 font-medium tracking-tight">
                   {p.subtitle}
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-neutral-400">
@@ -536,15 +542,20 @@ export default function Work({ projects }: WorkProps) {
       className="py-20 sm:py-28 bg-[#0e0f12] text-white scroll-mt-16"
     >
       <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 sm:mb-14">
-          <h2 className="font-hero text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-[#f2ede4] leading-tight">
-            {workSection.title}
+        <div data-reveal className="mb-10 sm:mb-16 grid lg:grid-cols-12 gap-6 items-end">
+          <h2 className="lg:col-span-7 font-hero text-5xl sm:text-6xl md:text-7xl xl:text-8xl uppercase tracking-tight leading-[0.9] text-[#f2ede4]">
+            <SectionTitle title={workSection.title} accent={workSection.titleAccent} />
           </h2>
+          {workSection.subtitle && (
+            <p className="lg:col-span-5 text-base sm:text-lg text-neutral-400 leading-relaxed lg:text-right">
+              {workSection.subtitle}
+            </p>
+          )}
         </div>
 
         {/* ===== Escritorio: paneles verticales ===== */}
         {isDesktop !== false && (
-          <div className="work-wrap hidden lg:block">
+          <div data-reveal data-reveal-delay="1" className="work-wrap hidden lg:block">
             <div
               ref={panelsRef}
               className="work-panels flex gap-3"
@@ -566,7 +577,7 @@ export default function Work({ projects }: WorkProps) {
         )}
         {/* ===== Celular y tablet: franjas apiladas ===== */}
         {isDesktop !== true && (
-          <div className="flex flex-col gap-3 lg:hidden">
+          <div data-reveal data-reveal-delay="1" className="flex flex-col gap-3 lg:hidden">
             {projects.map((p, i) => (
               <MobileRow
                 key={p.id}

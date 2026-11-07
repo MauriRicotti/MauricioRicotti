@@ -97,7 +97,7 @@ export default function HeroTitle({
           {
             duration: 420,
             delay: base + i * 40,
-            easing: "cubic-bezier(.6,0,.8,.3)",
+            easing: "cubic-bezier(0.23, 1, 0.32, 1)",
             fill: "forwards",
           },
         );
@@ -109,7 +109,7 @@ export default function HeroTitle({
           {
             duration: 560,
             delay: base + 150 + i * 40,
-            easing: "cubic-bezier(.2,.85,.25,1)",
+            easing: "cubic-bezier(0.23, 1, 0.32, 1)",
             fill: "backwards",
           },
         );

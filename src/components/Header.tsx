@@ -1,5 +1,5 @@
 import LogoMark from "./LogoMark";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowUpRight, Download, Volume2, VolumeX } from "lucide-react";
 import { sound } from "../lib/sound";
 import { scrollToTop } from "../lib/smoothScroll";
@@ -11,19 +11,17 @@ interface HeaderProps {
   onNavigate: (id: string) => void;
 }
 
-const GRID_BG = {
-  backgroundImage:
-    "linear-gradient(rgba(14,15,18,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(14,15,18,0.07) 1px, transparent 1px)",
-  backgroundSize: "44px 44px",
-};
-
 export default function Header({
   name,
   onOpenContact,
   onNavigate,
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
-  const [soundOn, setSoundOn] = useState(true);
+  const soundOn = useSyncExternalStore(
+    sound.subscribe,
+    sound.getSnapshot,
+    sound.getServerSnapshot,
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -98,8 +96,7 @@ export default function Header({
   }, []);
 
   const toggleSound = () => {
-    const next = !soundOn;
-    setSoundOn(next);
+    const next = !sound.enabled;
     sound.enabled = next;
     if (next) sound.playPop(600);
   };
@@ -137,7 +134,7 @@ export default function Header({
         style={{ "--d": "0.5s" } as React.CSSProperties}
         className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,padding,border-color] duration-300 border-b ${
           scrolled ? "py-3.5" : "py-5 sm:py-7"
-        } ${solid ? "bg-[#0e0f12]/80 backdrop-blur-[3px] border-white/10" : "bg-transparent border-transparent"}`}
+        } ${solid ? "bg-[#0e0f12] border-white/[0.08]" : "bg-transparent border-transparent"}`}
       >
         {/* En PC (desde 1280 px): tres columnas, las de los costados iguales, así los links quedan centrados de verdad respecto de la pantalla. En pantallas más angostas no entra: van entre el logo y los botones. */}
         <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between xl:grid xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] xl:gap-6">
@@ -208,10 +205,10 @@ export default function Header({
                     changeLang(l);
                   }}
                   aria-current={lang === l ? "page" : undefined}
-                  className={`inline-flex items-center justify-center h-full px-2.5 rounded-full uppercase tracking-wider transition-colors cursor-pointer ${
+                  className={`inline-flex items-center justify-center h-full px-2.5 rounded-full uppercase tracking-wider transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                     lang === l
-                      ? "bg-[#f2ede4] text-[#0e0f12]"
-                      : "text-white/65 hover:text-white"
+                      ? "bg-[#f2ede4] text-[#0e0f12] font-semibold"
+                      : "text-white/70 hover:text-white"
                   }`}
                 >
                   {l}
@@ -223,8 +220,9 @@ export default function Header({
             <button
               onClick={toggleSound}
               aria-label={ui.soundToggle}
+              aria-pressed={soundOn}
               title={soundOn ? ui.soundOn : ui.soundOff}
-              className="hidden md:flex w-9 h-9 rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white/40 items-center justify-center transition-colors cursor-pointer"
+              className="hidden md:flex relative w-9 h-9 rounded-full border border-white/20 text-white/75 hover:text-white hover:border-white/40 items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent before:content-[''] before:absolute before:-inset-1"
             >
               {soundOn ? (
                 <Volume2 size={14} />
@@ -238,7 +236,7 @@ export default function Header({
                 sound.playPop(650);
                 onOpenContact();
               }}
-              className="group hidden md:flex items-center gap-3 h-10 pl-5 pr-1 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-accent transition-colors duration-200 cursor-pointer"
+              className="group hidden md:flex items-center gap-3 h-10 pl-5 pr-1 rounded-full bg-[#f2ede4] text-[#0e0f12] text-sm font-semibold hover:bg-accent transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0f12]"
             >
               <span>{ui.talk}</span>
               <span className="w-8 h-8 rounded-full bg-[#0e0f12] text-[#f2ede4] flex items-center justify-center transition-transform duration-300 group-hover:rotate-45">
@@ -246,30 +244,30 @@ export default function Header({
               </span>
             </button>
 
-            {/* Botón hamburguesa: las dos líneas se cruzan y forman una X */}
+            {/* Botón hamburguesa: las dos líneas se cruzan y forman una X (mínimo 44x44px táctil WCAG) */}
             <button
               onClick={toggleMenu}
               aria-label={menuOpen ? ui.closeMenu : ui.openMenu}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
-              className={`md:hidden relative w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
+              className={`md:hidden relative w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0f12] ${
                 menuOpen
-                  ? "bg-[#eee9df]"
-                  : "bg-white/[0.06] border border-white/15"
+                  ? "bg-white/10 border border-white/25 text-white"
+                  : "bg-white/[0.06] border border-white/15 text-white"
               }`}
             >
               <span
-                className={`absolute h-[2px] w-[18px] rounded-full transition-[transform,background-color] duration-300 ${
+                className={`absolute h-[2px] w-[18px] rounded-full bg-white transition-[transform,background-color] duration-300 ${
                   menuOpen
-                    ? "rotate-45 bg-[#0e0f12]"
-                    : "-translate-y-[4px] bg-white"
+                    ? "rotate-45"
+                    : "-translate-y-[4px]"
                 }`}
               />
               <span
-                className={`absolute h-[2px] w-[18px] rounded-full transition-[transform,background-color] duration-300 ${
+                className={`absolute h-[2px] w-[18px] rounded-full bg-white transition-[transform,background-color] duration-300 ${
                   menuOpen
-                    ? "-rotate-45 bg-[#0e0f12]"
-                    : "translate-y-[4px] bg-white"
+                    ? "-rotate-45"
+                    : "translate-y-[4px]"
                 }`}
               />
             </button>
@@ -279,10 +277,10 @@ export default function Header({
 
       {/* ===== Menú móvil ===== */}
       <div className="md:hidden">
-        {/* Fondo oscuro: al tocarlo se cierra */}
+        {/* Fondo oscuro sin blur: cero lag en GPU */}
         <div
           onClick={() => setMenuOpen(false)}
-          className={`fixed inset-0 z-40 bg-black/60 touch-none transition-opacity duration-300 ${
+          className={`fixed inset-0 z-40 bg-black/75 touch-none transition-opacity duration-200 ${
             menuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         />
@@ -290,134 +288,135 @@ export default function Header({
         <div
           id="mobile-menu"
           inert={!menuOpen}
-          className={`fixed left-0 right-0 ${scrolled ? "top-[68px]" : "top-[80px]"} z-40 mx-2 rounded-[28px] touch-none bg-[#eee9df] text-[#0e0f12] shadow-2xl origin-top transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.65,0,0.25,1)] ${
+          className={`fixed left-0 right-0 ${scrolled ? "top-[70px]" : "top-[82px]"} z-40 mx-3 rounded-[24px] touch-none bg-[#121318] text-[#f2ede4] border border-white/[0.12] shadow-2xl origin-top will-change-transform transition-[transform,opacity] duration-200 ease-out overflow-hidden ${
             menuOpen
               ? "opacity-100 translate-y-0"
-              : "opacity-0 -translate-y-3 pointer-events-none"
+              : "opacity-0 -translate-y-2 pointer-events-none"
           }`}
-          style={GRID_BG}
         >
-          <nav className="px-6 pt-4">
-            {navLinks.map((link, i) => (
-              <a
-                key={link.id}
-                href={`#${link.id}`}
-                onClick={(e) => {
-                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                  e.preventDefault();
-                  handleNav(link.id);
-                }}
-                aria-current={link.id === active ? "true" : undefined}
-                className="w-full flex items-center gap-4 py-3.5 text-left cursor-pointer group"
-              >
-                <span
-                  className={`relative font-mono text-xs ${
-                    link.id === active
-                      ? "text-[#0e0f12] font-semibold"
-                      : "text-[#0e0f12]/50"
-                  }`}
-                >
-                  {link.id === active && (
+                <nav className="px-5 pt-3 pb-2 divide-y divide-white/[0.06]">
+                  {navLinks.map((link, i) => (
+                    <a
+                      key={link.id}
+                      href={`#${link.id}`}
+                      onClick={(e) => {
+                        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                        e.preventDefault();
+                        handleNav(link.id);
+                      }}
+                      aria-current={link.id === active ? "true" : undefined}
+                      className="w-full flex items-center gap-3.5 py-3 text-left cursor-pointer group active:opacity-75 transition-opacity"
+                    >
+                      <span
+                        className={`relative font-mono text-xs ${
+                          link.id === active
+                            ? "text-accent font-semibold"
+                            : "text-neutral-500"
+                        }`}
+                      >
+                        {link.id === active && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute -left-2.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-accent"
+                          />
+                        )}
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="font-hero text-3xl sm:text-4xl uppercase tracking-[-0.02em] leading-none text-[#f2ede4] group-active:text-accent transition-colors">
+                        {link.label}
+                      </span>
+                      <ArrowUpRight
+                        size={18}
+                        className="ml-auto text-neutral-500 group-active:text-accent transition-colors"
+                      />
+                    </a>
+                  ))}
+                </nav>
+
+                <div className="px-5 py-3.5 border-t border-white/[0.08] bg-[#0f1014] flex items-center justify-between gap-3">
+                  {/* Interruptor de sonido (área táctil accesible de 44px) */}
+                  <button
+                    onClick={toggleSound}
+                    role="switch"
+                    aria-label={ui.soundToggle}
+                    aria-checked={soundOn}
+                    className="flex items-center gap-2.5 min-h-[44px] cursor-pointer active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
+                  >
                     <span
-                      aria-hidden="true"
-                      className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-accent ring-1 ring-[#0e0f12]"
-                    />
+                      className={`relative w-11 h-6 rounded-full border border-white/20 transition-colors duration-200 ${
+                        soundOn ? "bg-accent border-accent" : "bg-white/10"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-[2px] left-[2px] w-[18px] h-[18px] rounded-full bg-[#0e0f12] transition-transform duration-200 ${
+                          soundOn ? "translate-x-5" : ""
+                        }`}
+                      />
+                    </span>
+                    <span className="flex items-center gap-1.5 text-xs font-mono font-medium text-neutral-300">
+                      {soundOn ? <Volume2 size={14} className="text-accent" /> : <VolumeX size={14} className="text-neutral-500" />}
+                      {soundOn ? ui.soundShort : ui.muteShort}
+                    </span>
+                  </button>
+
+                  {/* Idioma */}
+                  <div
+                    role="group"
+                    aria-label={ui.language}
+                    className="flex items-center h-9 p-1 rounded-full border border-white/20 font-mono text-xs"
+                  >
+                    {(["es", "en"] as const).map((l) => (
+                      <a
+                        key={l}
+                        href={l === "en" ? "/en" : "/"}
+                        hrefLang={l}
+                        lang={l}
+                        onClick={(e) => {
+                          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                          e.preventDefault();
+                          changeLang(l);
+                        }}
+                        aria-current={lang === l ? "page" : undefined}
+                        className={`inline-flex items-center justify-center h-full min-w-[38px] px-3 rounded-full uppercase tracking-wider text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                          lang === l
+                            ? "bg-[#f2ede4] text-[#0e0f12] font-semibold"
+                            : "text-white/60 active:bg-white/10"
+                        }`}
+                      >
+                        {l}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="px-5 pt-2 pb-5 border-t border-white/[0.06] bg-[#0f1014] flex items-center gap-3">
+                  {profile.cvUrl && (
+                    <a
+                      href={profile.cvUrl}
+                      download
+                      onClick={() => {
+                        sound.playClick();
+                        setMenuOpen(false);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full border border-white/20 bg-white/[0.04] text-xs font-semibold text-[#f2ede4] active:scale-[0.97] hover:border-white/40 transition-all select-none"
+                    >
+                      <Download size={14} /> {ui.downloadCv}
+                    </a>
                   )}
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="font-hero text-5xl uppercase tracking-tight leading-none">
-                  {link.label}
-                </span>
-                <ArrowUpRight
-                  size={22}
-                  className="ml-auto text-[#0e0f12]/40 group-active:text-[#0e0f12] transition-colors"
-                />
-              </a>
-            ))}
-          </nav>
-
-          <div className="px-6 pt-5 flex items-center justify-between gap-3">
-            {/* Interruptor de sonido */}
-            <button
-              onClick={toggleSound}
-              role="switch"
-              aria-checked={soundOn}
-              className="flex items-center gap-3 cursor-pointer"
-            >
-              <span
-                className={`relative w-12 h-7 rounded-full border-2 border-[#0e0f12] transition-colors duration-200 ${
-                  soundOn ? "bg-accent" : "bg-white"
-                }`}
-              >
-                <span
-                  className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] rounded-full bg-[#0e0f12] transition-transform duration-200 ${
-                    soundOn ? "translate-x-5" : ""
-                  }`}
-                />
-              </span>
-              <span className="flex items-center gap-1.5 text-sm font-semibold">
-                {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
-                {soundOn ? ui.soundShort : ui.muteShort}
-              </span>
-            </button>
-
-            {/* Idioma */}
-            <div
-              role="group"
-              aria-label={ui.language}
-              className="flex items-center h-10 p-1 rounded-full border-2 border-[#0e0f12] font-mono text-xs font-semibold"
-            >
-              {(["es", "en"] as const).map((l) => (
-                <a
-                  key={l}
-                  href={l === "en" ? "/en" : "/"}
-                  hrefLang={l}
-                  lang={l}
-                  onClick={(e) => {
-                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                    e.preventDefault();
-                    changeLang(l);
-                  }}
-                  aria-current={lang === l ? "page" : undefined}
-                  className={`inline-flex items-center justify-center h-full px-3.5 rounded-full uppercase tracking-wider transition-colors ${
-                    lang === l
-                      ? "bg-[#0e0f12] text-[#f2ede4]"
-                      : "text-[#0e0f12]/60 active:bg-[#0e0f12]/10"
-                  }`}
-                >
-                  {l}
-                </a>
-              ))}
+                  <button
+                    onClick={() => {
+                      sound.playPop(650);
+                      setMenuOpen(false);
+                      onOpenContact();
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full whitespace-nowrap bg-[#f2ede4] text-[#0e0f12] text-xs font-bold uppercase tracking-wider hover:bg-accent active:scale-[0.97] transition-all select-none cursor-pointer"
+                  >
+                    <span>{ui.talk}</span>
+                    <ArrowUpRight size={14} />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="px-6 pt-4 pb-6 flex items-center gap-3">
-            {profile.cvUrl && (
-              <a
-                href={profile.cvUrl}
-                download
-                onClick={() => {
-                  sound.playClick();
-                  setMenuOpen(false);
-                }}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-full border-2 border-[#0e0f12] text-sm font-semibold whitespace-nowrap active:bg-[#0e0f12] active:text-[#f2ede4] transition-colors"
-              >
-                <Download size={16} /> {ui.downloadCv}
-              </a>
-            )}
-            <button
-              onClick={() => {
-                sound.playPop(650);
-                setMenuOpen(false);
-                onOpenContact();
-              }}
-              className="flex-1 flex items-center justify-center gap-1.5 px-5 py-3 rounded-full whitespace-nowrap bg-[#0e0f12] text-[#f2ede4] text-sm font-semibold shadow-[3px_3px_0_var(--color-accent)]"
-            >
-              {ui.talk} <ArrowUpRight size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
     </>
   );
 }

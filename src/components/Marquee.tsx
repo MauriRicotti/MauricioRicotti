@@ -117,7 +117,7 @@ export default function Marquee() {
       ref={sectionRef}
       data-section="marquee"
       aria-label={marqueeRows.map((r) => r.words.join(", ")).join(". ")}
-      className="relative py-20 sm:py-24 bg-[#0e0f12] text-white overflow-hidden border-t border-white/5 select-none"
+      className="relative py-20 sm:py-24 bg-[#0e0f12] text-white overflow-hidden border-t border-white/[0.06] select-none"
     >
       {marqueeRows.map((row, i) => {
         const words = Array.from({ length: COPIES }, () => row.words).flat();

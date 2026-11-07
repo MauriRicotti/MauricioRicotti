@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import type { Lang } from "../i18n";
 
 /**
- * Cortina del cambio de idioma: un panel crema barre la pantalla de izquierda a derecha
+ * Cortina del cambio de idioma: un panel oscuro barre la pantalla de izquierda a derecha
  * con el nombre del idioma en grande. Cuando tapa todo, se cambia el texto de la web
  * (onCovered) y el panel sigue de largo (onDone). Total ≈ 0,9 s.
  * Solo transform (liviano). Con "reducir movimiento" no se usa (el cambio es directo).
@@ -14,7 +14,7 @@ const EASE = "cubic-bezier(0.76, 0, 0.24, 1)";
 
 const GRID_BG = {
   backgroundImage:
-    "linear-gradient(rgba(14,15,18,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(14,15,18,0.07) 1px, transparent 1px)",
+    "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
   backgroundSize: "44px 44px",
 };
 
@@ -89,13 +89,13 @@ export default function LangCurtain({
       <div
         ref={panelRef}
         style={{ ...GRID_BG, transform: "translateX(-101%)" }}
-        className="absolute inset-0 bg-[#eee9df] text-[#0e0f12] flex items-center justify-center will-change-transform"
+        className="absolute inset-0 bg-[#0e0f12] text-[#f2ede4] flex items-center justify-center will-change-transform"
       >
         <div
           ref={textRef}
           className="flex flex-col items-center gap-4 sm:gap-6"
         >
-          <span className="font-mono text-xs sm:text-sm tracking-[0.3em] uppercase text-[#0e0f12]/55">
+          <span className="font-mono text-xs sm:text-sm tracking-[0.3em] uppercase text-[#f2ede4]/55">
             {from} → {to}
           </span>
           <span className="font-hero uppercase leading-none tracking-tight text-[min(20vw,15rem)]">

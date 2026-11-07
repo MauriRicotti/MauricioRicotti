@@ -1,96 +1,114 @@
 import type { CSSProperties } from "react";
 import type { TechGroup } from "../types";
-import { techIcons } from "../lib/techIcons";
+import { brandColor, techIcons } from "../lib/techIcons";
+import { useLang } from "../i18n";
 
 interface TechStackProps {
   title: string;
   groups: TechGroup[];
 }
 
-/** Colores de las etiquetas de cada grupo (se repiten si hay más grupos). */
-const LABEL_COLORS = [
-  "var(--color-accent)", // color de acento (index.css)
-  "#ffd23f",
-  "#ff4f7b",
-  "#ff7a1a",
-  "#a3e635",
-  "#5ee7df",
-];
-const LABEL_TILT = [-3, 2, -2, 3];
-
-/** Color de marca legible sobre fondo claro (los logos muy claros se muestran oscuros). */
-function colorOnLight(hex: string): string {
-  const n = parseInt(hex, 16);
-  const lum = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
-  return lum > 185 ? "#1a1a1a" : `#${hex}`;
-}
-
 export default function TechStack({ title, groups }: TechStackProps) {
-  // La franja comparte el reloj de entrada del hero (html.intro-go).
-  // No espera a entrar en pantalla: al hacer scroll ya está en su posición final.
+  const { lang } = useLang();
+
+  // Repartimos los elementos en dos cintas dinámicas para movimiento continuo cruzado
+  const allItems = groups.flatMap((g) => g.items);
+  const mid = Math.ceil(allItems.length / 2);
+  const stream1 = allItems.slice(0, mid);
+  const stream2 = allItems.slice(mid);
 
   return (
     <section
       id="stack"
       aria-label={title}
-      className="tech-anim bg-[#0e0f12] pb-2 sm:pb-4 overflow-hidden"
+      className="relative z-10 bg-[#0e0f12] text-white py-14 sm:py-20 border-y border-white/[0.08] overflow-hidden"
     >
-      {/* Título solo para lectores de pantalla (mantiene el orden h1 → h2 → h3) */}
-      <h2 className="sr-only">{title}</h2>
-      <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Franja: nace en el borde izquierdo de la pantalla y se redondea a la derecha */}
+      {/* Encabezado limpio sin badges pesados */}
+      <div data-reveal className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="font-hero text-2xl sm:text-3xl md:text-4xl uppercase tracking-tight text-[#f2ede4]">
+          {title}
+        </h2>
+
+        <p className="text-xs sm:text-sm text-[#f2ede4]/60 font-mono tracking-wide max-w-md">
+          {lang === "en"
+            ? "Production-tested tools for fast, scalable, and resilient web applications."
+            : "Herramientas probadas en producción para aplicaciones web rápidas, escalables y seguras."}
+        </p>
+      </div>
+
+      {/* Contenedor de doble cinta cruzada */}
+      <div data-reveal data-reveal-delay="1" className="relative flex flex-col gap-3 sm:gap-4 overflow-hidden select-none">
+        {/* Degradados laterales estáticos (cero costo de composición para la GPU, 60/120 fps fluidos) */}
         <div
-          className="tech-band ml-[calc(50%-50vw)] rounded-r-2xl sm:rounded-r-3xl bg-[#eee9df] text-[#0e0f12] py-10 sm:py-14 pl-[calc(50vw-50%)] pr-8 sm:pr-24 lg:pr-36"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(14,15,18,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(14,15,18,0.07) 1px, transparent 1px)",
-            backgroundSize: "56px 56px",
-          }}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-            {groups.map((group, i) => (
-              <div
-                key={i} // índice: el título cambia con el idioma
-                className="tech-group"
-                style={{ "--i": i } as CSSProperties}
-              >
-                <h3
-                  className="tech-label inline-block font-hero text-2xl sm:text-[1.7rem] uppercase tracking-tight leading-none px-4 py-2.5 rounded-md border-2 border-[#0e0f12] shadow-[4px_4px_0_#0e0f12] mb-5"
-                  style={{
-                    backgroundColor:
-                      group.color ?? LABEL_COLORS[i % LABEL_COLORS.length],
-                    // El giro va en una variable para que la animación lo respete
-                    ["--tilt" as string]: `${LABEL_TILT[i % LABEL_TILT.length]}deg`,
-                  }}
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-[#0e0f12] to-transparent z-10"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-[#0e0f12] to-transparent z-10"
+        />
+
+        {/* Cinta 1: Hacia la izquierda (Frameworks y Core) */}
+        <div className="group flex overflow-hidden">
+          <div className="animate-marquee-left flex items-center gap-3 sm:gap-4 group-hover:[animation-play-state:paused]">
+            {[...stream1, ...stream1, ...stream1, ...stream1].map((item, index) => {
+              const icon = item.icon ? techIcons[item.icon] : undefined;
+              const color = icon ? brandColor(icon.hex) : "#F46200";
+              return (
+                <div
+                  key={`${item.name}-${index}`}
+                  style={{ "--brand": color } as CSSProperties}
+                  className="group/chip inline-flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/[0.03] border border-white/[0.08] hover:border-white/25 hover:bg-white/[0.07] transition-colors duration-150 cursor-pointer whitespace-nowrap"
                 >
-                  {group.title}
-                </h3>
-                <ul className="flex flex-wrap gap-2">
-                  {group.items.map((item, j) => {
-                    const icon = item.icon ? techIcons[item.icon] : undefined;
-                    return (
-                      <li
-                        key={j}
-                        style={{ "--j": j } as CSSProperties}
-                        className="tech-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border-[1.5px] border-[#0e0f12]/80 text-sm font-medium text-[#0e0f12]"
-                      >
-                        {icon && (
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="w-4 h-4"
-                            fill={colorOnLight(icon.hex)}
-                            aria-hidden="true"
-                          >
-                            <path d={icon.path} />
-                          </svg>
-                        )}
-                        {item.name}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
+                  {icon ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 shrink-0 fill-white/45 group-hover/chip:fill-[var(--brand)] transition-colors duration-150"
+                      aria-hidden="true"
+                    >
+                      <path d={icon.path} />
+                    </svg>
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 group-hover/chip:bg-accent transition-colors duration-150 shrink-0" />
+                  )}
+                  <span className="text-xs sm:text-sm font-medium text-white/75 group-hover/chip:text-white transition-colors duration-150">
+                    {item.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Cinta 2: Hacia la derecha (Plataformas y Delivery) */}
+        <div className="group flex overflow-hidden">
+          <div className="animate-marquee-right flex items-center gap-3 sm:gap-4 group-hover:[animation-play-state:paused]">
+            {[...stream2, ...stream2, ...stream2, ...stream2].map((item, index) => {
+              const icon = item.icon ? techIcons[item.icon] : undefined;
+              const color = icon ? brandColor(icon.hex) : "#F46200";
+              return (
+                <div
+                  key={`${item.name}-${index}`}
+                  style={{ "--brand": color } as CSSProperties}
+                  className="group/chip inline-flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/[0.03] border border-white/[0.08] hover:border-white/25 hover:bg-white/[0.07] transition-colors duration-150 cursor-pointer whitespace-nowrap"
+                >
+                  {icon ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 shrink-0 fill-white/45 group-hover/chip:fill-[var(--brand)] transition-colors duration-150"
+                      aria-hidden="true"
+                    >
+                      <path d={icon.path} />
+                    </svg>
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 group-hover/chip:bg-accent transition-colors duration-150 shrink-0" />
+                  )}
+                  <span className="text-xs sm:text-sm font-medium text-white/75 group-hover/chip:text-white transition-colors duration-150">
+                    {item.name}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -70,7 +70,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
   }, []);
 
   const btn =
-    "group inline-flex items-center gap-3 h-12 pl-1.5 pr-6 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/35 text-sm font-semibold text-neutral-200 hover:text-white transition-colors";
+    "group inline-flex items-center gap-3 h-12 pl-1.5 pr-6 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/35 active:scale-[0.97] text-sm font-semibold text-neutral-200 hover:text-white transition-[transform,background-color,border-color,color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090a]";
 
   return (
     <footer
@@ -81,9 +81,9 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
       <div className="footer-inner">
         <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-40">
           {/* Llamado a la acción */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div data-reveal className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
-              <h2 className="font-hero text-4xl sm:text-6xl md:text-8xl font-black uppercase tracking-tight text-[#f2ede4] leading-none">
+              <h2 className="font-hero text-4xl sm:text-6xl md:text-8xl font-black uppercase tracking-[-0.03em] text-[#f2ede4] leading-none">
                 {footer.title}
               </h2>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -140,14 +140,14 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
                 sound.playPop(650);
                 onOpenContact();
               }}
-              className="self-start md:self-auto px-8 py-4 rounded-full bg-white text-black hover:bg-accent font-hero text-lg sm:text-xl font-black uppercase tracking-wider transition-all duration-200 shadow-xl hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
+              className="self-start md:self-auto px-8 py-4 rounded-full bg-[#f2ede4] text-[#0e0f12] hover:bg-accent font-hero text-lg sm:text-xl font-black uppercase tracking-wider active:scale-[0.97] transition-[transform,background-color,color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090a]"
             >
               {footer.ctaText}
             </button>
           </div>
 
           {/* Columnas (estilo minimalista): logo y texto · explorar · redes · horario */}
-          <div className="mt-16 sm:mt-24 pt-10 sm:pt-14 border-t border-white/10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-12 gap-x-6 gap-y-10 text-sm">
+          <div data-reveal data-reveal-delay="1" className="mt-16 sm:mt-24 pt-10 sm:pt-14 border-t border-white/[0.08] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-12 gap-x-6 gap-y-10 text-sm">
             <div className="col-span-2 md:col-span-3 lg:col-span-4">
               <LogoMark className="h-14 sm:h-16 w-auto text-white" />
               <p className="mt-5 text-base sm:text-lg font-semibold text-[#f2ede4] leading-snug max-w-sm text-balance">
@@ -175,7 +175,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
                         if (link.id === "contact") onOpenContact();
                         else scrollToId(link.id);
                       }}
-                      className="text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                      className="inline-block py-1 text-neutral-300 hover:text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
                     >
                       {link.label}
                     </a>
@@ -198,7 +198,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
                           ? { target: "_blank", rel: "me noopener noreferrer" }
                           : {})}
                         onClick={() => sound.playClick()}
-                        className="group inline-flex items-center gap-2.5 text-neutral-300 hover:text-white transition-colors"
+                        className="group inline-flex items-center gap-2.5 py-1 text-neutral-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
                       >
                         <span className="text-neutral-500 group-hover:text-accent transition-colors">
                           <SocialIcon label={s.label} />
@@ -241,7 +241,7 @@ export default function Footer({ profile, onOpenContact }: FooterProps) {
         </div>
 
         {/* Nombre gigante: una línea, crema sólido */}
-        <div className="footer-name-wrap relative mt-16 sm:mt-24 px-3 sm:px-6 lg:px-8 max-w-[88rem] mx-auto">
+        <div data-reveal data-reveal-delay="2" className="footer-name-wrap relative mt-16 sm:mt-24 px-3 sm:px-6 lg:px-8 max-w-[88rem] mx-auto">
           <p
             aria-hidden="true"
             className="footer-name relative font-hero uppercase leading-[0.82] text-[#f2ede4] select-none"

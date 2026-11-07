@@ -21,7 +21,11 @@ for (const [file, lang, heading] of [
   assert.equal((html.match(/<h1\b/g) || []).length, 1, `${file}: se necesita un solo h1`);
   const h1 = match(html, /<h1\b[^>]*>([\s\S]*?)<\/h1>/, "h1").replace(/<[^>]*>/g, "");
   assert.ok(h1.includes("Mauricio Ricotti — FULL STACK DEVELOPER"), `${file}: h1 incompleto`);
-  assert.ok(html.includes(heading), `${file}: contenido sin traducir`);
+  // Comprobar el texto del h2, no el HTML crudo: un span de color no cambia el contenido.
+  const headings = [...html.matchAll(/<h2\b[^>]*>([\s\S]*?)<\/h2>/g)].map((m) =>
+    m[1].replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(),
+  );
+  assert.ok(headings.includes(heading), `${file}: título de proyectos sin traducir`);
   assert.ok(html.includes("https://github.com/MauriRicotti"), "Falta GitHub real");
   assert.ok(!/%VITE_|tu-usuario|example\.com|content="noindex/.test(html), `${file}: placeholder/noindex`);
   const canonical = match(html, /rel="canonical" href="([^"]+)"/, "canonical");
